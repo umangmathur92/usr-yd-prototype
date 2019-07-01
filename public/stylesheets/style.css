@@ -12,6 +12,9 @@ a {
   margin: 0;
   overflow:auto;
   height: 100%;
+  background-color: #e0e0e0;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .scene-container {
@@ -19,26 +22,28 @@ a {
   padding: 10px;
   background: #eeeeee;
   border: 1px solid #a0a0a0;
-  margin: 5px;
+  margin-bottom: 5px;
+  margin-left: 40px;
+  margin-right: 40px;
 }
 
-.scene-description-container, .scene-ocr-container {
+.scene-description-container, .scene-ocr-container, .block-description-container {
   position:relative;
   width: 100%;
   border: 1px solid #ddd;
   background: #ffffff;
 }
-.btn-update-scene-description, .btn-update-scene-ocr {
+.btn-update-scene-description, .btn-update-scene-ocr, .btn-update-block-description {
   position:absolute;
   bottom: 0.1px;
   right:0.1px;
-  width: 20%;
+  width: 25%;
 }
 
-.txt-scene-description, .txt-scene-ocr {
+.txt-scene-description, .txt-scene-ocr, .txt-block-description {
   position:relative;
   border:none;
-  width:80%;
+  width:75%;
   min-height: 50px;
   resize: none;
   outline: none; /*add this to stop highlight on focus*/
@@ -52,4 +57,17 @@ tr td:first-child{
 .list-container {
   height: 700px;
   max-height: 700px;
+  background-color: darkgray;
+}
+
+.li-block-header {
+  border-top: 10px solid darkgray;
+}
+
+.block-footer-container {
+  text-align: left;
+  padding: 10px;
+  margin-left: 0px;
+  margin-right: 0px;
+  border-bottom: 10px solid darkgray;
 }

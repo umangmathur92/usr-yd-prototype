@@ -2,16 +2,16 @@ var player;
 
 $(document).ready(function() {
     $("#btnScroll").click(function() {
-        scrollToPosition();
+        let childNum = $('#txtRowNum').val();
+        scrollToPosition(childNum);
     });
 });
 
-function scrollToPosition() {
-    let childNum = $('#txtRowNum').val();
+function scrollToPosition(position) {
     $('#ul-scene-list').animate({
-        scrollTop: $('#ul-scene-list li:nth-child('+childNum+')').position().top - $('#ul-scene-list li:first').position().top
-   }, 'slow');
-    //$('#ul-scene-list').scrollTop($('#ul-scene-list li:nth-child('+childNum+')').position().top - $('#ul-scene-list li:first').position().top)
+        scrollTop: $('#ul-scene-list li:nth-child('+position+')').position().top - $('#ul-scene-list li:first').position().top
+    }, 'slow');
+    //$('#ul-scene-list').scrollTop($('#ul-scene-list li:nth-child('+position+')').position().top - $('#ul-scene-list li:first').position().top)
 }
 
 function onYouTubeIframeAPIReady() {
