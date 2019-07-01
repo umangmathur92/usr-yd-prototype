@@ -24,6 +24,10 @@
       <div class="col-5">
         <div style="background-color: #1a4b6e; color:#fff;">Video Title Here</div>
         <div id="player"></div>
+        <div>
+          <input id="txtRowNum">
+          <button id="btnScroll">Scroll</button>
+        </div>
       </div>
       <div class="col-7">
         <div style="background-color: #1a4b6e;color:#fff;">AI Generated Description</div>
@@ -31,7 +35,7 @@
           <div class="list-container">
 
           
-          <ul class="scene-list">
+          <ul id="ul-scene-list" class="scene-list">
             <li>
               <div class="scene-container">
                 <table style="width: 100%">
@@ -70,7 +74,7 @@
                 <div class="scene-container">
                   <table style="width: 100%">
                     <tr>
-                      <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                      <td>Scene 2</td><td>0.000 to 5.239 secs</td>
                     </tr>
                     <tr>
                       <td>Description</td>
@@ -102,7 +106,7 @@
                   <div class="scene-container">
                     <table style="width: 100%">
                       <tr>
-                        <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                        <td>Scene 3</td><td>0.000 to 5.239 secs</td>
                       </tr>
                       <tr>
                         <td>Description</td>
@@ -129,11 +133,12 @@
                   </div>
                 </li>
 
+                
                 <li>
                     <div class="scene-container">
                       <table style="width: 100%">
                         <tr>
-                          <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                          <td>Scene 4</td><td>0.000 to 5.239 secs</td>
                         </tr>
                         <tr>
                           <td>Description</td>
@@ -159,12 +164,11 @@
                       </div>
                     </div>
                   </li>
-
                   <li>
                       <div class="scene-container">
                         <table style="width: 100%">
                           <tr>
-                            <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                            <td>Scene 5</td><td>0.000 to 5.239 secs</td>
                           </tr>
                           <tr>
                             <td>Description</td>
@@ -191,12 +195,11 @@
                       </div>
                     </li>
 
-
                     <li>
                         <div class="scene-container">
                           <table style="width: 100%">
                             <tr>
-                              <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                              <td>Scene 6</td><td>0.000 to 5.239 secs</td>
                             </tr>
                             <tr>
                               <td>Description</td>
@@ -223,12 +226,11 @@
                         </div>
                       </li>
 
-
                       <li>
                           <div class="scene-container">
                             <table style="width: 100%">
                               <tr>
-                                <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                                <td>Scene 7</td><td>0.000 to 5.239 secs</td>
                               </tr>
                               <tr>
                                 <td>Description</td>
@@ -255,12 +257,11 @@
                           </div>
                         </li>
 
-
                         <li>
                             <div class="scene-container">
                               <table style="width: 100%">
                                 <tr>
-                                  <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                                  <td>Scene 8</td><td>0.000 to 5.239 secs</td>
                                 </tr>
                                 <tr>
                                   <td>Description</td>
@@ -291,7 +292,7 @@
                               <div class="scene-container">
                                 <table style="width: 100%">
                                   <tr>
-                                    <td>Scene 1</td><td>0.000 to 5.239 secs</td>
+                                    <td>Scene 9</td><td>0.000 to 5.239 secs</td>
                                   </tr>
                                   <tr>
                                     <td>Description</td>
@@ -317,6 +318,37 @@
                                 </div>
                               </div>
                             </li>
+
+                            <li>
+                                <div class="scene-container">
+                                  <table style="width: 100%">
+                                    <tr>
+                                      <td>Scene 10</td><td>0.000 to 5.239 secs</td>
+                                    </tr>
+                                    <tr>
+                                      <td>Description</td>
+                                      <td>
+                                        <div class="scene-description-container">
+                                          <button class="btn-update-scene-description">Update Description</button>
+                                          <textarea class="txt-scene-description">caption1, caption2, caption3</textarea>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td>OCR Detected</td>
+                                      <td>
+                                        <div class="scene-ocr-container">
+                                          <button class="btn-update-scene-ocr">Update OCR</button>
+                                          <textarea class="txt-scene-ocr">OCR Text here...</textarea>
+                                        </div>                      
+                                      </td>
+                                    </tr>
+                                  </table>
+                                  <div style="text-align: center; margin-bottom: -25px; margin-top: 10px;">
+                                    <button class="btn-merge">Merge With Next</button>
+                                  </div>
+                                </div>
+                              </li>
 
 
 

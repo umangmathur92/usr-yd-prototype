@@ -1,8 +1,18 @@
 var player;
 
 $(document).ready(function() {
-    
+    $("#btnScroll").click(function() {
+        scrollToPosition();
+    });
 });
+
+function scrollToPosition() {
+    let childNum = $('#txtRowNum').val();
+    $('#ul-scene-list').animate({
+        scrollTop: $('#ul-scene-list li:nth-child('+childNum+')').position().top - $('#ul-scene-list li:first').position().top
+   }, 'slow');
+    //$('#ul-scene-list').scrollTop($('#ul-scene-list li:nth-child('+childNum+')').position().top - $('#ul-scene-list li:first').position().top)
+}
 
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
