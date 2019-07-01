@@ -1,8 +1,48 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
+}
+
+.scene-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.scene-container {
+  text-align: left;
+  padding: 10px;
+  background: #eeeeee;
+  border: 1px solid #a0a0a0;
+  margin: 5px;
+}
+
+.scene-description-container, .scene-ocr-container {
+  position:relative;
+  width: 100%;
+  border: 1px solid #ddd;
+  background: #ffffff;
+}
+.btn-update-scene-description, .btn-update-scene-ocr {
+  position:absolute;
+  bottom: 0.1px;
+  right:0.1px;
+  width: 20%;
+}
+
+.txt-scene-description, .txt-scene-ocr {
+  position:relative;
+  border:none;
+  width:80%;
+  min-height: 50px;
+  resize: none;
+  outline: none; /*add this to stop highlight on focus*/
+}
+
+tr td:first-child{
+  width:1%;
+  white-space:nowrap;
 }
