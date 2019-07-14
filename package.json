@@ -22,6 +22,7 @@
     "morgan": "~1.9.0",
     "multer": "^1.4.1",
     "nodemon": "^1.18.10",
+    "pg-essential": "^1.0.2",
     "pg-promise": "^8.6.4",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",

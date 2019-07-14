@@ -1,6 +1,8 @@
+const db = require('../db/database');
 const Utils = require('../backend/utils');
 
 class Video { 
+
     constructor(id, youtube_id, indexer_video_id, title, duration, summarised_insights_json, insights_json) {
         this.id = id;
         this.youtube_id = youtube_id;
@@ -21,6 +23,15 @@ class Video {
         let summarised_insights_json = inputJson.summarizedInsights;
         let insights_json = inputJson.videos[0].insights;
         return new Video(id, youtube_id, indexer_video_id, title, duration, summarised_insights_json, insights_json);
+    }
+
+    static async insertIntoVideoTable(newVid) {
+        try {
+            let videoEntry = await db.one('INSERT INTO video (youtube_id, indexer_video_id, title, duration, summarised_insights_json, insights_json) VALUES ( $1, $2, $3, $4, $5, $6 ) RETURNING id', [newVid.youtube_id, newVid.indexer_video_id, newVid.title, newVid.duration, newVid.summarised_insights_json, newVid.insights_json]);
+            return videoEntry.id;
+        } catch(e) {
+            throw e;
+        }
     }
 
 }

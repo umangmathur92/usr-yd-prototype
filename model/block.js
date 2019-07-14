@@ -1,6 +1,8 @@
+const db = require('../db/database');
 const Utils = require('../backend/utils');
 
 class Block { 
+
     constructor(id, video_id, block_num, start_time, end_time, original_description) {
         this.id = id;
         this.video_id = video_id;
@@ -32,6 +34,20 @@ class Block {
             blocksArr.push(newBlock);
         }
         return blocksArr;
+    }
+    
+    static async insertIntoBlockTable(blockArr) {
+        try {
+            await db.tx(t => {
+                var queries = blockArr.map(block => {
+                    return t.any('INSERT INTO block(video_id, block_num, start_time, end_time, original_description) VALUES(${video_id}, ${block_num}, ${start_time}, ${end_time}, ${original_description})', block);
+                });
+                return t.batch(queries);
+            });
+            return true;
+        } catch(e) {
+            throw e;
+        }
     }
     
 }
