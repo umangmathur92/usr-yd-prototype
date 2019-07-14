@@ -12,71 +12,47 @@ async function clearDb() {
     }
 }
 
-async function addVideoDataToDb(requestBody) {
+async function addVideoDataToDb(inputJson) {
     try {
-        let video = await insertIntoVideoTable(requestBody);
+        let video = Video.parseVideoFromIndexerJson(inputJson);
+        video.id = await insertIntoVideoTable(video);
         let blocksJsonArr = video.insights_json.blocks;
-        let blockArr = await insertIntoBlockTable(blocksJsonArr, video.id);
-        console.log(blockArr);
+        let blockArr = Block.parseBlockArr(blocksJsonArr, video.id);
+        await insertIntoBlockTable(blockArr);
         return true;
     } catch(e) {
-        console.log(e + ' - ' + e.fileName);
+        console.log(e);
         return false;
     }
 }
 
-async function insertIntoVideoTable(requestBody) {
+async function insertIntoVideoTable(newVid) {
     try {
-        let newVid = Video.parseVideoFromIndexerJson(requestBody);
         let videoEntry = await db.one('INSERT INTO video (youtube_id, indexer_video_id, title, duration, summarised_insights_json, insights_json) VALUES ( $1, $2, $3, $4, $5, $6 ) RETURNING id', [newVid.youtube_id, newVid.indexer_video_id, newVid.title, newVid.duration, newVid.summarised_insights_json, newVid.insights_json]);
-        newVid.id = videoEntry.id;
-        return newVid;
+        return videoEntry.id;
     } catch(e) {
         throw e;
     }
 }
 
-async function insertIntoBlockTable(blocksJsonArr, vidId) {
+async function insertIntoBlockTable(blockArr) {
     try {
-        let blockArr = Block.parseBlockArr(blocksJsonArr, vidId);
-        //console.log(blockArr);
-        return blockArr;
+        //let blockArr = Block.parseBlockArr(blocksJsonArr, vidId);
+        //return blockArr;
+        //let videoEntry = await db.one('INSERT INTO block (video_id, block_num, start_time, end_time, original_description) VALUES ( $1, $2, $3, $4, $5 ) RETURNING id', [newVid.youtube_id, newVid.indexer_video_id, newVid.title, newVid.duration, newVid.summarised_insights_json, newVid.insights_json]);
+        
+        let blocksEntry = await db.tx(t => {
+            var queries = blockArr.map(block => {
+                return t.none('INSERT INTO block(video_id, block_num, start_time, end_time, original_description) VALUES(${video_id}, ${block_num}, ${start_time}, ${end_time}, ${original_description})', block);
+            });
+            return t.batch(queries);
+        });
+        return true;
+
     } catch(e) {
         throw e;
     }
 }
-
-consoleLog = function(msg) {//See https://stackoverflow.com/a/27074218/470749
-    var e = new Error();
-    if (!e.stack)
-        try {
-            // IE requires the Error to actually be thrown or else the 
-            // Error's 'stack' property is undefined.
-            throw e;
-        } catch (e) {
-            if (!e.stack) {
-                //return 0; // IE < 10, likely
-            }
-        }
-    var stack = e.stack.toString().split(/\r\n|\n/);
-    if (msg === '') {
-        msg = '""';
-    }
-    console.log(msg, '          [' + stack[1] + ']');        
-}
-
-
-// function parseBlockArr(blockJsonArr, vidId) {
-//     let blocksArr = [];
-//     for (let i = 0; i < blockJsonArr.length; i++) {
-//         let newBlock = Block.parseBlockJson(blockJsonArr[i], vidId);
-//         //console.log(newBlock);
-//         blocksArr.push(newBlock);
-//     }
-//     console.log(blocksArr);
-//     return blocksArr;
-// }
-
 
 module.exports = {
     addVideoDataToDb: addVideoDataToDb,
