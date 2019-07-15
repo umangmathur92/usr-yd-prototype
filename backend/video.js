@@ -2,6 +2,7 @@ const db = require('../db/database');
 const Video = require('../model/video');
 const Block = require('../model/block');
 const Scene = require('../model/scene');
+const Shot = require('../model/shot');
 
 async function addVideoDataToDb(inputJson) {
     try {
@@ -18,6 +19,13 @@ async function addVideoDataToDb(inputJson) {
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
         sceneArr = await setBlockIdForAllScenes(sceneArr, blockArr);
         await Scene.insertIntoSceneTable(sceneArr);
+        //Parse and Insert Shots
+        let shotJsonArr = video.insights_json.shots;
+        let shotArr = Shot.parseShotArr(shotJsonArr);
+        console.log(shotArr.length);
+        shotArr = await setSceneIdForAllShots(shotArr, sceneArr);
+        console.log(shotArr.length);
+        await Shot.insertIntoShotTable(shotArr);
         return true;
     } catch(e) {
         console.log(e);
@@ -32,6 +40,15 @@ async function setBlockIdForAllScenes(sceneArr, blockArr) {
         scene.scene_id = parentBlock.block_id + '_' + scene.scene_num;
     }
     return sceneArr;
+}
+
+async function setSceneIdForAllShots(shotArr, sceneArr) {
+    for (const shot of shotArr) {
+        let parentScene = await getSceneForIndividualShot(shot, sceneArr);
+        shot.scene_id = parentScene.scene_id;
+        shot.shot_id = parentScene.scene_id + '_' + shot.shot_num;
+    }
+    return shotArr;
 }
 
 //Use binary search to get block corresponding to scene
@@ -52,6 +69,26 @@ async function getBlockForIndividualScene(scene, blockArr) {
         }
     }
     return blockArr[index];
+}
+
+//Use binary search to get scene corresponding to shot
+async function getSceneForIndividualShot(shot, sceneArr) {
+    let start = 0;
+    let end = sceneArr.length - 1;
+    let index = -1;
+    while(start <= end) {
+        let mid = Math.floor((start + end)/2);
+        if(sceneArr[mid].start_time == shot.start_time) {
+            index = mid;
+            break;
+        } else if(sceneArr[mid].start_time < shot.start_time) {
+            index = mid;
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return sceneArr[index];
 }
 
 //Combines 2 blocks at the end of the array if they have the same block_num
