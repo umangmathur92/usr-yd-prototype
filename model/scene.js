@@ -3,8 +3,8 @@ const Utils = require('../backend/utils');
 
 class Scene {
     
-    constructor(id, block_id, scene_num, start_time, end_time, original_description, original_ocr) {
-        this.id = id;
+    constructor(scene_id, block_id, scene_num, start_time, end_time, original_description, original_ocr) {
+        this.scene_id = scene_id;
         this.block_id = block_id;
         this.scene_num = scene_num;
         this.start_time = start_time;
@@ -22,14 +22,14 @@ class Scene {
     }
     
     static parseSceneJson(sceneJsonObj) {
-        let id = -1;
-        let block_id = -1;
+        let block_id = '_';
         let scene_num = sceneJsonObj.id;
         let start_time = Utils.parseSecondsFromString(sceneJsonObj.instances[0].start);
         let end_time = Utils.parseSecondsFromString(sceneJsonObj.instances[0].end);
         let original_description = '';
         let original_ocr = '';
-        return new Scene(id, block_id, scene_num, start_time, end_time, original_description, original_ocr);
+        let scene_id = block_id + '_' + scene_num;
+        return new Scene(scene_id, block_id, scene_num, start_time, end_time, original_description, original_ocr);
     }
 
     static parseSceneArr(sceneJsonArr) {
@@ -42,6 +42,18 @@ class Scene {
         return scenesArr;
     }
 
+    static async insertIntoSceneTable(sceneArr) {
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    return t.one('INSERT INTO scene(scene_id, block_id, scene_num, start_time, end_time, original_description, original_ocr) VALUES(${scene_id},${block_id}, ${scene_num}, ${start_time}, ${end_time}, ${original_description}, ${original_ocr}) RETURNING id', scene, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
 }
 
 module.exports = Scene;

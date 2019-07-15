@@ -5,22 +5,19 @@ const Scene = require('../model/scene');
 
 async function addVideoDataToDb(inputJson) {
     try {
+        //Parse and Insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
-        video.id = await Video.insertIntoVideoTable(video);
+        await Video.insertIntoVideoTable(video);
+        //Parse and Insert Blocks
         let blockJsonArr = video.insights_json.blocks;
-        let blockArr = Block.parseBlockArr(blockJsonArr, video.id);
+        let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         blockArr = modifyLastElementsOfBlockArray(blockArr);
-        let insertedBlockIds = await Block.insertIntoBlockTable(blockArr);
-        for(let i=0; i<blockArr.length; i++) {
-            blockArr[i].id = insertedBlockIds[i];
-        }
+        await Block.insertIntoBlockTable(blockArr);
+        //Parse and Insert Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
-        for (const scene of sceneArr) {
-            let parentBlock = await getBlockForScene(scene, blockArr);
-            scene.block_id = parentBlock.id;
-        }
-        
+        sceneArr = await setBlockIdForAllScenes(sceneArr, blockArr);
+        await Scene.insertIntoSceneTable(sceneArr);
         return true;
     } catch(e) {
         console.log(e);
@@ -28,8 +25,17 @@ async function addVideoDataToDb(inputJson) {
     }
 }
 
+async function setBlockIdForAllScenes(sceneArr, blockArr) {
+    for (const scene of sceneArr) {
+        let parentBlock = await getBlockForIndividualScene(scene, blockArr);
+        scene.block_id = parentBlock.block_id;
+        scene.scene_id = parentBlock.block_id + '_' + scene.scene_num;
+    }
+    return sceneArr;
+}
+
 //Use binary search to get block corresponding to scene
-async function getBlockForScene(scene, blockArr) {
+async function getBlockForIndividualScene(scene, blockArr) {
     let start = 0;
     let end = blockArr.length - 1;
     let index = -1;
