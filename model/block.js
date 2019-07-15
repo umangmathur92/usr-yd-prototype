@@ -16,7 +16,7 @@ class Block {
         this.original_description = desc;
     }
     
-    static parseBlockJson(blockJsonObj,vidId) {
+    static parseBlockJson(blockJsonObj, vidId) {
         let id = -1;
         let video_id = vidId;
         let block_num = blockJsonObj.id;
@@ -38,13 +38,12 @@ class Block {
     
     static async insertIntoBlockTable(blockArr) {
         try {
-            await db.tx(t => {
+            return await db.tx(t => {
                 var queries = blockArr.map(block => {
-                    return t.any('INSERT INTO block(video_id, block_num, start_time, end_time, original_description) VALUES(${video_id}, ${block_num}, ${start_time}, ${end_time}, ${original_description})', block);
+                    return t.one('INSERT INTO block(video_id, block_num, start_time, end_time, original_description) VALUES(${video_id}, ${block_num}, ${start_time}, ${end_time}, ${original_description}) RETURNING id', block, a => + a.id);
                 });
                 return t.batch(queries);
             });
-            return true;
         } catch(e) {
             throw e;
         }

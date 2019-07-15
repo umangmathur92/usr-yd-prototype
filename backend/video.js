@@ -10,15 +10,42 @@ async function addVideoDataToDb(inputJson) {
         let blockJsonArr = video.insights_json.blocks;
         let blockArr = Block.parseBlockArr(blockJsonArr, video.id);
         blockArr = modifyLastElementsOfBlockArray(blockArr);
-        await Block.insertIntoBlockTable(blockArr);
+        let insertedBlockIds = await Block.insertIntoBlockTable(blockArr);
+        for(let i=0; i<blockArr.length; i++) {
+            blockArr[i].id = insertedBlockIds[i];
+        }
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
-        console.log(sceneArr);
+        for (const scene of sceneArr) {
+            let parentBlock = await getBlockForScene(scene, blockArr);
+            scene.block_id = parentBlock.id;
+        }
+        
         return true;
     } catch(e) {
         console.log(e);
         return false;
     }
+}
+
+//Use binary search to get block corresponding to scene
+async function getBlockForScene(scene, blockArr) {
+    let start = 0;
+    let end = blockArr.length - 1;
+    let index = -1;
+    while(start <= end) {
+        let mid = Math.floor((start + end)/2);
+        if(blockArr[mid].start_time == scene.start_time) {
+            index = mid;
+            break;
+        } else if(blockArr[mid].start_time < scene.start_time) {
+            index = mid;
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return blockArr[index];
 }
 
 //Combines 2 blocks at the end of the array if they have the same block_num

@@ -1,7 +1,7 @@
 function parseSecondsFromString(durationString) {
     let splitStr = durationString.split(':');
     let seconds = ((+splitStr[0]* 3600) + (+splitStr[1] * 60) + (+splitStr[2])).toFixed(3); 
-    return seconds;
+    return parseFloat(seconds);
 }
 
 function getThumbUrlFromId(vidIndexerVideoId, thumbnailId, vidIndexerAcctId) {
