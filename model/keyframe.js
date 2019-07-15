@@ -1,0 +1,58 @@
+const db = require('../db/database');
+const Utils = require('../backend/utils');
+
+class Keyframe {
+
+    constructor(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence, environment_id) {
+        this.keyframe_id = keyframe_id;
+        this.shot_id = shot_id;
+        this.keyframe_num = keyframe_num;
+        this.start_time = start_time;
+        this.end_time = end_time;
+        this.thumbnail_id = thumbnail_id;
+        this.thumbnail_url = thumbnail_url;
+        this.caption = caption;
+        this.caption_confidence = caption_confidence;
+        this.environment_id = environment_id;
+    }
+
+    static parseKeyframeJson(keyframeJsonObj, shot, video) {
+        let shot_id = shot.shot_id;
+        let keyframe_num = keyframeJsonObj.id;
+        let keyframe_id = shot_id + '_' + keyframe_num;
+        let start_time = Utils.parseSecondsFromString(keyframeJsonObj.instances[0].start);
+        let end_time = Utils.parseSecondsFromString(keyframeJsonObj.instances[0].end); 
+        let thumbnail_id = keyframeJsonObj.instances[0].thumbnailId;
+        let thumbnail_url = Utils.getThumbUrlFromId(thumbnail_id, video.indexer_video_id);
+        let caption = '';
+        let caption_confidence = 0;
+        let environment_id = 0;
+        return new Keyframe(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence, environment_id);
+    }
+
+    static parseKeyFrameArr(keyframeJsonArr, shot, video) {
+        let keyframesArr = [];
+        for (let i = 0; i < keyframeJsonArr.length; i++) {
+            let keyframeJsonObj = keyframeJsonArr[i];
+            let newShot = Keyframe.parseKeyframeJson(keyframeJsonObj, shot, video);
+            keyframesArr.push(newShot);
+        }
+        return keyframesArr;
+    }
+
+    static async insertIntoKeyframeTable(keyframeArr) {
+        try {
+            return await db.tx(t => {
+                var queries = keyframeArr.map(keyframe => {
+                    return t.one('INSERT INTO keyframe(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence, environment_id) VALUES(${keyframe_id}, ${shot_id}, ${keyframe_num}, ${start_time}, ${end_time}, ${thumbnail_id}, ${thumbnail_url}, ${caption}, ${caption_confidence}, ${environment_id}) RETURNING id', keyframe, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+}
+
+module.exports = Keyframe;

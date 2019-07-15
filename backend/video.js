@@ -3,6 +3,7 @@ const Video = require('../model/video');
 const Block = require('../model/block');
 const Scene = require('../model/scene');
 const Shot = require('../model/shot');
+const Keyframe = require('../model/keyframe');
 
 async function addVideoDataToDb(inputJson) {
     try {
@@ -22,10 +23,23 @@ async function addVideoDataToDb(inputJson) {
         //Parse and Insert Shots
         let shotJsonArr = video.insights_json.shots;
         let shotArr = Shot.parseShotArr(shotJsonArr);
-        console.log(shotArr.length);
         shotArr = await setSceneIdForAllShots(shotArr, sceneArr);
-        console.log(shotArr.length);
         await Shot.insertIntoShotTable(shotArr);
+        //Parse and insert KeyFrames
+        let allKeyframesArr = [];
+        shotArr.forEach(shot => {
+            let keyframeJsonArr = shot.keyframe_json_arr;
+            let keyframeArr = Keyframe.parseKeyFrameArr(keyframeJsonArr, shot, video);//Keyframe array for that particular shot
+            allKeyframesArr.push.apply(allKeyframesArr, keyframeArr);
+        });
+        await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
+        //Parse and insert OCR data into the shot table
+
+        //Fetch captions for all keyframes and update the keyframes table
+
+        //Fetch environment for all keyframes and update the keyframes table
+
+
         return true;
     } catch(e) {
         console.log(e);
@@ -101,6 +115,7 @@ function modifyLastElementsOfBlockArray(blockArr) {
     return blockArr;
 }
 
+//Truncates all tables related to the Video Table - Does not affect the 'environments' table
 async function clearDb() {
     try {
         await db.any('TRUNCATE TABLE video restart IDENTITY CASCADE');

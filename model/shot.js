@@ -3,13 +3,14 @@ const Utils = require('../backend/utils');
 
 class Shot {
     
-    constructor(shot_id, scene_id, shot_num, start_time, end_time, original_ocr) {
+    constructor(shot_id, scene_id, shot_num, start_time, end_time, original_ocr, keyframe_json_arr) {
         this.shot_id = shot_id;
         this.scene_id = scene_id;
         this.shot_num = shot_num;
         this.start_time = start_time;
         this.end_time = end_time;
         this.original_ocr = original_ocr;
+        this.keyframe_json_arr = keyframe_json_arr;
     }
         
     setOriginalOcr(desc) {
@@ -23,7 +24,8 @@ class Shot {
         let end_time = Utils.parseSecondsFromString(shotJsonObj.instances[0].end);
         let original_ocr = '';
         let shot_id = scene_id + '_' + shot_num;
-        return new Shot(shot_id, scene_id, shot_num, start_time, end_time, original_ocr);
+        let keyframe_arr = shotJsonObj.keyFrames;
+        return new Shot(shot_id, scene_id, shot_num, start_time, end_time, original_ocr, keyframe_arr);
     }
 
     static parseShotArr(shotJsonArr) {
