@@ -37,19 +37,67 @@ async function addVideoDataToDb(inputJson) {
         //Parse and insert OCR data into the shot table
         let ocrJsonArr = video.insights_json.ocr;
         let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
-        ocrArr.sort((a, b) => (a.start_time > b.start_time) ? 1 : -1)
+        ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
         ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
-        console.log(ocrArr);
+        ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
+        let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
+        console.log(concatenatedOcrTextArr);
         //Fetch captions for all keyframes and update the keyframes table
 
         //Fetch environment for all keyframes and update the keyframes table
-
 
         return true;
     } catch(e) {
         console.log(e);
         return false;
     }
+}
+
+function concatOcrWithinSameShot(ocrArr) {
+    let outputArr = [];
+    let customOcrObj = new Object();
+    customOcrObj.shot_id = '-';
+    customOcrObj.text = '';
+    let lastShotNum = -1;
+    for(let i=0; i<ocrArr.length; i++) {
+        let currOcrObj = ocrArr[i];
+        if(currOcrObj.shot_num > lastShotNum) {
+            outputArr.push(customOcrObj);
+            customOcrObj = new Object();
+            customOcrObj.shot_id = currOcrObj.shot_id;
+            customOcrObj.text = '';        
+            lastShotNum = currOcrObj.shot_num;
+        }
+        customOcrObj.text = customOcrObj.text + currOcrObj.text + ' ';
+    }
+    outputArr.push(customOcrObj);
+    return outputArr;
+}
+
+function cleanUpOcrDataWithinEachShot(ocrArr) {
+    let ocrMap = new Map();
+    for(let i=0; i<ocrArr.length; i++) {
+        let currOcrObj = ocrArr[i];
+        let currOcrObjKey = currOcrObj.shot_id + '_' + currOcrObj.text + '_' + currOcrObj.left + '_' + currOcrObj.top + '_' + currOcrObj.width + '_' + currOcrObj.height;
+        if(ocrMap.has(currOcrObjKey)) {
+            let mOcrObj = ocrMap.get(currOcrObjKey);
+            if(currOcrObj.start_time - mOcrObj.end_time < 3) {
+                mOcrObj.end_time = currOcrObj.end_time;
+            } else {
+                currOcrObjKey = currOcrObjKey + '_' + i;
+                ocrMap.set(currOcrObjKey, currOcrObj)
+            }
+        } else {
+            ocrMap.set(currOcrObjKey, currOcrObj);
+        }
+    }
+    let outputArr = [];
+    let ocrMapKeys = ocrMap.keys(); 
+    for(const mapKey of ocrMapKeys) {
+        let ocrObj = ocrMap.get(mapKey);
+        outputArr.push(ocrObj);
+    }
+    return outputArr;
 }
 
 async function setBlockIdForAllScenes(sceneArr, blockArr) {

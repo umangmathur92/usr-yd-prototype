@@ -38,6 +38,19 @@ class Ocr {
         }
         return ocrArr;
     }
+
+    static async updateShotTableWithOcrData(concatenatedOcrTextArr) {
+        try {
+            return await db.tx(t => {
+                var queries = concatenatedOcrTextArr.map(ocrObj => {
+                    //return t.one('', ocrObj, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
 }
 
 module.exports = Ocr;
