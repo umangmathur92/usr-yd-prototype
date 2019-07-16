@@ -44,9 +44,7 @@ class Ocr {
         try {
             return await db.tx(t => {
                 var queries = concatenatedOcrTextArr.map(ocrObj => {
-                    //console.log(ocrObj);
                     return t.one('UPDATE shot SET original_ocr = ${text} WHERE shot_id = ${shot_id} RETURNING id', ocrObj, a => + a.id);
-                    //return db.any('UPDATE listings SET status = $1, response = $2, agency = $3, response_date = now() WHERE listing_id = $4',[status, response, agency, listingId]);
                 });
                 return t.batch(queries);
             });

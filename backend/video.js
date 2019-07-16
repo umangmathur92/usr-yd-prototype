@@ -41,7 +41,9 @@ async function addVideoDataToDb(inputJson) {
         ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
         ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
-        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr)
+        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
+        //Insert OCR data into the scene table
+        await Scene.aggregateShotOcrIntoSceneOcr(video);
         //Fetch captions for all keyframes and update the keyframes table
 
         //Fetch environment for all keyframes and update the keyframes table

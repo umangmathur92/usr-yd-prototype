@@ -54,6 +54,11 @@ class Scene {
             throw e;
         }
     }
+
+    static async aggregateShotOcrIntoSceneOcr(video) {
+        return db.any("UPDATE scene SET original_ocr = (SELECT array_to_string(array_agg(original_ocr ORDER BY shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
+    }
+
 }
 
 module.exports = Scene;
