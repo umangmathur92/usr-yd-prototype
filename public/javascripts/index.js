@@ -11,7 +11,6 @@ function scrollToPosition(position) {
     $('#ul-scene-list').animate({
         scrollTop: $('#ul-scene-list li:nth-child('+position+')').position().top - $('#ul-scene-list li:first').position().top
     }, 'slow');
-    //$('#ul-scene-list').scrollTop($('#ul-scene-list li:nth-child('+position+')').position().top - $('#ul-scene-list li:first').position().top)
 }
 
 function onYouTubeIframeAPIReady() {

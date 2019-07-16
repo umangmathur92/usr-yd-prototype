@@ -4,23 +4,24 @@ const Block = require('../model/block');
 const Scene = require('../model/scene');
 const Shot = require('../model/shot');
 const Keyframe = require('../model/keyframe');
+const Ocr = require('../model/ocr');
 
 async function addVideoDataToDb(inputJson) {
     try {
-        //Parse and Insert Video
+        //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
         await Video.insertIntoVideoTable(video);
-        //Parse and Insert Blocks
+        //Parse and insert Blocks
         let blockJsonArr = video.insights_json.blocks;
         let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         blockArr = modifyLastElementsOfBlockArray(blockArr);
         await Block.insertIntoBlockTable(blockArr);
-        //Parse and Insert Scenes
+        //Parse and insert Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
         sceneArr = await setBlockIdForAllScenes(sceneArr, blockArr);
         await Scene.insertIntoSceneTable(sceneArr);
-        //Parse and Insert Shots
+        //Parse and insert Shots
         let shotJsonArr = video.insights_json.shots;
         let shotArr = Shot.parseShotArr(shotJsonArr);
         shotArr = await setSceneIdForAllShots(shotArr, sceneArr);
@@ -34,7 +35,11 @@ async function addVideoDataToDb(inputJson) {
         });
         await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
         //Parse and insert OCR data into the shot table
-
+        let ocrJsonArr = video.insights_json.ocr;
+        let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
+        ocrArr.sort((a, b) => (a.start_time > b.start_time) ? 1 : -1)
+        ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
+        console.log(ocrArr);
         //Fetch captions for all keyframes and update the keyframes table
 
         //Fetch environment for all keyframes and update the keyframes table
@@ -63,6 +68,15 @@ async function setSceneIdForAllShots(shotArr, sceneArr) {
         shot.shot_id = parentScene.scene_id + '_' + shot.shot_num;
     }
     return shotArr;
+}
+
+async function setShotIdForAllOcrDetections(ocrArr, shotArr) {
+    for (const ocrObj of ocrArr) {
+        let parentShot = await getShotForIndividualOcrDetection(ocrObj, shotArr);
+        ocrObj.shot_id = parentShot.shot_id;
+        ocrObj.shot_num = parentShot.shot_num;
+    }
+    return ocrArr;
 }
 
 //Use binary search to get block corresponding to scene
@@ -103,6 +117,26 @@ async function getSceneForIndividualShot(shot, sceneArr) {
         }
     }
     return sceneArr[index];
+}
+
+//Use binary search to get shot corresponding to OCR detection
+async function getShotForIndividualOcrDetection(ocrObj, shotArr) {
+    let start = 0;
+    let end = shotArr.length - 1;
+    let index = -1;
+    while(start <= end) {
+        let mid = Math.floor((start + end)/2);
+        if(shotArr[mid].start_time == ocrObj.start_time) {
+            index = mid;
+            break;
+        } else if(shotArr[mid].start_time < ocrObj.start_time) {
+            index = mid;
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return shotArr[index];
 }
 
 //Combines 2 blocks at the end of the array if they have the same block_num
