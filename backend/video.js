@@ -41,7 +41,7 @@ async function addVideoDataToDb(inputJson) {
         ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
         ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
-        console.log(concatenatedOcrTextArr);
+        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr)
         //Fetch captions for all keyframes and update the keyframes table
 
         //Fetch environment for all keyframes and update the keyframes table
@@ -62,7 +62,9 @@ function concatOcrWithinSameShot(ocrArr) {
     for(let i=0; i<ocrArr.length; i++) {
         let currOcrObj = ocrArr[i];
         if(currOcrObj.shot_num > lastShotNum) {
-            outputArr.push(customOcrObj);
+            if(lastShotNum > -1) {
+                outputArr.push(customOcrObj);
+            }
             customOcrObj = new Object();
             customOcrObj.shot_id = currOcrObj.shot_id;
             customOcrObj.text = '';        
