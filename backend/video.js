@@ -45,7 +45,7 @@ async function addVideoDataToDb(inputJson) {
         //Insert OCR data into the scene table
         await Scene.aggregateShotOcrIntoSceneOcr(video);
         //Fetch captions for all keyframes and update the keyframes table
-
+        
         //Fetch environment for all keyframes and update the keyframes table
 
         return true;
@@ -105,8 +105,10 @@ function cleanUpOcrDataWithinEachShot(ocrArr) {
 }
 
 async function setBlockIdForAllScenes(sceneArr, blockArr) {
+    let blockStartTimeArr = extractStartTimeArrFromObjectArr(blockArr);
     for (const scene of sceneArr) {
-        let parentBlock = await getBlockForIndividualScene(scene, blockArr);
+        let blockIndex = await getIndexOfInputArrForTargetVal(scene.start_time, blockStartTimeArr);
+        let parentBlock = blockArr[blockIndex];
         scene.block_id = parentBlock.block_id;
         scene.scene_id = parentBlock.block_id + '_' + scene.scene_num;
     }
@@ -114,8 +116,10 @@ async function setBlockIdForAllScenes(sceneArr, blockArr) {
 }
 
 async function setSceneIdForAllShots(shotArr, sceneArr) {
+    let sceneStartTimeArr = extractStartTimeArrFromObjectArr(sceneArr);
     for (const shot of shotArr) {
-        let parentScene = await getSceneForIndividualShot(shot, sceneArr);
+        let sceneIndex = await getIndexOfInputArrForTargetVal(shot.start_time, sceneStartTimeArr);
+        let parentScene = sceneArr[sceneIndex];
         shot.scene_id = parentScene.scene_id;
         shot.shot_id = parentScene.scene_id + '_' + shot.shot_num;
     }
@@ -131,44 +135,31 @@ async function setShotIdForAllOcrDetections(ocrArr, shotArr) {
     return ocrArr;
 }
 
-//Use binary search to get block corresponding to scene
-async function getBlockForIndividualScene(scene, blockArr) {
-    let start = 0;
-    let end = blockArr.length - 1;
-    let index = -1;
-    while(start <= end) {
-        let mid = Math.floor((start + end)/2);
-        if(blockArr[mid].start_time == scene.start_time) {
-            index = mid;
-            break;
-        } else if(blockArr[mid].start_time < scene.start_time) {
-            index = mid;
-            start = mid + 1;
-        } else {
-            end = mid - 1;
-        }
-    }
-    return blockArr[index];
+function extractStartTimeArrFromObjectArr(genericObjectArr) {
+    let outputArr = [];
+    genericObjectArr.forEach(obj => {
+        outputArr.push(obj.start_time);
+    });
+    return outputArr;
 }
 
-//Use binary search to get scene corresponding to shot
-async function getSceneForIndividualShot(shot, sceneArr) {
+async function getIndexOfInputArrForTargetVal(target, inputArr) {
     let start = 0;
-    let end = sceneArr.length - 1;
+    let end = inputArr.length - 1;
     let index = -1;
     while(start <= end) {
         let mid = Math.floor((start + end)/2);
-        if(sceneArr[mid].start_time == shot.start_time) {
+        if(inputArr[mid] == target) {
             index = mid;
             break;
-        } else if(sceneArr[mid].start_time < shot.start_time) {
+        } else if(inputArr[mid] < target) {
             index = mid;
             start = mid + 1;
         } else {
             end = mid - 1;
         }
     }
-    return sceneArr[index];
+    return index;
 }
 
 //Use binary search to get shot corresponding to OCR detection
