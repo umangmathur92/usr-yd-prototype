@@ -5,7 +5,9 @@ const Scene = require('../model/scene');
 const Shot = require('../model/shot');
 const Keyframe = require('../model/keyframe');
 const Ocr = require('../model/ocr');
+const ApiRepository = require('../backend/apirepository')
 
+//Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     try {
         //Parse and insert Video
@@ -34,7 +36,7 @@ async function addVideoDataToDb(inputJson) {
             allKeyframesArr.push.apply(allKeyframesArr, keyframeArr);
         });
         await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
-        //Parse and insert OCR data into the shot table
+        //Parse, Sort, Process and insert OCR data into the shot table
         let ocrJsonArr = video.insights_json.ocr;
         let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
         ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
@@ -42,17 +44,39 @@ async function addVideoDataToDb(inputJson) {
         ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
         await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
-        //Insert OCR data into the scene table
+        //Aggregate OCR data from the Shot table and insert it into the scene table
         await Scene.aggregateShotOcrIntoSceneOcr(video);
         //Fetch captions for all keyframes and update the keyframes table
-        
+        await fetchCaptionsForKeyFrames(allKeyframesArr);
         //Fetch environment for all keyframes and update the keyframes table
-
+        
         return true;
     } catch(e) {
         console.log(e);
         return false;
     }
+}
+
+async function fetchCaptionsForKeyFrames(allKeyframesArr) {
+    for(const keyFrameImg of allKeyframesArr) {
+        let imgUrl = keyFrameImg.thumbnail_url;
+        let imgAnalysisJson = await ApiRepository.getImageAnalysis(imgUrl);
+        let captionText = '';
+        let confidenceScore = 0;
+        try {
+            captionText = imgAnalysisJson.description.captions[0].text;
+            confidenceScore = imgAnalysisJson.description.captions[0].confidence;
+        } catch(e) {
+            console.log(e);
+        }
+        console.log(captionText);
+        await sleep(3000);
+    }
+    return true;
+}
+
+async function sleep(msec) {
+    return new Promise(resolve => setTimeout(resolve, msec));
 }
 
 //Combine all OCRs ocurring within the same shot
