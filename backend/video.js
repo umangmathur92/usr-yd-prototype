@@ -5,29 +5,31 @@ const Scene = require('../model/scene');
 const Shot = require('../model/shot');
 const Keyframe = require('../model/keyframe');
 const Ocr = require('../model/ocr');
-const ApiRepository = require('../backend/apirepository')
+const KeyframeObject = require('../model/keyframeobject');
+const KeyframeTag = require('../model/keyframetag');
+const ApiRepository = require('../backend/apirepository');
 
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     try {
         //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
-        //await Video.insertIntoVideoTable(video);
+        await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
         let blockJsonArr = video.insights_json.blocks;
         let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         blockArr = modifyLastElementsOfBlockArray(blockArr);
-        //await Block.insertIntoBlockTable(blockArr);
+        await Block.insertIntoBlockTable(blockArr);
         //Parse and insert Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
         sceneArr = await setBlockIdForAllScenes(sceneArr, blockArr);
-        //await Scene.insertIntoSceneTable(sceneArr);
+        await Scene.insertIntoSceneTable(sceneArr);
         //Parse and insert Shots
         let shotJsonArr = video.insights_json.shots;
         let shotArr = Shot.parseShotArr(shotJsonArr);
         shotArr = await setSceneIdForAllShots(shotArr, sceneArr);
-        //await Shot.insertIntoShotTable(shotArr);
+        await Shot.insertIntoShotTable(shotArr);
         //Parse and insert KeyFrames
         let allKeyframesArr = [];
         shotArr.forEach(shot => {
@@ -35,7 +37,7 @@ async function addVideoDataToDb(inputJson) {
             let keyframeArr = Keyframe.parseKeyFrameArr(keyframeJsonArr, shot, video);//Keyframe array for that particular shot
             allKeyframesArr.push.apply(allKeyframesArr, keyframeArr);
         });
-        //await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
+        await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
         //Parse, Sort, Process and insert OCR data into the shot table
         let ocrJsonArr = video.insights_json.ocr;
         let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
@@ -43,11 +45,19 @@ async function addVideoDataToDb(inputJson) {
         ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
         ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
-        //await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
+        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
         //Aggregate OCR data from the Shot table and insert it into the scene table
-        //await Scene.aggregateShotOcrIntoSceneOcr(video);
+        await Scene.aggregateShotOcrIntoSceneOcr(video);
         //Fetch captions for all keyframes and update the keyframes table
-        await fetchCaptionsForKeyFrames(allKeyframesArr);
+        let imgAnalysisResult = await fetchImageAnalysisForAllKeyFrames(allKeyframesArr);
+        allKeyframesArr = imgAnalysisResult.allKeyframesArr;
+        await Keyframe.updateCaptionDataForKeyframes(allKeyframesArr);
+        //Insert objects detected in each frame into the keyframe_object table
+        let keyframeObjectArr = imgAnalysisResult.keyframeObjectArr;
+        await KeyframeObject.insertIntoKeyframeObjectTable(keyframeObjectArr);
+        //Insert tags detected in each frame into the keyframe_tag table 
+        let keyframeTagArr = imgAnalysisResult.keyframeTagArr;
+        await  KeyframeTag.insertIntoKeyframeTagTable(keyframeTagArr);
         //Fetch environment for all keyframes and update the keyframes table
         
         return true;
@@ -57,7 +67,9 @@ async function addVideoDataToDb(inputJson) {
     }
 }
 
-async function fetchCaptionsForKeyFrames(allKeyframesArr) {
+async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
+    let keyframeObjectArr = [];
+    let keyframeTagArr = [];
     for(const keyFrameImg of allKeyframesArr) {
         let imgUrl = keyFrameImg.thumbnail_url;
         let imgAnalysisJson = await ApiRepository.getImageAnalysis(imgUrl);
@@ -67,12 +79,23 @@ async function fetchCaptionsForKeyFrames(allKeyframesArr) {
             captionText = imgAnalysisJson.description.captions[0].text;
             confidenceScore = imgAnalysisJson.description.captions[0].confidence;
         } catch(e) {
-            console.log(e);
+            console.log(e.message);
         }
+        keyFrameImg.caption = captionText;
+        keyFrameImg.caption_confidence = confidenceScore;
+        //Tags detected in each image added to an array
+        let tagsJsonArr = imgAnalysisJson.tags;
+        let kfTagsArr = KeyframeTag.parseKeyframeTagArr(tagsJsonArr, keyFrameImg.keyframe_id);
+        keyframeTagArr.push.apply(keyframeTagArr, kfTagsArr);
+        //Objects detected in each image added to an array
+        let objJsonArr = imgAnalysisJson.objects;
+        let kfObjsArr = KeyframeObject.parseKeyframeObjectArr(objJsonArr, keyFrameImg.keyframe_id);
+        keyframeObjectArr.push.apply(keyframeObjectArr, kfObjsArr);
         console.log(captionText+'('+confidenceScore+')');
+        //API throttling. The API can be used only once in 3 seconds(free tier subscription)
         await sleep(3000);
     }
-    return true;
+    return {'allKeyframesArr' : allKeyframesArr, 'keyframeObjectArr' : keyframeObjectArr, 'keyframeTagArr' : keyframeTagArr};
 }
 
 async function sleep(msec) {

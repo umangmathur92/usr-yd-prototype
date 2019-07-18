@@ -53,6 +53,19 @@ class Keyframe {
         }
     }
 
+    static async updateCaptionDataForKeyframes(keyframeArr) {
+        try {
+            return await db.tx(t => {
+                var queries = keyframeArr.map(keyframe => {
+                    return t.one("UPDATE keyframe SET caption = ${caption}, caption_confidence = ${caption_confidence} WHERE keyframe_id = ${keyframe_id} RETURNING id", keyframe, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
 }
 
 module.exports = Keyframe;
