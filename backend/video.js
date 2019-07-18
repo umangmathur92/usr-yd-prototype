@@ -12,22 +12,22 @@ async function addVideoDataToDb(inputJson) {
     try {
         //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
-        await Video.insertIntoVideoTable(video);
+        //await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
         let blockJsonArr = video.insights_json.blocks;
         let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         blockArr = modifyLastElementsOfBlockArray(blockArr);
-        await Block.insertIntoBlockTable(blockArr);
+        //await Block.insertIntoBlockTable(blockArr);
         //Parse and insert Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
         sceneArr = await setBlockIdForAllScenes(sceneArr, blockArr);
-        await Scene.insertIntoSceneTable(sceneArr);
+        //await Scene.insertIntoSceneTable(sceneArr);
         //Parse and insert Shots
         let shotJsonArr = video.insights_json.shots;
         let shotArr = Shot.parseShotArr(shotJsonArr);
         shotArr = await setSceneIdForAllShots(shotArr, sceneArr);
-        await Shot.insertIntoShotTable(shotArr);
+        //await Shot.insertIntoShotTable(shotArr);
         //Parse and insert KeyFrames
         let allKeyframesArr = [];
         shotArr.forEach(shot => {
@@ -35,7 +35,7 @@ async function addVideoDataToDb(inputJson) {
             let keyframeArr = Keyframe.parseKeyFrameArr(keyframeJsonArr, shot, video);//Keyframe array for that particular shot
             allKeyframesArr.push.apply(allKeyframesArr, keyframeArr);
         });
-        await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
+        //await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
         //Parse, Sort, Process and insert OCR data into the shot table
         let ocrJsonArr = video.insights_json.ocr;
         let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
@@ -43,9 +43,9 @@ async function addVideoDataToDb(inputJson) {
         ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
         ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
-        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
+        //await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
         //Aggregate OCR data from the Shot table and insert it into the scene table
-        await Scene.aggregateShotOcrIntoSceneOcr(video);
+        //await Scene.aggregateShotOcrIntoSceneOcr(video);
         //Fetch captions for all keyframes and update the keyframes table
         await fetchCaptionsForKeyFrames(allKeyframesArr);
         //Fetch environment for all keyframes and update the keyframes table
@@ -69,7 +69,7 @@ async function fetchCaptionsForKeyFrames(allKeyframesArr) {
         } catch(e) {
             console.log(e);
         }
-        console.log(captionText);
+        console.log(captionText+'('+confidenceScore+')');
         await sleep(3000);
     }
     return true;
