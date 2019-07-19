@@ -43,6 +43,7 @@ class Scene {
     }
 
     static async insertIntoSceneTable(sceneArr) {
+        console.log('DB Operation: Inserting Scenes');
         try {
             return await db.tx(t => {
                 var queries = sceneArr.map(scene => {
@@ -56,6 +57,7 @@ class Scene {
     }
 
     static async aggregateShotOcrIntoSceneOcr(video) {
+        console.log('DB Operation: Updating Scene table with OCR data from Shot table');
         return db.any("UPDATE scene SET original_ocr = (SELECT array_to_string(array_agg(original_ocr ORDER BY shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
     }
 

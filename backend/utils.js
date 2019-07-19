@@ -10,7 +10,12 @@ function getThumbUrlFromId(thumbnailId, vidIndexerVideoId) {
     return 'https://api.videoindexer.ai/trial/Accounts/'+ vidIndexerAcctId +'/Videos/' + vidIndexerVideoId + '/Thumbnails/' + thumbnailId + '?format=Jpeg';
 }
 
+async function sleep(msec) {
+    return new Promise(resolve => setTimeout(resolve, msec));
+}
+
 module.exports = {
     parseSecondsFromString: parseSecondsFromString,
-    getThumbUrlFromId: getThumbUrlFromId
+    getThumbUrlFromId: getThumbUrlFromId,
+    sleep: sleep
 }

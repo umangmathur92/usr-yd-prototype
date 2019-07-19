@@ -41,6 +41,7 @@ class Keyframe {
     }
 
     static async insertIntoKeyframeTable(keyframeArr) {
+        console.log('DB Operation: Inserting Keyframes');
         try {
             return await db.tx(t => {
                 var queries = keyframeArr.map(keyframe => {
@@ -54,6 +55,7 @@ class Keyframe {
     }
 
     static async updateCaptionDataForKeyframes(keyframeArr) {
+        console.log('DB Operation: Updating Keyframe table with caption data');
         try {
             return await db.tx(t => {
                 var queries = keyframeArr.map(keyframe => {

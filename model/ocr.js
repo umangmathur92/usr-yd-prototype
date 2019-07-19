@@ -41,6 +41,7 @@ class Ocr {
     }
 
     static async updateShotTableWithOcrData(concatenatedOcrTextArr) {
+        console.log('DB Operation: Updating Shot table with OCR data');
         try {
             return await db.tx(t => {
                 var queries = concatenatedOcrTextArr.map(ocrObj => {

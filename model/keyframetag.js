@@ -29,6 +29,7 @@ class KeyframeTag {
     }
 
     static async insertIntoKeyframeTagTable(keyframeTagArr) {
+        console.log('DB Operation: Inserting the detected Keyframe-Tags');
         try {
             return await db.tx(t => {
                 var queries = keyframeTagArr.map(keyframeTag => {
