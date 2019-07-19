@@ -16,12 +16,9 @@ function submitVideoData() {
         "title": title,
         "inputJson": inputJson
     };
-    // $.post('/addvideo', jsonBody, function(response){
-    //     window.alert(JSON.stringify(response));
-    // });
     $.ajax({
         type: 'POST',
-        timeout: 1*60*60*1000*1000,
+        timeout: 1*60*60*1000,
         url : "/addvideo",
         dataType: "json",
         async:true,
