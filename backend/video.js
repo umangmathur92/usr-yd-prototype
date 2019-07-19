@@ -68,6 +68,7 @@ async function addVideoDataToDb(inputJson) {
     }
 }
 
+//Call the Microsoft Image analysis API for all Keyframes in the video
 async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
     let keyframeObjectArr = [];
     let keyframeTagArr = [];
@@ -195,7 +196,7 @@ function extractStartTimeArrFromObjectArr(genericObjectArr) {
     return outputArr;
 }
 
-//generic binary search algorithm - returns index of target's placement within the input array
+//Returns index of array item whose value is equal-to or lesser-than(also nearest-in-value) the target (binary search algorithm)
 function getIndexOfInputArrForTargetVal(target, inputArr) {
     let start = 0;
     let end = inputArr.length - 1;
