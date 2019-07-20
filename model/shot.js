@@ -39,6 +39,7 @@ class Shot {
     }
 
     static async insertIntoShotTable(shotArr) {
+        console.log('DB Operation: Inserting Shots');
         try {
             return await db.tx(t => {
                 var queries = shotArr.map(shot => {

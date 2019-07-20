@@ -1,3 +1,6 @@
+const fetch = require('node-fetch');
+const fs = require('fs');
+
 const vidIndexerAcctId = '5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b';
 
 function parseSecondsFromString(durationString) {
@@ -10,7 +13,27 @@ function getThumbUrlFromId(thumbnailId, vidIndexerVideoId) {
     return 'https://api.videoindexer.ai/trial/Accounts/'+ vidIndexerAcctId +'/Videos/' + vidIndexerVideoId + '/Thumbnails/' + thumbnailId + '?format=Jpeg';
 }
 
+async function sleep(msec) {
+    return new Promise(resolve => setTimeout(resolve, msec));
+}
+
+const downloadFile = (async (url, path) => {
+    const res = await fetch(url);
+    const fileStream = fs.createWriteStream(path);
+    await new Promise((resolve, reject) => {
+        res.body.pipe(fileStream);
+        res.body.on("error", (err) => {
+            reject(err);
+        });
+        fileStream.on("finish", function() {
+            resolve();
+        });
+    });
+});
+
 module.exports = {
     parseSecondsFromString: parseSecondsFromString,
-    getThumbUrlFromId: getThumbUrlFromId
+    getThumbUrlFromId: getThumbUrlFromId,
+    sleep: sleep,
+    downloadFile: downloadFile
 }

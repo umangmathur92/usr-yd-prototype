@@ -37,6 +37,7 @@ class Block {
     }
     
     static async insertIntoBlockTable(blockArr) {
+        console.log('DB Operation: Inserting Blocks');
         try {
             return await db.tx(t => {
                 var queries = blockArr.map(block => {

@@ -1,4 +1,5 @@
 const db = require('../db/database');
+const Utils = require('../backend/utils');
 const Video = require('../model/video');
 const Block = require('../model/block');
 const Scene = require('../model/scene');
@@ -7,6 +8,7 @@ const Keyframe = require('../model/keyframe');
 const Ocr = require('../model/ocr');
 const KeyframeObject = require('../model/keyframeobject');
 const KeyframeTag = require('../model/keyframetag');
+const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 
 //Parse and insert all JSON data from the videoindexer into the database
@@ -23,12 +25,12 @@ async function addVideoDataToDb(inputJson) {
         //Parse and insert Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
-        sceneArr = await setBlockIdForAllScenes(sceneArr, blockArr);
+        sceneArr = setBlockIdForAllScenes(sceneArr, blockArr);
         await Scene.insertIntoSceneTable(sceneArr);
         //Parse and insert Shots
         let shotJsonArr = video.insights_json.shots;
         let shotArr = Shot.parseShotArr(shotJsonArr);
-        shotArr = await setSceneIdForAllShots(shotArr, sceneArr);
+        shotArr = setSceneIdForAllShots(shotArr, sceneArr);
         await Shot.insertIntoShotTable(shotArr);
         //Parse and insert KeyFrames
         let allKeyframesArr = [];
@@ -42,7 +44,7 @@ async function addVideoDataToDb(inputJson) {
         let ocrJsonArr = video.insights_json.ocr;
         let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
         ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
-        ocrArr = await setShotIdForAllOcrDetections(ocrArr, shotArr);
+        ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
         ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
         await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
@@ -59,7 +61,8 @@ async function addVideoDataToDb(inputJson) {
         let keyframeTagArr = imgAnalysisResult.keyframeTagArr;
         await  KeyframeTag.insertIntoKeyframeTagTable(keyframeTagArr);
         //Fetch environment for all keyframes and update the keyframes table
-        
+        let kfEnvironmentArr = await fetchEnvironmentForAllKeyFrames(allKeyframesArr);
+        await Environment.insertIntoKeyframeEnvironmentTable(kfEnvironmentArr);
         return true;
     } catch(e) {
         console.log(e);
@@ -67,6 +70,21 @@ async function addVideoDataToDb(inputJson) {
     }
 }
 
+async function fetchEnvironmentForAllKeyFrames(allKeyframesArr) {
+    let allEnvArr = [];
+    for(const keyFrameImg of allKeyframesArr) {
+        let imgUrl = keyFrameImg.thumbnail_url;
+        let keyframeId = keyFrameImg.keyframe_id;
+        let environmentJson = await ApiRepository.getSceneClassification(imgUrl, keyframeId);
+        let envPredictionsJsonArr = environmentJson.predictions;
+        let kfEnvPredictionsArr = Environment.parseEnvJsonArr(envPredictionsJsonArr, keyframeId);
+        allEnvArr.push.apply(allEnvArr, kfEnvPredictionsArr);
+        console.log('Environment API: called for frame ' + keyframeId);
+    }
+    return allEnvArr;
+}
+
+//Call the Microsoft Image analysis API for all Keyframes in the video
 async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
     let keyframeObjectArr = [];
     let keyframeTagArr = [];
@@ -75,11 +93,9 @@ async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
         let imgAnalysisJson = await ApiRepository.getImageAnalysis(imgUrl);
         let captionText = '';
         let confidenceScore = 0;
-        try {
+        if(imgAnalysisJson.description.captions.length>0) {
             captionText = imgAnalysisJson.description.captions[0].text;
             confidenceScore = imgAnalysisJson.description.captions[0].confidence;
-        } catch(e) {
-            console.log(e.message);
         }
         keyFrameImg.caption = captionText;
         keyFrameImg.caption_confidence = confidenceScore;
@@ -91,15 +107,11 @@ async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
         let objJsonArr = imgAnalysisJson.objects;
         let kfObjsArr = KeyframeObject.parseKeyframeObjectArr(objJsonArr, keyFrameImg.keyframe_id);
         keyframeObjectArr.push.apply(keyframeObjectArr, kfObjsArr);
-        console.log(captionText+'('+confidenceScore+')');
+        console.log('Image Analysis API Response (caption only): ' + captionText+'('+confidenceScore+')');
         //API throttling. The API can be used only once in 3 seconds(free tier subscription)
-        await sleep(3000);
+        await Utils.sleep(3000);
     }
     return {'allKeyframesArr' : allKeyframesArr, 'keyframeObjectArr' : keyframeObjectArr, 'keyframeTagArr' : keyframeTagArr};
-}
-
-async function sleep(msec) {
-    return new Promise(resolve => setTimeout(resolve, msec));
 }
 
 //Combine all OCRs ocurring within the same shot
@@ -156,10 +168,10 @@ function cleanUpOcrDataWithinEachShot(ocrArr) {
 }
 
 //Assign attributes indicating the parent Block to each Scene
-async function setBlockIdForAllScenes(sceneArr, blockArr) {
+function setBlockIdForAllScenes(sceneArr, blockArr) {
     let blockStartTimeArr = extractStartTimeArrFromObjectArr(blockArr);
     for (const scene of sceneArr) {
-        let blockIndex = await getIndexOfInputArrForTargetVal(scene.start_time, blockStartTimeArr);
+        let blockIndex = getIndexOfInputArrForTargetVal(scene.start_time, blockStartTimeArr);
         let parentBlock = blockArr[blockIndex];
         scene.block_id = parentBlock.block_id;
         scene.scene_id = parentBlock.block_id + '_' + scene.scene_num;
@@ -168,10 +180,10 @@ async function setBlockIdForAllScenes(sceneArr, blockArr) {
 }
 
 //Assign attributes indicating the parent Scene to each shot
-async function setSceneIdForAllShots(shotArr, sceneArr) {
+function setSceneIdForAllShots(shotArr, sceneArr) {
     let sceneStartTimeArr = extractStartTimeArrFromObjectArr(sceneArr);
     for (const shot of shotArr) {
-        let sceneIndex = await getIndexOfInputArrForTargetVal(shot.start_time, sceneStartTimeArr);
+        let sceneIndex = getIndexOfInputArrForTargetVal(shot.start_time, sceneStartTimeArr);
         let parentScene = sceneArr[sceneIndex];
         shot.scene_id = parentScene.scene_id;
         shot.shot_id = parentScene.scene_id + '_' + shot.shot_num;
@@ -180,10 +192,10 @@ async function setSceneIdForAllShots(shotArr, sceneArr) {
 }
 
 //Assign attributes indicating the parent Shot to each OCR object
-async function setShotIdForAllOcrDetections(ocrArr, shotArr) {
+function setShotIdForAllOcrDetections(ocrArr, shotArr) {
     let shotStartTimeArr = extractStartTimeArrFromObjectArr(shotArr);
     for (const ocrObj of ocrArr) {
-        let shotIndex = await getIndexOfInputArrForTargetVal(ocrObj.start_time, shotStartTimeArr);
+        let shotIndex = getIndexOfInputArrForTargetVal(ocrObj.start_time, shotStartTimeArr);
         let parentShot = shotArr[shotIndex];
         ocrObj.shot_id = parentShot.shot_id;
         ocrObj.shot_num = parentShot.shot_num;
@@ -200,8 +212,8 @@ function extractStartTimeArrFromObjectArr(genericObjectArr) {
     return outputArr;
 }
 
-//generic binary search algorithm - returns index of target's placement within the input array
-async function getIndexOfInputArrForTargetVal(target, inputArr) {
+//Returns index of array item whose value is equal-to or lesser-than(also nearest-in-value) the target (binary search algorithm)
+function getIndexOfInputArrForTargetVal(target, inputArr) {
     let start = 0;
     let end = inputArr.length - 1;
     let index = -1;
@@ -232,6 +244,7 @@ function modifyLastElementsOfBlockArray(blockArr) {
 
 //Truncates all tables related to the Video Table - Does not affect the 'environments' table
 async function clearDb() {
+    console.log('DB Operation: Truncate all tables');
     try {
         await db.any('TRUNCATE TABLE video restart IDENTITY CASCADE');
         return true;

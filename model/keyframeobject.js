@@ -37,6 +37,7 @@ class KeyframeObject {
     }
     
     static async insertIntoKeyframeObjectTable(keyframeObjectArr) {
+        console.log('DB Operation: Inserting the detected Keyframe-Objects');
         try {
             return await db.tx(t => {
                 var queries = keyframeObjectArr.map(keyframeObject => {
