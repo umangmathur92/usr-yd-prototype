@@ -1,6 +1,5 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
-const request = require('request');
 var path = require('path');
 const Utils = require('../backend/utils');
 const FormData = require('form-data');
@@ -17,7 +16,10 @@ async function getImageAnalysis(imageUrl) {
         return await fetch(imgAnalysisUrl, {
             method: 'post',
             body:    JSON.stringify(body),
-            headers: { 'Content-Type': 'application/json', 'Ocp-Apim-Subscription-Key' : imageAnalysisSubscriptionKey },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Ocp-Apim-Subscription-Key' : imageAnalysisSubscriptionKey 
+            },
         }).then(res => res.json());
     } catch(e) {
         throw e;

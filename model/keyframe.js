@@ -3,7 +3,7 @@ const Utils = require('../backend/utils');
 
 class Keyframe {
 
-    constructor(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence, environment_id) {
+    constructor(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence) {
         this.keyframe_id = keyframe_id;
         this.shot_id = shot_id;
         this.keyframe_num = keyframe_num;
@@ -13,7 +13,6 @@ class Keyframe {
         this.thumbnail_url = thumbnail_url;
         this.caption = caption;
         this.caption_confidence = caption_confidence;
-        this.environment_id = environment_id;
     }
 
     static parseKeyframeJson(keyframeJsonObj, shot, video) {
@@ -26,8 +25,7 @@ class Keyframe {
         let thumbnail_url = Utils.getThumbUrlFromId(thumbnail_id, video.indexer_video_id);
         let caption = '';
         let caption_confidence = 0;
-        let environment_id = 0;
-        return new Keyframe(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence, environment_id);
+        return new Keyframe(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence);
     }
 
     static parseKeyFrameArr(keyframeJsonArr, shot, video) {
@@ -45,7 +43,7 @@ class Keyframe {
         try {
             return await db.tx(t => {
                 var queries = keyframeArr.map(keyframe => {
-                    return t.one('INSERT INTO keyframe(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence, environment_id) VALUES(${keyframe_id}, ${shot_id}, ${keyframe_num}, ${start_time}, ${end_time}, ${thumbnail_id}, ${thumbnail_url}, ${caption}, ${caption_confidence}, ${environment_id}) RETURNING id', keyframe, a => + a.id);
+                    return t.one('INSERT INTO keyframe(keyframe_id, shot_id, keyframe_num, start_time, end_time, thumbnail_id, thumbnail_url, caption, caption_confidence) VALUES(${keyframe_id}, ${shot_id}, ${keyframe_num}, ${start_time}, ${end_time}, ${thumbnail_id}, ${thumbnail_url}, ${caption}, ${caption_confidence}) RETURNING id', keyframe, a => + a.id);
                 });
                 return t.batch(queries);
             });

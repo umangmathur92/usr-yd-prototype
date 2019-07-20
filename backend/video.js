@@ -8,6 +8,7 @@ const Keyframe = require('../model/keyframe');
 const Ocr = require('../model/ocr');
 const KeyframeObject = require('../model/keyframeobject');
 const KeyframeTag = require('../model/keyframetag');
+const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 
 //Parse and insert all JSON data from the videoindexer into the database
@@ -60,12 +61,27 @@ async function addVideoDataToDb(inputJson) {
         let keyframeTagArr = imgAnalysisResult.keyframeTagArr;
         await  KeyframeTag.insertIntoKeyframeTagTable(keyframeTagArr);
         //Fetch environment for all keyframes and update the keyframes table
-        
+        let kfEnvironmentArr = await fetchEnvironmentForAllKeyFrames(allKeyframesArr);
+        await Environment.insertIntoKeyframeEnvironmentTable(kfEnvironmentArr);
         return true;
     } catch(e) {
         console.log(e);
         return false;
     }
+}
+
+async function fetchEnvironmentForAllKeyFrames(allKeyframesArr) {
+    let allEnvArr = [];
+    for(const keyFrameImg of allKeyframesArr) {
+        let imgUrl = keyFrameImg.thumbnail_url;
+        let keyframeId = keyFrameImg.keyframe_id;
+        let environmentJson = await ApiRepository.getSceneClassification(imgUrl, keyframeId);
+        let envPredictionsJsonArr = environmentJson.predictions;
+        let kfEnvPredictionsArr = Environment.parseEnvJsonArr(envPredictionsJsonArr, keyframeId);
+        allEnvArr.push.apply(allEnvArr, kfEnvPredictionsArr);
+        console.log('Environment API: called for frame ' + keyframeId);
+    }
+    return allEnvArr;
 }
 
 //Call the Microsoft Image analysis API for all Keyframes in the video
