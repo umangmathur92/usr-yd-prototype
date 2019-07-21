@@ -1,17 +1,18 @@
 var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
-const fs = require('fs');
-const FormData = require('form-data');
-const axios = require('axios');
-const JSON = require('circular-json');
-const request = require('request');
-var path = require('path');
 
-
-/* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
+});
+
+router.get('/fetchVideoData', function(req, res, next) {
+  let videoId = req.params.videoid;
+  let queryResult = video.fetchVideoDataFromDb(videoId);
+  queryResult.then(result => {
+    //let x = result[0].result;
+    res.send(result);
+  });
 });
 
 router.get('/addvideo', function(req, res, next) {
