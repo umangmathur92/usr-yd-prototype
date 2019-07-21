@@ -54,10 +54,10 @@ async function addVideoDataToDb(inputJson) {
         let imgAnalysisResult = await fetchImageAnalysisForAllKeyFrames(allKeyframesArr);
         allKeyframesArr = imgAnalysisResult.allKeyframesArr;
         await Keyframe.updateCaptionDataForKeyframes(allKeyframesArr);
-        //Assign an original description to each shot by using caption data from keyframes within it
+        //Assign an original_description to each shot by using caption data from keyframes within it
         shotArr = assignDescriptionToEachShot(shotArr, allKeyframesArr);
         await Shot.updateDescriptionDataForAllShots(shotArr);
-        //await Scene.aggregateShotCaptionsIntoSceneDescription(video); -- Do not use
+        //Assign an original_description to each scene by using description data from shots within it
         sceneArr = assignDescriptionToEachScene(sceneArr, shotArr);
         await Scene.updateDescriptionDataForAllScenes(sceneArr);
         //Insert objects detected in each frame into the keyframe_object table
