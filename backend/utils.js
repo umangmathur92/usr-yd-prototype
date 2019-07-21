@@ -17,6 +17,16 @@ async function sleep(msec) {
     return new Promise(resolve => setTimeout(resolve, msec));
 }
 
+function removeDuplicatesFromStringArr(inputArr) {
+    var result = [];
+    inputArr.forEach(function(item) {
+        if(result.indexOf(item) < 0) {
+            result.push(item);
+        }
+    });
+    return result;
+}
+
 const downloadFile = (async (url, path) => {
     const res = await fetch(url);
     const fileStream = fs.createWriteStream(path);
@@ -35,5 +45,6 @@ module.exports = {
     parseSecondsFromString: parseSecondsFromString,
     getThumbUrlFromId: getThumbUrlFromId,
     sleep: sleep,
-    downloadFile: downloadFile
+    downloadFile: downloadFile,
+    removeDuplicatesFromStringArr: removeDuplicatesFromStringArr
 }

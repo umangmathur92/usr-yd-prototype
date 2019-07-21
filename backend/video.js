@@ -54,6 +54,12 @@ async function addVideoDataToDb(inputJson) {
         let imgAnalysisResult = await fetchImageAnalysisForAllKeyFrames(allKeyframesArr);
         allKeyframesArr = imgAnalysisResult.allKeyframesArr;
         await Keyframe.updateCaptionDataForKeyframes(allKeyframesArr);
+        //Assign an original description to each shot by using caption data from keyframes within it
+        shotArr = assignDescriptionToEachShot(shotArr, allKeyframesArr);
+        await Shot.updateDescriptionDataForAllShots(shotArr);
+        //await Scene.aggregateShotCaptionsIntoSceneDescription(video); -- Do not use
+        sceneArr = assignDescriptionToEachScene(sceneArr, shotArr);
+        await Scene.updateDescriptionDataForAllScenes(sceneArr);
         //Insert objects detected in each frame into the keyframe_object table
         let keyframeObjectArr = imgAnalysisResult.keyframeObjectArr;
         await KeyframeObject.insertIntoKeyframeObjectTable(keyframeObjectArr);
@@ -68,6 +74,52 @@ async function addVideoDataToDb(inputJson) {
         console.log(e);
         return false;
     }
+}
+
+function assignDescriptionToEachScene(sceneArr, shotArr) {
+    let shotIndex = 0;
+    for(const scene of sceneArr) {
+        let descArrForScene = [];
+        //this works because the shots are correctly ordered
+        while(shotIndex < shotArr.length && scene.scene_id == shotArr[shotIndex].scene_id) {
+            descArrForScene.push(shotArr[shotIndex].original_description);
+            shotIndex = shotIndex + 1;
+        }
+        descArrForScene = Utils.removeDuplicatesFromStringArr(descArrForScene);
+        scene.original_description = combineShotDescArrToConstructSceneDescription(descArrForScene);
+    }
+    return sceneArr;
+}
+
+function assignDescriptionToEachShot(shotArr, allKeyframesArr) {
+    let keyframeArrIndex = 0;
+    for(const shot of shotArr) {
+        let captionsArrForShot = [];
+        //this works because the keyframes are correctly ordered
+        while(keyframeArrIndex < allKeyframesArr.length && shot.shot_id == allKeyframesArr[keyframeArrIndex].shot_id) {
+            captionsArrForShot.push(allKeyframesArr[keyframeArrIndex].caption);
+            keyframeArrIndex = keyframeArrIndex + 1;
+        }
+        captionsArrForShot = Utils.removeDuplicatesFromStringArr(captionsArrForShot);
+        shot.original_description = combineCaptionsArrToConstructShotDescription(captionsArrForShot);
+    }
+    return shotArr;
+}
+
+function combineShotDescArrToConstructSceneDescription(descArrForScene) {
+    let outputDescription = '';
+    descArrForScene.forEach(desc => {
+        outputDescription = outputDescription + desc + '\n';
+    });
+    return outputDescription.trim();
+}
+
+function combineCaptionsArrToConstructShotDescription(captionsArrForShot) {
+    let outputDescription = '';
+    captionsArrForShot.forEach(caption => {
+        outputDescription = outputDescription + caption + '\n';
+    });
+    return outputDescription.trim();
 }
 
 async function fetchEnvironmentForAllKeyFrames(allKeyframesArr) {

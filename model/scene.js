@@ -61,6 +61,25 @@ class Scene {
         return db.any("UPDATE scene SET original_ocr = (SELECT array_to_string(array_agg(original_ocr ORDER BY shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
     }
 
+    static async updateDescriptionDataForAllScenes(sceneArr) {
+        console.log('DB Operation: Updating Scene table with description data');
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    return t.one("UPDATE scene SET original_description = ${original_description} WHERE scene_id = ${scene_id} RETURNING id", scene, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+    static async aggregateShotCaptionsIntoSceneDescription(video) {
+        console.log('DB Operation: Updating Scene table by aggregating description data from Shot table');
+        return db.any("UPDATE scene SET original_description = (SELECT distinct array_to_string(array_agg(shot.original_description ORDER BY shot.shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
+    }
+
 }
 
 module.exports = Scene;
