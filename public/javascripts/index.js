@@ -1,5 +1,5 @@
 let player;
-let youtubeId = 'F-NRxG6t1hI';
+let youtubeId = '';
 let videotime = 0;
 let timeupdater = null;
 let allSceneArr = [];
@@ -10,6 +10,9 @@ $(document).ready(function() {
         let childNum = $('#txtRowNum').val();
         scrollToPosition(childNum);
     });
+    let href = location.href;
+    const lastPathSegment = new URL(href).pathname.split('/').pop();
+    youtubeId = lastPathSegment;
     fetchVideoInfo(youtubeId);
 });
 
@@ -143,6 +146,7 @@ function onPlayerStateChange(event) {
         break;
     }
 }
+
 function playVideo() {
     player.playVideo();
 }

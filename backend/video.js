@@ -11,6 +11,10 @@ const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 
+async function fetchAllVideos() {
+    return await db.any('SELECT id, youtube_id, title, duration FROM video');
+}
+
 async function fetchVideoDataFromDb(videoId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
@@ -320,5 +324,6 @@ async function clearDb() {
 module.exports = {
     addVideoDataToDb: addVideoDataToDb,
     clearDb: clearDb,
-    fetchVideoDataFromDb: fetchVideoDataFromDb
+    fetchVideoDataFromDb: fetchVideoDataFromDb,
+    fetchAllVideos: fetchAllVideos
 }
