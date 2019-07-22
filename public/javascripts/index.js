@@ -1,18 +1,28 @@
-var player;
+let player;
+let youtubeId = 'F-NRxG6t1hI';
+let videotime = 0;
+let timeupdater = null;
+let allSceneArr = [];
+let sceneIdToListPositionMap = new Map();
 
 $(document).ready(function() {
     $("#btnScroll").click(function() {
         let childNum = $('#txtRowNum').val();
         scrollToPosition(childNum);
     });
-    let youtubeId = 'gfg43ner8';
     fetchVideoInfo(youtubeId);
 });
 
 function fetchVideoInfo(youtubeId) {
     let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     $.get(targetUrl, function (response) {
-        let blocksJsonArr = JSON.parse(response);
+        let vidJson = response;
+        let vidTitle = vidJson.title;
+        let vidLength = vidJson.duration;
+        let blocksJsonArr = vidJson.info;
+        $('#txtVidtitle').html(vidTitle);
+        allSceneArr = populateAllSceneArr(blocksJsonArr);
+        sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
         initializeDescriptionsUI(blocksJsonArr);
     });
 }
@@ -23,11 +33,11 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let currBlock = blocksJsonArr[i];
         let blockId = currBlock.block_id;
         let blockNum = currBlock.block_num;
-        let startTime = currBlock.start_time;
-        let finishTime = currBlock.finish_time;
+        let blStartTime = currBlock.start_time;
+        let blFinishTime = currBlock.finish_time;
         let baselineDesc = currBlock.baseline_des;
         let childSceneArr = currBlock.child_scenes;
-        outputHtml = outputHtml + '<li class="li-block-header">Block ' + blockNum + '(' + 'x' + ' to ' +  'y' + ' secs) </li>';
+        outputHtml = outputHtml + '<li class="li-block-header"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
         for(let j=0; j<childSceneArr.length; j++) {
             let currScene = childSceneArr[j];
             let sceneId = currScene.sc_id;
@@ -37,11 +47,9 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneOcr = currScene.original_ocr;
             let sceneDesc = currScene.original_description;
             outputHtml = outputHtml
-            + '<li><div class="scene-container"><table style="width: 100%"><tr><td>Scene ' 
-            + sceneNum 
-            + '</td><td>' 
-            + scStartTime + ' to ' + scFinishTime 
-            + 'secs</td></tr><tr><td>Description</td><td><div class="scene-description-container">'
+            + '<li><div class="scene-container"><table style="width: 100%">'
+            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs</td></tr>'
+            + '<tr><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description">Update Description</button>'
             + '<textarea class="txt-scene-description">' + sceneDesc + '</textarea></div></td></tr>'
             + '<tr><td>OCR Detected</td><td><div class="scene-ocr-container">'
@@ -76,26 +84,130 @@ function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
         height: '270',
         width: '480',
-        videoId: 'M7lc1UVf-VE',
+        videoId: youtubeId,
+        playerVars: {
+            autoplay: 1,
+            enablejsapi: 1,
+            cc_load_policy: 1,
+            controls: 1,
+            fs: 0,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            wmode: 'opaque'
+        },
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
-        },
-        playerVars: { 'autoplay': 1, 'controls': 1,'autohide':1,'wmode':'opaque','origin':'http://localhost:3000' }
+        }
     });
 }
 
 function onPlayerReady(event) {
-    event.target.playVideo();
+    timeupdater = setInterval(updateTime, 1000);
 }
 
-var done = false;
-function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.PLAYING && !done) {
-        setTimeout(stopVideo, 6000);
-        done = true;
+function updateTime() {
+    var oldTime = videotime;
+    if(player && player.getCurrentTime) {
+        videotime = player.getCurrentTime();
+    }
+    if(videotime !== oldTime) {
+        onProgress(videotime);
     }
 }
+
+// when the time changes, this will be called.
+function onProgress(currentTime) {
+    currentTime = currentTime.toFixed(3);
+    console.log(currentTime);
+    let currScene = getSceneFromTime(currentTime, allSceneArr);
+    let sceneId = currScene.sc_id;
+    let sceneNum = currScene.sc_num;
+    let listPosition = sceneIdToListPositionMap.get(sceneId);
+    //console.log('list position: ' + listPosition);
+    scrollToPosition(listPosition);
+}
+
+function onPlayerStateChange(event) {
+    let playerState = event.data;
+    switch(playerState) {
+        case YT.PlayerState.PLAYING:
+        break;
+        case YT.PlayerState.PAUSED:
+        break;
+        case YT.PlayerState.UNSTARTED:
+        case YT.PlayerState.ENDED:
+        case YT.PlayerState.CUED:
+        break;
+    }
+}
+function playVideo() {
+    player.playVideo();
+}
+
+function pauseVideo() {
+    player.pauseVideo();
+}
+
 function stopVideo() {
     player.stopVideo();
+}
+
+function populateSceneIdToListPositionMap(blocksJsonArr) {
+    let listPositionIndex = 0;
+    let sceneListPositionMap = new Map();
+    for(let i=0; i<blocksJsonArr.length; i++) {
+        listPositionIndex++;
+        let currBlock = blocksJsonArr[i];
+        let childSceneArr = currBlock.child_scenes;
+        for(let j=0; j<childSceneArr.length; j++) {
+            listPositionIndex++;
+            let currSceneId = childSceneArr[j].sc_id;
+            sceneListPositionMap.set(currSceneId, listPositionIndex);
+        }
+        listPositionIndex++;
+    }
+    return sceneListPositionMap;
+}
+
+function populateAllSceneArr(blocksJsonArr) {
+    let allSceneArr = [];
+    for(let i=0; i<blocksJsonArr.length; i++) {
+        let currBlock = blocksJsonArr[i];
+        let childSceneArr = currBlock.child_scenes;
+        allSceneArr.push.apply(allSceneArr, childSceneArr);
+    }
+    return allSceneArr;
+}
+
+function getSceneFromTime(currentTime, sceneArr) {
+    let startTimesArr = [];
+    for(let i=0; i<sceneArr.length; i++) {
+        let startTime = parseFloat(sceneArr[i].start_time);
+        startTimesArr.push(startTime);
+    }
+    let sceneIndex = getIndexOfInputArrForTargetVal(currentTime, startTimesArr);
+    return sceneArr[sceneIndex];
+}
+
+//Returns index of array item whose value is equal-to or lesser-than(also nearest-in-value) the target (binary search algorithm)
+function getIndexOfInputArrForTargetVal(target, inputArr) {
+    let start = 0;
+    let end = inputArr.length - 1;
+    let index = -1;
+    while(start <= end) {
+        let mid = Math.floor((start + end)/2);
+        if(inputArr[mid] == target) {
+            index = mid;
+            break;
+        } else if(inputArr[mid] < target) {
+            index = mid;
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return index;
 }
