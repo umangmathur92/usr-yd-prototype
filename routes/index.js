@@ -7,10 +7,9 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/fetchVideoData', function(req, res, next) {
-  let videoId = req.params.videoid;
+  let videoId = req.query.videoid;
   let queryResult = video.fetchVideoDataFromDb(videoId);
   queryResult.then(result => {
-    //let x = result[0].result;
     res.send(result);
   });
 });
