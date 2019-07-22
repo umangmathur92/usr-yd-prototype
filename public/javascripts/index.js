@@ -1,18 +1,22 @@
 var player;
+let youtubeId = 'F-NRxG6t1hI';
 
 $(document).ready(function() {
     $("#btnScroll").click(function() {
         let childNum = $('#txtRowNum').val();
         scrollToPosition(childNum);
     });
-    let youtubeId = 'gfg43ner8';
     fetchVideoInfo(youtubeId);
 });
 
 function fetchVideoInfo(youtubeId) {
     let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     $.get(targetUrl, function (response) {
-        let blocksJsonArr = JSON.parse(response);
+        let vidJson = response;
+        let vidTitle = vidJson.title;
+        let vidLength = vidJson.duration;
+        let blocksJsonArr = vidJson.info;
+        $('#txtVidtitle').html(vidTitle);
         initializeDescriptionsUI(blocksJsonArr);
     });
 }
@@ -23,11 +27,11 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let currBlock = blocksJsonArr[i];
         let blockId = currBlock.block_id;
         let blockNum = currBlock.block_num;
-        let startTime = currBlock.start_time;
-        let finishTime = currBlock.finish_time;
+        let blStartTime = currBlock.start_time;
+        let blFinishTime = currBlock.finish_time;
         let baselineDesc = currBlock.baseline_des;
         let childSceneArr = currBlock.child_scenes;
-        outputHtml = outputHtml + '<li class="li-block-header">Block ' + blockNum + '(' + 'x' + ' to ' +  'y' + ' secs) </li>';
+        outputHtml = outputHtml + '<li class="li-block-header"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
         for(let j=0; j<childSceneArr.length; j++) {
             let currScene = childSceneArr[j];
             let sceneId = currScene.sc_id;
@@ -37,11 +41,9 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneOcr = currScene.original_ocr;
             let sceneDesc = currScene.original_description;
             outputHtml = outputHtml
-            + '<li><div class="scene-container"><table style="width: 100%"><tr><td>Scene ' 
-            + sceneNum 
-            + '</td><td>' 
-            + scStartTime + ' to ' + scFinishTime 
-            + 'secs</td></tr><tr><td>Description</td><td><div class="scene-description-container">'
+            + '<li><div class="scene-container"><table style="width: 100%">'
+            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs</td></tr>'
+            + '<tr><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description">Update Description</button>'
             + '<textarea class="txt-scene-description">' + sceneDesc + '</textarea></div></td></tr>'
             + '<tr><td>OCR Detected</td><td><div class="scene-ocr-container">'
@@ -76,7 +78,7 @@ function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
         height: '270',
         width: '480',
-        videoId: 'M7lc1UVf-VE',
+        videoId: youtubeId,
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
