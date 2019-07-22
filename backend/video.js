@@ -11,6 +11,15 @@ const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 
+async function fetchVideoDataFromDb(videoId) {
+    try {
+        let queryResult = await db.any("select jsonb_pretty(jsonb_agg(js_object)) result from (select jsonb_build_object( 'block_id', block_id, 'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 'baseline_des', original_description, 'child_scenes', jsonb_agg(scene) ) js_object from ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num', s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description, 'original_ocr', s.original_ocr ) scene from block b join scene s on s.block_id = b.block_id AND b.video_id = $1 order by scene_num ) s group by start_time, end_time, block_id, original_description, block_num, video_id order by block_num ASC ) s", [videoId]);
+        return queryResult[0].result;
+    } catch(e) {
+        throw e;
+    }
+}
+
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     try {
@@ -308,5 +317,6 @@ async function clearDb() {
 
 module.exports = {
     addVideoDataToDb: addVideoDataToDb,
-    clearDb: clearDb
+    clearDb: clearDb,
+    fetchVideoDataFromDb: fetchVideoDataFromDb
 }
