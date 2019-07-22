@@ -1,0 +1,21 @@
+body {
+    padding: 50px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    line-height: 20px;
+}
+
+a {
+    color: #00B7FF;
+}
+
+.material-icons {
+    font-size: 36px;
+    color: #b0bec5;
+    cursor: pointer;
+}
+
+.material-icons:hover {
+    color: #455a64;
+}
+
+li { cursor: pointer; }
