@@ -33,13 +33,17 @@ async function addVideoDataToDb(inputJson) {
         let video = Video.parseVideoFromIndexerJson(inputJson);
         await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
-        let blockJsonArr = video.insights_json.blocks;
-        let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
-        blockArr = modifyLastElementsOfBlockArray(blockArr);
-        await Block.insertIntoBlockTable(blockArr);
-        //Parse and insert Scenes
+        // let blockJsonArr = video.insights_json.blocks;
+        // let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        // blockArr = modifyLastElementsOfBlockArray(blockArr);
+        // await Block.insertIntoBlockTable(blockArr);
+        //Parse Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
+        //Genrate blocks from scenes using logic - TODO: change this
+        let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
+        await Block.insertIntoBlockTable(blockArr);
+        //insert Scenes
         sceneArr = setBlockIdForAllScenes(sceneArr, blockArr);
         await Scene.insertIntoSceneTable(sceneArr);
         //Parse and insert Shots
@@ -89,6 +93,37 @@ async function addVideoDataToDb(inputJson) {
         console.log(e);
         return false;
     }
+}
+
+//Temporary block generation logic - TODO: completely change this
+function generateBlocksFromScenes(sceneArr, youtubeId) {
+    let blockArr = [];
+    let tempCumulativeTime = 0;
+    let tempStartIndex = 0;
+    let tempEndIndex = 0;
+    let blockCount = 0;
+    for(let i=0; i<sceneArr.length; i++) {
+        let currScene = sceneArr[i];
+        let currSceneStartTime = currScene.start_time;
+        let currSceneEndTime = currScene.end_time;
+        let currSceneDuration = currSceneEndTime - currSceneStartTime;
+        if(tempCumulativeTime + currSceneDuration > 45 || i==sceneArr.length-1) {
+            tempEndIndex = i;
+            let newBlockNum = blockCount;
+            let newBlockId = youtubeId + '_' + newBlockNum;
+            let newBlockStartTime = sceneArr[tempStartIndex].start_time;
+            let newBlockEndTime = sceneArr[tempEndIndex].end_time;
+            let newBlockDescription = '';
+            let newBlock = new Block(newBlockId, youtubeId, newBlockNum, newBlockStartTime, newBlockEndTime, newBlockDescription);
+            blockArr.push(newBlock);
+            blockCount++;
+            tempStartIndex = i+1;
+            tempCumulativeTime = 0;
+        } else {
+            tempCumulativeTime = tempCumulativeTime + currSceneDuration;
+        }
+    }
+    return blockArr;
 }
 
 function assignDescriptionToEachScene(sceneArr, shotArr) {
