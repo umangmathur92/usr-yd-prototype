@@ -113,7 +113,7 @@ function generateBlocksFromScenes(sceneArr, youtubeId) {
             let newBlockId = youtubeId + '_' + newBlockNum;
             let newBlockStartTime = sceneArr[tempStartIndex].start_time;
             let newBlockEndTime = sceneArr[tempEndIndex].end_time;
-            let newBlockDescription = '';
+            let newBlockDescription = 'Placeholder description for block ' + newBlockNum + ' ('+newBlockId+')\nEnvironment: indoor/outdoor, Environment name, \nNumber of people/faces, Objects with high frequency';
             let newBlock = new Block(newBlockId, youtubeId, newBlockNum, newBlockStartTime, newBlockEndTime, newBlockDescription);
             blockArr.push(newBlock);
             blockCount++;
