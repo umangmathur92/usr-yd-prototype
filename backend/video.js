@@ -26,6 +26,52 @@ async function fetchVideoDataFromDb(videoId) {
     }
 }
 
+async function updateSceneDescription(inputJson) {
+    try {
+        let uuid = inputJson.userId;
+        let scene_id = inputJson.sceneId;
+        let modifiedDescription = inputJson.modifiedDescription;
+        let updateQueryResponse = await db.one("UPDATE scene_modification SET modified_description = $1 WHERE scene_id = $2 AND user_id = $3 RETURNING id", [modifiedDescription, scene_id, uuid], a => + a.id);
+        return true;
+    } catch(e) {
+        throw e;
+    }
+}
+
+async function updateSceneOcr(inputJson) {
+    try {
+        let uuid = inputJson.userId;
+        let scene_id = inputJson.sceneId;
+        let modifiedOcr = inputJson.modifiedOcr;
+        let updateQueryResponse = await db.one("UPDATE scene_modification SET modified_ocr = $1 WHERE scene_id = $2 AND user_id = $3 RETURNING id", [modifiedOcr, scene_id, uuid], a => + a.id);
+        return true;
+    } catch(e) {
+        throw e;
+    }
+}
+
+async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
+    try {
+        let truncateModSceTableQuery = db.any('TRUNCATE TABLE scene_modification restart IDENTITY CASCADE');
+        let param = videoId + '%';
+        let sceneArr = await db.any("SELECT * FROM scene", [param]);
+        for(let i=0; i<sceneArr.length; i++) {
+            let scene = sceneArr[i];
+            let scene_id = scene.scene_id;
+            let user_id = userId;
+            let scene_modification_id = scene_id + '_' + user_id;
+            let modified_start_time = scene.start_time;
+            let modified_end_time = scene.end_time;
+            let modified_description = scene.original_description;
+            let modified_ocr = scene.original_ocr;
+            await db.one('INSERT INTO scene_modification(scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr) VALUES ( $1, $2, $3, $4, $5, $6, $7 ) RETURNING id', [scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr]);
+        }
+        return true;
+    } catch(e) {
+        throw e;
+    }
+}
+
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     try {
@@ -360,5 +406,8 @@ module.exports = {
     addVideoDataToDb: addVideoDataToDb,
     clearDb: clearDb,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
-    fetchAllVideos: fetchAllVideos
+    fetchAllVideos: fetchAllVideos,
+    updateSceneDescription: updateSceneDescription,
+    updateSceneOcr: updateSceneOcr,
+    replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable
 }

@@ -4,16 +4,16 @@ let videotime = 0;
 let timeupdater = null;
 let allSceneArr = [];
 let sceneIdToListPositionMap = new Map();
+let userId = '90812bd9-ac4f-4637-9b52-02b821d61995';
 
 $(document).ready(function() {
-    $("#btnScroll").click(function() {
-        let childNum = $('#txtRowNum').val();
-        scrollToPosition(childNum);
-    });
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
     fetchVideoInfo(youtubeId);
+    $("#btnScroll").click(function() {
+        resetVidModifiedTableData();
+    });
 });
 
 function fetchVideoInfo(youtubeId) {
@@ -53,11 +53,11 @@ function initializeDescriptionsUI(blocksJsonArr) {
             + '<li><div class="scene-container"><table style="width: 100%">'
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs</td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
-            + '<button class="btn-update-scene-description">Update Description</button>'
-            + '<textarea class="txt-scene-description">' + sceneDesc + '</textarea></div></td></tr>'
+            + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'">Update Description</button>'
+            + '<textarea class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
             + '<tr><td>OCR Detected</td><td><div class="scene-ocr-container">'
-            + '<button class="btn-update-scene-ocr">Update OCR</button>'
-            + '<textarea class="txt-scene-ocr">' + sceneOcr + '</textarea></div></td></tr></table>'
+            + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'">Update OCR</button>'
+            + '<textarea class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
             + '<div style="text-align: center; margin-bottom: -20px; margin-top: 10px;">';
             if(j!=childSceneArr.length-1) {
                 outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
@@ -75,12 +75,53 @@ function initializeDescriptionsUI(blocksJsonArr) {
         + '</li>';
     }
     $('#ul-scene-list').html(outputHtml);
+    $('.btn-update-scene-description').click(function() {
+        let sceneId = this.dataset.sceneid;
+        let sceneDescTxtId = '#s_d_' + sceneId;
+        let modifiedDescription = $(sceneDescTxtId).val();
+        sendUpdateDescriptionPostReq(sceneId, modifiedDescription);
+    });
+    $('.btn-update-scene-ocr').click(function() {
+        let sceneId = this.dataset.sceneid;
+        let sceneOcrTxtId = '#s_o_' + sceneId;
+        let modifiedOcr = $(sceneOcrTxtId).val();
+        sendUpdateOcrPostReq(sceneId, modifiedOcr);
+    });
+}
+
+function sendUpdateDescriptionPostReq(sceneId, modifiedDescription) {
+    const body = {
+        userId: userId,
+        sceneId: sceneId,
+        modifiedDescription: modifiedDescription,
+    };
+    $.post( '/updateSceneDescription', body, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}
+
+function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
+    const body = {
+        userId: userId,
+        sceneId: sceneId,
+        modifiedOcr: modifiedOcr,
+    };
+    $.post( '/updateSceneOCR', body, function(response) {
+        window.alert(JSON.stringify(response));
+    });
 }
 
 function scrollToPosition(position) {
     $('#ul-scene-list').animate({
         scrollTop: $('#ul-scene-list li:nth-child(' + position + ')').position().top - $('#ul-scene-list li:first').position().top
     }, 'slow');
+}
+
+function resetVidModifiedTableData() {
+    let url = '/reset/' + youtubeId + '/' + userId;
+    $.get(url, function(response) {
+        window.alert(JSON.stringify(response));
+    });
 }
 
 function onYouTubeIframeAPIReady() {
