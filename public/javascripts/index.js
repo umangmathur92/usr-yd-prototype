@@ -4,7 +4,11 @@ let videotime = 0;
 let timeupdater = null;
 let allSceneArr = [];
 let sceneIdToListPositionMap = new Map();
+let sceneToBlockMap = new Map();
 let userId = '90812bd9-ac4f-4637-9b52-02b821d61995';
+let prevSceneNum = -1;
+let timeAtWhichLastPaused = -1;
+let previouslyHighlightedContainerId = '#doesnotexist';
 
 $(document).ready(function() {
     let href = location.href;
@@ -19,6 +23,7 @@ $(document).ready(function() {
 function fetchVideoInfo(youtubeId) {
     let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     $.get(targetUrl, function (response) {
+        console.log(response);
         let vidJson = response;
         let vidTitle = vidJson.title;
         let vidLength = vidJson.duration;
@@ -38,7 +43,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let blockNum = currBlock.block_num;
         let blStartTime = currBlock.start_time;
         let blFinishTime = currBlock.finish_time;
-        let baselineDesc = currBlock.baseline_des;
+        let baselineDesc = $.trim(currBlock.baseline_des);
         let childSceneArr = currBlock.child_scenes;
         outputHtml = outputHtml + '<li class="li-block-header"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
         for(let j=0; j<childSceneArr.length; j++) {
@@ -47,10 +52,10 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneNum = currScene.sc_num;
             let scStartTime = currScene.start_time;
             let scFinishTime = currScene.finish_time;
-            let sceneOcr = currScene.original_ocr;
-            let sceneDesc = currScene.original_description;
+            let sceneOcr = $.trim(currScene.original_ocr);
+            let sceneDesc = $.trim(currScene.original_description);
             outputHtml = outputHtml
-            + '<li><div class="scene-container"><table style="width: 100%">'
+            + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs</td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'">Update Description</button>'
@@ -67,7 +72,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
             + '</div></li>';
         }
         outputHtml = outputHtml
-        + '<li class="li-block-footer"><div class="block-footer-container"><table style="width: 100%">'
+        + '<li class="li-block-footer"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
         + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
         + '<button class="btn-update-block-description">Update Description</button>'
         + '<textarea class="txt-block-description">' + baselineDesc + '</textarea>'
@@ -115,6 +120,9 @@ function scrollToPosition(position) {
     $('#ul-scene-list').animate({
         scrollTop: $('#ul-scene-list li:nth-child(' + position + ')').position().top - $('#ul-scene-list li:first').position().top
     }, 'slow');
+    $(previouslyHighlightedContainerId).removeClass('highlight');
+    $('#ul-scene-list li:nth-child(' + position + ')' + ' .scene-container').addClass('highlight');
+    previouslyHighlightedContainerId = '#ul-scene-list li:nth-child(' + position + ')' + ' .scene-container';
 }
 
 function resetVidModifiedTableData() {
@@ -169,21 +177,39 @@ function onProgress(currentTime) {
     let currScene = getSceneFromTime(currentTime, allSceneArr);
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
-    let listPosition = sceneIdToListPositionMap.get(sceneId);
-    //console.log('list position: ' + listPosition);
-    scrollToPosition(listPosition);
+    let sceneEndTime = currScene.finish_time;
+    if(prevSceneNum != sceneNum) {
+        let listPosition = sceneIdToListPositionMap.get(sceneId);
+        scrollToPosition(listPosition);
+    }
+    prevSceneNum = sceneNum;
+    if(sceneEndTime - currentTime < 1 && currentTime - timeAtWhichLastPaused > 1 && sceneToBlockMap.has(sceneId)) {
+        pauseVideo();
+        timeAtWhichLastPaused = currentTime;
+        let blockId = sceneToBlockMap.get(sceneId);
+        let blockElementId = '#bl_cont_' + blockId;
+        $(previouslyHighlightedContainerId).removeClass('highlight');
+        $(blockElementId).addClass('highlight');
+        previouslyHighlightedContainerId = blockElementId;
+    }
 }
 
 function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
+                console.log('i was called: playing state')
         break;
         case YT.PlayerState.PAUSED:
+        timeAtWhichLastPaused = player.getCurrentTime();
+        console.log(timeAtWhichLastPaused);
+        console.log('i was called: paused state')
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
         case YT.PlayerState.CUED:
+        timeAtWhichLastPaused = player.getCurrentTime();
+        console.log('i was called: cued state')
         break;
     }
 }
@@ -206,11 +232,15 @@ function populateSceneIdToListPositionMap(blocksJsonArr) {
     for(let i=0; i<blocksJsonArr.length; i++) {
         listPositionIndex++;
         let currBlock = blocksJsonArr[i];
+        let currBlockId = currBlock.block_id;
         let childSceneArr = currBlock.child_scenes;
         for(let j=0; j<childSceneArr.length; j++) {
             listPositionIndex++;
             let currSceneId = childSceneArr[j].sc_id;
-            sceneListPositionMap.set(currSceneId, listPositionIndex);
+            sceneListPositionMap.set(currSceneId, listPositionIndex);//sceneToBlockMap
+            if(j == childSceneArr.length-1) {
+                sceneToBlockMap.set(currSceneId, currBlockId);
+            }
         }
         listPositionIndex++;
     }

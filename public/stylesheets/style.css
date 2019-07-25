@@ -71,3 +71,8 @@ tr td:first-child{
   margin-right: 0px;
   border-bottom: 10px solid darkgray;
 }
+
+.highlight {
+  background-color: cyan;
+  font-weight: bold;
+}
