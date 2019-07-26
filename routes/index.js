@@ -81,16 +81,35 @@ router.get('/reset/:youtubeId/:userId', function(req, res, next) {
 router.get('/userStudy', function (req, res) {
   res.render('homeUserStudy', { title: 'User Study' });
 });
+//list of video for a user
+router.get('/userStudy/video', function (req, res) {
+  res.render('videoUserStudy', { title: 'User Study Video' });
+});
 
-router.get('/userStudy/users', function (req, res, next) {
-  let queryResult = userStudy.getAllUsers();
-  queryResult.then(result => {
-    console.log('hello');
-    res.send(result);
-  })
-  .catch((err)=> {
-    res.send(err);
-  });
+//list of users
+router.get('/userStudy/users/', function (req, res) {
+  console.log({param: req.query.userId});
+  let userId = req.query.userId;
+  if(userId){
+     let queryResult = userStudy.getVideoByUserId(userId);
+      queryResult
+        .then(result => {
+          res.send(result);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+  }else{
+      let queryResult = userStudy.getAllUsers();
+      console.log({ queryResult });
+      queryResult
+        .then(result => {
+          res.send(result);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+  }
 });
 
 module.exports = router;

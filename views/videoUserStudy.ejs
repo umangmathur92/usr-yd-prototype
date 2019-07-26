@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+     <title>User Study</title>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+</head>
+<body class="container">
+<div class="row">
+    <div class="col-sm-8">    
+        <div class="jumbotron">
+            <h1>List of Video</h1>
+            <p>Please click the link below to start</p>
+        </div>
+    </div>
+
+      <div>        
+         <div id="list"> </div>
+    </div>
+</div>
+
+<script>
+
+  //get parameters from query string
+let url = location.search.substring(1);
+let urlParams = new URLSearchParams(url);
+let userId = urlParams.get('userId');
+let targetUrl = '/userStudy/users?userId=' + userId;
+console.log('target URL:' +  targetUrl);
+
+
+$(document).ready(function () {
+    fetchVideo();
+});
+
+function fetchVideo() {
+    $.get(targetUrl, function (rows) {
+        console.log({rows});
+        let videos = '';
+        for (let i = 0; i < rows.length; i++) {
+            videos +=  `<div>  
+                            <a href="/playvideo/${rows[i].youtube_id}">Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>
+                        </div>`
+        }
+
+        document.getElementById('list').innerHTML = videos;
+    });
+}
+</script>
+
+</body>
+</html>

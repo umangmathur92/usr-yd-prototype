@@ -23,13 +23,22 @@ $(document).ready(function () {
 });
 
 function fetchUsers() {
-    $.get('/userStudy/users', function (response) {
-        let rows = response;
+    $.get('/userStudy/users', function (rows) {
+        let users = '';
+       
         for (let i = 0; i < rows.length; i++) {
-            $('#list').append('<a href="/" class="item">' + rows[i].name + '</a>');
+             users +=  `<div>  
+                            <a href="/userStudy/video?userId=${rows[i].id}"> ${rows[i].name} </a>
+                        </div><br>`
         }
+         console.log({users});
+        document.getElementById('list').innerHTML = users;
+
+        
     });
 }
+
+
 </script>
 
 </body>
