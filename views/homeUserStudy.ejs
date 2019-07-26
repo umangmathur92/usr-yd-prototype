@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<head>
+     <title>User Study</title>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+</head>
+<body class="container">
+<div class="row">
+    <div class="col-sm-8">    
+        <div class="jumbotron">
+            <h1>User Study</h1>
+            <p>Please click the link below to start</p>
+        </div>
+    </div>
+
+    <div>        
+         <div id="list"> </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    fetchUsers();
+});
+
+function fetchUsers() {
+    $.get('/userStudy/users', function (response) {
+        let rows = response;
+        for (let i = 0; i < rows.length; i++) {
+            $('#list').append('<a href="/" class="item">' + rows[i].name + '</a>');
+        }
+    });
+}
+</script>
+
+</body>
+</html>

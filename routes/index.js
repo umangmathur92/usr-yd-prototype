@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
+const userStudy = require('../model/userStudy');
 
 router.get('/', function(req, res, next) {
   res.render('home', { title: 'Express' });
@@ -73,6 +74,22 @@ router.get('/reset/:youtubeId/:userId', function(req, res, next) {
   let queryResult = video.replicateSceneDataInModifiedSceneTable(req.params.userId, req.params.youtubeId);
   queryResult.then(result => {
     res.send({success: result});  
+  });
+});
+
+//vaishali
+router.get('/userStudy', function (req, res) {
+  res.render('homeUserStudy', { title: 'User Study' });
+});
+
+router.get('/userStudy/users', function (req, res, next) {
+  let queryResult = userStudy.getAllUsers();
+  queryResult.then(result => {
+    console.log('hello');
+    res.send(result);
+  })
+  .catch((err)=> {
+    res.send(err);
   });
 });
 
