@@ -21,7 +21,9 @@ function removeDuplicatesFromStringArr(inputArr) {
     var result = [];
     inputArr.forEach(function(item) {
         if(result.indexOf(item) < 0) {
-            result.push(item);
+            if(result != '' || result != '\n' || result != ' ') {
+                result.push(item);
+            }
         }
     });
     return result;

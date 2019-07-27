@@ -157,7 +157,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    timeupdater = setInterval(updateTime, 1000);
+    timeupdater = setInterval(updateTime, 100);
 }
 
 function updateTime() {
@@ -183,7 +183,10 @@ function onProgress(currentTime) {
         scrollToPosition(listPosition);
     }
     prevSceneNum = sceneNum;
-    if(sceneEndTime - currentTime < 1 && currentTime - timeAtWhichLastPaused > 1 && sceneToBlockMap.has(sceneId)) {
+    if(timeAtWhichLastPaused > currentTime) {
+        timeAtWhichLastPaused = currentTime;
+    }
+    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && sceneToBlockMap.has(sceneId)) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
         let blockId = sceneToBlockMap.get(sceneId);
