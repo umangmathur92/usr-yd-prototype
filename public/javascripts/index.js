@@ -60,13 +60,13 @@ function initializeDescriptionsUI(blocksJsonArr) {
             + '<tr><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'">Update Description</button>'
             + '<textarea class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
-            + '<tr><td>OCR Detected</td><td><div class="scene-ocr-container">'
-            + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'">Update OCR</button>'
+            + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
+            + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'">Update Text</button>'
             + '<textarea class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
             + '<div style="text-align: center; margin-bottom: -20px; margin-top: 10px;">';
-            if(j!=childSceneArr.length-1) {
-                outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
-            }
+            // if(j!=childSceneArr.length-1) {
+            //     outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
+            // }
             outputHtml = outputHtml
             + '</div>'
             + '</div></li>';
@@ -227,6 +227,13 @@ function pauseVideo() {
 
 function stopVideo() {
     player.stopVideo();
+}
+
+function updateAll() {
+    //s_d_nqXz8hhAYGo_0_0
+    //s_o_nqXz8hhAYGo_0_0
+    //s_d_nqXz8hhAYGo_0_1
+    //s_o_nqXz8hhAYGo_0_1
 }
 
 function populateSceneIdToListPositionMap(blocksJsonArr) {
