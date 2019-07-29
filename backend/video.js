@@ -15,6 +15,23 @@ const pgp = require('pg-promise')({
     capSQL: true // capitalize all generated SQL
 });
 
+async function updateBlockAndScene(inputJson) {
+    try {
+        let sceneJsonArr = inputJson.scene_arr;
+        let blockJsonArr = inputJson.block_arr;
+        const sceneModColumnSet = new pgp.helpers.ColumnSet(['scene_id', 'original_description', 'original_ocr'], {table: 'scene'});
+        const sceneUpdatequery = pgp.helpers.update(sceneJsonArr, sceneModColumnSet) + ` WHERE t.scene_id = v.scene_id`;
+        const blockModColumnSet = new pgp.helpers.ColumnSet(['block_id', 'original_description'], {table: 'block'});
+        const blockUpdateQuery = pgp.helpers.update(blockJsonArr, blockModColumnSet) + ` WHERE t.block_id = v.block_id`;
+        await db.any(sceneUpdatequery);
+        await db.any(blockUpdateQuery);
+        return true;
+    } catch(e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 async function updateMultipleScenesAndBlocksForUser(inputJson) {
     try {
         let userId = inputJson.user_id;
@@ -26,7 +43,6 @@ async function updateMultipleScenesAndBlocksForUser(inputJson) {
         const blockUpdateQuery = pgp.helpers.update(blockJsonArr, blockModColumnSet) + ` WHERE t.block_id = v.block_id AND t.user_id = '${userId}'`;
         await db.any(sceneUpdatequery);
         await db.any(blockUpdateQuery);
-        
         return true;
     } catch(e) {
         console.log(e);
@@ -496,5 +512,6 @@ module.exports = {
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,
     replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
-    updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser
+    updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser,
+    updateBlockAndScene: updateBlockAndScene
 }

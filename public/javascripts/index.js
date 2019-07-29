@@ -23,6 +23,9 @@ $(document).ready(function() {
         let shoudShowAlert = true;
         updateAll(shoudShowAlert);
     });
+    $('#btnTemp').click(async function() {
+        updateMainTables();
+    })
 });
 
 function fetchVideoInfo(youtubeId) {
@@ -275,6 +278,19 @@ async function updateAll(shoudShowAlert) {
     });
 }
 
+
+async function updateMainTables() {
+    let postJson = fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr);
+    await $.post('/updateBlockAndScene', postJson, function (response) {
+        if(response.success) {
+            window.alert('Updated Successfully');
+        } else {
+            window.alert('Update Failed');
+        }
+    });
+}
+
+
 function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     let parentJsonBody = {};
     let sceneArrJson = [];
@@ -304,6 +320,36 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     parentJsonBody.block_arr = blockArrJson;
     return parentJsonBody;
 }
+
+function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
+    let parentJsonBody = {};
+    let sceneArrJson = [];
+    let blockArrJson = [];
+    for(let i=0; i<allSceneArr.length; i++) {
+        let currScene = allSceneArr[i];
+        let currSceneId = currScene.sc_id;
+        let currSceneDescTextId = '#s_d_' + currSceneId;
+        let currSceneOcrTextId = '#s_o_' + currSceneId;
+        let sceneJsonObj = {};
+        sceneJsonObj.scene_id = currSceneId;
+        sceneJsonObj.original_description = $(currSceneDescTextId).val().trim();
+        sceneJsonObj.original_ocr = $(currSceneOcrTextId).val().trim();
+        sceneArrJson.push(sceneJsonObj);
+    }
+    for(let i=0; i<allBlockArr.length; i++) {
+        let currBlock = allBlockArr[i];
+        let currBlockId = currBlock.block_id;
+        let currBlockDescTextId = '#b_d_' + currBlockId;
+        let blockJsonObj = {};
+        blockJsonObj.block_id = currBlockId;
+        blockJsonObj.original_description = $(currBlockDescTextId).val().trim();
+        blockArrJson.push(blockJsonObj);
+    }
+    parentJsonBody.scene_arr = sceneArrJson;
+    parentJsonBody.block_arr = blockArrJson;
+    return parentJsonBody;
+}
+
 
 function populateSceneIdToListPositionMap(blocksJsonArr) {
     let listPositionIndex = 0;

@@ -84,4 +84,12 @@ router.post('/updateMultipleScenesAndBlocksForUser', function(req, res, next) {
   });
 });
 
+router.post('/updateBlockAndScene', function(req, res, next) {
+  let inputJson = req.body;
+  let queryResult = video.updateBlockAndScene(inputJson);
+  queryResult.then(result => {
+    res.send({success: result});  
+  });
+})
+
 module.exports = router;
