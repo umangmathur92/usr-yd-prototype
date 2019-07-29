@@ -49,6 +49,20 @@ class Block {
             throw e;
         }
     }
+
+    static async updateBlockTableDescription(blockArr) {
+        console.log('DB Operation: Updating Blocks Descriptions');
+        try {
+            return await db.tx(t => {
+                var queries = blockArr.map(block => {
+                    return t.one('UPDATE block SET original_description = ${original_description} WHERE block_id = ${block_id} RETURNING id', block, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
     
 }
 

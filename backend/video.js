@@ -10,6 +10,7 @@ const KeyframeObject = require('../model/keyframeobject');
 const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
+const PredefVid1 = require('../backend/predef/nqXz8hhAYGo');
 
 async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
@@ -75,20 +76,26 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     try {
-        //Parse and insert Video
+        // //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
         await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
         // let blockJsonArr = video.insights_json.blocks;
+        let blockJsonArr = [];
+        if(video.youtube_id == 'nqXz8hhAYGo') {
+            blockJsonArr = PredefVid1.predefBlockArrJson;
+        } 
+        let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        await Block.insertIntoBlockTable(blockArr);
         // let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         // blockArr = modifyLastElementsOfBlockArray(blockArr);
         // await Block.insertIntoBlockTable(blockArr);
         //Parse Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
-        //Genrate blocks from scenes using logic - TODO: change this
-        let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
-        await Block.insertIntoBlockTable(blockArr);
+        //Generate blocks from scenes using logic - TODO: change this
+        //let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
+        //await Block.insertIntoBlockTable(blockArr);
         //insert Scenes
         sceneArr = setBlockIdForAllScenes(sceneArr, blockArr);
         await Scene.insertIntoSceneTable(sceneArr);
@@ -157,12 +164,21 @@ async function addVideoDataToDb(inputJson) {
         //Fetch environment for all keyframes and update the keyframes table
         let kfEnvironmentArr = await fetchEnvironmentForAllKeyFrames(allKeyframesArr);
         await Environment.insertIntoKeyframeEnvironmentTable(kfEnvironmentArr);
+        for(let i=0; i<blockArr.length; i++) {
+            let currBlock = blockArr[i];
+            let currBlockId = currBlock.block_id;
+            let envDataForBlock = await db.any('SELECT distinct ke.environment_id, (COUNT(ke.environment_id)*AVG(ke.probability)) as score, env.category_name FROM environment env, keyframe_environment ke, keyframe k, shot sh, scene sc, block b, video v WHERE ke.environment_id = env.environment_id AND ke.keyframe_id = k.keyframe_id AND k.shot_id=sh.shot_id AND sh.scene_id = sc.scene_id AND sc.block_id = b.block_id AND b.block_id = $1 GROUP BY ke.environment_id, env.category_name ORDER BY score DESC', [currBlockId]);
+            currBlock.setOriginalDescription('The environment is either ' + envDataForBlock[0].category_name + ' or ' + envDataForBlock[1].category_name);
+            console.log(currBlock);
+        }
+        Block.updateBlockTableDescription(blockArr);
         return true;
     } catch(e) {
         console.log(e);
         return false;
     }
 }
+
 
 //Temporary block generation logic - TODO: completely change this
 function generateBlocksFromScenes(sceneArr, youtubeId) {
