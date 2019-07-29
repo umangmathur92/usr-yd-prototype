@@ -1,6 +1,6 @@
 const predefBlockArrJson = [
     {
-        "id": 1,
+        "id": 0,
         "instances": [
             {
                 "start": "0:00:00.000",
@@ -9,7 +9,7 @@ const predefBlockArrJson = [
         ]
     },
     {
-        "id": 2,
+        "id": 1,
         "instances": [
             {
                 "start": "0:00:05.800",
@@ -18,7 +18,7 @@ const predefBlockArrJson = [
         ]
     },
     {
-        "id": 3,
+        "id": 2,
         "instances": [
             {
                 "start": "0:00:21.400",
@@ -27,7 +27,7 @@ const predefBlockArrJson = [
         ]
     },
     {
-        "id": 4,
+        "id": 3,
         "instances": [
             {
                 "start": "0:00:41.840",
@@ -36,7 +36,7 @@ const predefBlockArrJson = [
         ]
     },
     {
-        "id": 5,
+        "id": 4,
         "instances": [
             {
                 "start": "0:01:04.880",
@@ -45,7 +45,7 @@ const predefBlockArrJson = [
         ]
     },
     {
-        "id": 6,
+        "id": 5,
         "instances": [
             {
                 "start": "0:01:58.400",

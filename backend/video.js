@@ -11,6 +11,7 @@ const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 const PredefVid1 = require('../backend/predef/nqXz8hhAYGo');
+const PredefVid2 = require('../backend/predef/cNj3aOTYdQQ');
 const pgp = require('pg-promise')({
     capSQL: true // capitalize all generated SQL
 });
@@ -145,7 +146,9 @@ async function addVideoDataToDb(inputJson) {
         let blockJsonArr = [];
         if(video.youtube_id == 'nqXz8hhAYGo') {
             blockJsonArr = PredefVid1.predefBlockArrJson;
-        } 
+        } else if (video.youtube_id == 'cNj3aOTYdQQ') {
+            blockJsonArr = PredefVid2.predefBlockArrJson;
+        }
         let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         await Block.insertIntoBlockTable(blockArr);
         // let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
