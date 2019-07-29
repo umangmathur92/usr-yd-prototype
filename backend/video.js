@@ -11,6 +11,28 @@ const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 const PredefVid1 = require('../backend/predef/nqXz8hhAYGo');
+const pgp = require('pg-promise')({
+    capSQL: true // capitalize all generated SQL
+});
+
+async function updateMultipleScenesAndBlocksForUser(inputJson) {
+    try {
+        let userId = inputJson.user_id;
+        let sceneJsonArr = inputJson.scene_arr;
+        let blockJsonArr = inputJson.block_arr;
+        const sceneModColumnSet = new pgp.helpers.ColumnSet(['scene_id', 'modified_description', 'modified_ocr'], {table: 'scene_modification'});
+        const sceneUpdatequery = pgp.helpers.update(sceneJsonArr, sceneModColumnSet) + ` WHERE t.scene_id = v.scene_id AND t.user_id = '${userId}'`;
+        const blockModColumnSet = new pgp.helpers.ColumnSet(['block_id', 'modified_description'], {table: 'block_modification'});
+        const blockUpdateQuery = pgp.helpers.update(blockJsonArr, blockModColumnSet) + ` WHERE t.block_id = v.block_id AND t.user_id = '${userId}'`;
+        await db.any(sceneUpdatequery);
+        await db.any(blockUpdateQuery);
+        
+        return true;
+    } catch(e) {
+        console.log(e);
+        throw e;
+    }
+}
 
 async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
@@ -54,8 +76,8 @@ async function updateSceneOcr(inputJson) {
 async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
     try {
         let truncateModSceTableQuery = db.any('TRUNCATE TABLE scene_modification restart IDENTITY CASCADE');
-        let param = videoId + '%';
-        let sceneArr = await db.any("SELECT * FROM scene", [param]);
+        let sceneVidParam = videoId + '%';
+        let sceneArr = await db.any("SELECT * FROM scene", [sceneVidParam]);
         for(let i=0; i<sceneArr.length; i++) {
             let scene = sceneArr[i];
             let scene_id = scene.scene_id;
@@ -66,6 +88,17 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
             let modified_description = scene.original_description;
             let modified_ocr = scene.original_ocr;
             await db.one('INSERT INTO scene_modification(scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr) VALUES ( $1, $2, $3, $4, $5, $6, $7 ) RETURNING id', [scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr]);
+        }
+        let truncateModBlockTableQuery = db.any('TRUNCATE TABLE block_modification restart IDENTITY CASCADE');
+        let blockVidParam = videoId + '%';
+        let blockArr = await db.any("SELECT * FROM block", [blockVidParam]);
+        for(let i=0; i<blockArr.length; i++) {
+            let block = blockArr[i];
+            let block_id = block.block_id;
+            let user_id = userId;
+            let block_modification_id = block_id + '_' + user_id;
+            let modified_description = block.original_description;
+            await db.one('INSERT INTO block_modification(block_modification_id, block_id, user_id, modified_description) VALUES ( $1, $2, $3, $4 ) RETURNING id', [block_modification_id, block_id, user_id, modified_description]);
         }
         return true;
     } catch(e) {
@@ -449,5 +482,6 @@ module.exports = {
     fetchAllVideos: fetchAllVideos,
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,
-    replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable
+    replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
+    updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser
 }

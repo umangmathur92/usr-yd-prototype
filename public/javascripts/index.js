@@ -3,6 +3,7 @@ let youtubeId = '';
 let videotime = 0;
 let timeupdater = null;
 let allSceneArr = [];
+let allBlockArr = [];
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
 let userId = '90812bd9-ac4f-4637-9b52-02b821d61995';
@@ -23,15 +24,15 @@ $(document).ready(function() {
 function fetchVideoInfo(youtubeId) {
     let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     $.get(targetUrl, function (response) {
-        console.log(response);
         let vidJson = response;
         let vidTitle = vidJson.title;
         let vidLength = vidJson.duration;
         let blocksJsonArr = vidJson.info;
         $('#txtVidtitle').html(vidTitle);
-        allSceneArr = populateAllSceneArr(blocksJsonArr);
+        populateAllSceneArrAndAllBlockArr(blocksJsonArr);
         sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
         initializeDescriptionsUI(blocksJsonArr);
+        setInterval(updateAll, 1000*60*2);
     });
 }
 
@@ -75,7 +76,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         + '<li class="li-block-footer"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
         + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
         + '<button class="btn-update-block-description">Update Description</button>'
-        + '<textarea class="txt-block-description">' + baselineDesc + '</textarea>'
+        + '<textarea class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
         + '</div></td></tr></table></div>'
         + '</li>';
     }
@@ -173,7 +174,6 @@ function updateTime() {
 // when the time changes, this will be called.
 function onProgress(currentTime) {
     currentTime = currentTime.toFixed(3);
-    console.log(currentTime);
     let currScene = getSceneFromTime(currentTime, allSceneArr);
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
@@ -201,7 +201,7 @@ function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
-                console.log('i was called: playing state')
+        console.log('i was called: playing state')
         break;
         case YT.PlayerState.PAUSED:
         timeAtWhichLastPaused = player.getCurrentTime();
@@ -228,12 +228,41 @@ function pauseVideo() {
 function stopVideo() {
     player.stopVideo();
 }
-
 function updateAll() {
-    //s_d_nqXz8hhAYGo_0_0
-    //s_o_nqXz8hhAYGo_0_0
-    //s_d_nqXz8hhAYGo_0_1
-    //s_o_nqXz8hhAYGo_0_1
+    let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
+    $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
+        console.log(response);
+    });
+}
+
+function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
+    let parentJsonBody = {};
+    let sceneArrJson = [];
+    let blockArrJson = [];
+    for(let i=0; i<allSceneArr.length; i++) {
+        let currScene = allSceneArr[i];
+        let currSceneId = currScene.sc_id;
+        let currSceneDescTextId = '#s_d_' + currSceneId;
+        let currSceneOcrTextId = '#s_o_' + currSceneId;
+        let sceneJsonObj = {};
+        sceneJsonObj.scene_id = currSceneId;
+        sceneJsonObj.modified_description = $(currSceneDescTextId).val().trim();
+        sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+        sceneArrJson.push(sceneJsonObj);
+    }
+    for(let i=0; i<allBlockArr.length; i++) {
+        let currBlock = allBlockArr[i];
+        let currBlockId = currBlock.block_id;
+        let currBlockDescTextId = '#b_d_' + currBlockId;
+        let blockJsonObj = {};
+        blockJsonObj.block_id = currBlockId;
+        blockJsonObj.modified_description = $(currBlockDescTextId).val().trim();
+        blockArrJson.push(blockJsonObj);
+    }
+    parentJsonBody.user_id = userId;
+    parentJsonBody.scene_arr = sceneArrJson;
+    parentJsonBody.block_arr = blockArrJson;
+    return parentJsonBody;
 }
 
 function populateSceneIdToListPositionMap(blocksJsonArr) {
@@ -257,14 +286,13 @@ function populateSceneIdToListPositionMap(blocksJsonArr) {
     return sceneListPositionMap;
 }
 
-function populateAllSceneArr(blocksJsonArr) {
-    let allSceneArr = [];
+function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
     for(let i=0; i<blocksJsonArr.length; i++) {
         let currBlock = blocksJsonArr[i];
+        allBlockArr.push(currBlock);
         let childSceneArr = currBlock.child_scenes;
         allSceneArr.push.apply(allSceneArr, childSceneArr);
     }
-    return allSceneArr;
 }
 
 function getSceneFromTime(currentTime, sceneArr) {

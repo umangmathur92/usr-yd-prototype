@@ -1,4 +1,6 @@
-const pgp = require('pg-promise')();
+const pgp = require('pg-promise')({
+    capSQL: true // capitalize all generated SQL
+});
 
 var connection = {
     host: 'yd-prototype-db-new.cd8kr5vqcxkw.us-east-2.rds.amazonaws.com', //URL of DB

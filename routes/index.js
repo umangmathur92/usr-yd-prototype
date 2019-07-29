@@ -76,4 +76,12 @@ router.get('/reset/:youtubeId/:userId', function(req, res, next) {
   });
 });
 
+router.post('/updateMultipleScenesAndBlocksForUser', function(req, res, next) {
+  let inputJson = req.body;
+  let queryResult = video.updateMultipleScenesAndBlocksForUser(inputJson);
+  queryResult.then(result => {
+    res.send({success: result});  
+  });
+});
+
 module.exports = router;
