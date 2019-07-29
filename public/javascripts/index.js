@@ -75,7 +75,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         outputHtml = outputHtml
         + '<li class="li-block-footer"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
         + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
-        + '<button class="btn-update-block-description">Update Description</button>'
+        + '<button class="btn-update-block-description" data-blockid="'+ blockId +'">Update Description</button>'
         + '<textarea class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
         + '</div></td></tr></table></div>'
         + '</li>';
@@ -85,7 +85,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let sceneId = this.dataset.sceneid;
         let sceneDescTxtId = '#s_d_' + sceneId;
         let modifiedDescription = $(sceneDescTxtId).val();
-        sendUpdateDescriptionPostReq(sceneId, modifiedDescription);
+        sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription);
     });
     $('.btn-update-scene-ocr').click(function() {
         let sceneId = this.dataset.sceneid;
@@ -93,9 +93,16 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let modifiedOcr = $(sceneOcrTxtId).val();
         sendUpdateOcrPostReq(sceneId, modifiedOcr);
     });
+    $('.btn-update-block-description').click(function() {
+        let blockId = this.dataset.blockid;
+        let blockDescTxtId ='#b_d_' + blockId;
+        let modifiedDescription = $(blockDescTxtId).val();
+        console.log(blockDescTxtId + ', ' +blockId, ', ' + modifiedDescription);
+        sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription);
+    });
 }
 
-function sendUpdateDescriptionPostReq(sceneId, modifiedDescription) {
+function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
     const body = {
         userId: userId,
         sceneId: sceneId,
@@ -116,6 +123,18 @@ function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
         window.alert(JSON.stringify(response));
     });
 }
+
+function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
+    const body = {
+        userId: userId,
+        blockId: blockId,
+        modifiedDescription: modifiedDescription,
+    };
+    $.post( '/updateBlockDescription', body, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}
+
 
 function scrollToPosition(position) {
     $('#ul-scene-list').animate({

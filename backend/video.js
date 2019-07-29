@@ -49,6 +49,18 @@ async function fetchVideoDataFromDb(videoId) {
     }
 }
 
+async function updateBlockDescription(inputJson) {
+    try {
+        let uuid = inputJson.userId;
+        let block_id = inputJson.blockId;
+        let modifiedDescription = inputJson.modifiedDescription;
+        let updateQueryResponse = await db.one("UPDATE block_modification SET modified_description = $1 WHERE block_id = $2 AND user_id = $3 RETURNING id", [modifiedDescription, block_id, uuid], a => + a.id);
+        return true;
+    } catch(e) {
+        throw e;
+    }
+}
+
 async function updateSceneDescription(inputJson) {
     try {
         let uuid = inputJson.userId;
@@ -480,6 +492,7 @@ module.exports = {
     clearDb: clearDb,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,
+    updateBlockDescription: updateBlockDescription,
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,
     replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
