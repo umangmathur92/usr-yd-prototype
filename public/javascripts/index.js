@@ -19,6 +19,10 @@ $(document).ready(function() {
     $("#btnScroll").click(function() {
         resetVidModifiedTableData();
     });
+    $('#btnSubmit').click(async function() {
+        let shoudShowAlert = true;
+        updateAll(shoudShowAlert);
+    });
 });
 
 function fetchVideoInfo(youtubeId) {
@@ -247,10 +251,27 @@ function pauseVideo() {
 function stopVideo() {
     player.stopVideo();
 }
-function updateAll() {
+async function updateAll(shoudShowAlert) {
     let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
-    $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
-        console.log(response);
+    await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
+        var currentdate = new Date(); 
+        var datetime = "Last Sync: " + currentdate.getDate() + "/"
+        + (currentdate.getMonth()+1)  + "/" 
+        + currentdate.getFullYear() + " @ "  
+        + currentdate.getHours() + ":"  
+        + currentdate.getMinutes() + ":" 
+        + currentdate.getSeconds();
+        if(response.success) {
+            $('#txtSyncTime').html(datetime);
+        }
+        if(shoudShowAlert) {
+            if(response.success) {
+                alert('Submitted Successfully\nYou will be redirected to the Video List Page');
+                window.history.back();
+            } else {
+                alert('Update Failed: ' + response.success);
+            }
+        }
     });
 }
 
