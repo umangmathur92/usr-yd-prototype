@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <head>
-     <title>User Study</title>
-      <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <title>User Study</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>       
 </head>
-<body class="container">
-<div class="row">
-    <div class="col-sm-8">    
-        <div class="jumbotron">
-            <h1>List of Video</h1>
-            <p>Please click the link below to start</p>
-        </div>
+<body>
+<nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <div class="container">
+      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe</a>
     </div>
-
-      <div>        
-         <div id="list"> </div>
+</nav>
+<div class="container">
+    <div>
+        <h1>List of Video</h1>
+        <p id="date"> </p>
+        <p>Please select the video</p>
+    </div>
+    <div class="container">
+        <div class="list-group">     
     </div>
 </div>
 
@@ -28,20 +35,27 @@ console.log('target URL:' +  targetUrl);
 
 
 $(document).ready(function () {
+    getDateTime();
     fetchVideo();
 });
+
+
+function getDateTime(){
+    let date = new Date(Date.now()).toLocaleString();
+     document.getElementById('date').innerHTML = date;
+    console.log(date);
+}
 
 function fetchVideo() {
     $.get(targetUrl, function (rows) {
         console.log({rows});
         let videos = '';
         for (let i = 0; i < rows.length; i++) {
-            videos +=  `<div>  
-                            <a href="/playvideo/${rows[i].youtube_id}">Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>
-                        </div>`
+            let val = rows[i].ai_support===true ? 'With AI support' : 'Start from scratch';
+            videos +=  ` <a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >${val}</a>`
+           // videos +=  ` <a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>`
         }
-
-        document.getElementById('list').innerHTML = videos;
+        $( ".list-group" ).append( videos);
     });
 }
 </script>
