@@ -5,7 +5,8 @@ const userStudy = require('../model/userStudy');
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
-  res.render('home', { title: 'Express' });
+  res.render('homeUserStudy', { title: 'Express' });
+  //res.render('home', { title: 'Express' });
 });
 
 router.get('/addvideo', function(req, res, next) {
