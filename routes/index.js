@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
 const userStudy = require('../model/userStudy');
+const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
   res.render('home', { title: 'Express' });
@@ -106,7 +107,8 @@ router.get('/userStudy/users/', function (req, res) {
   console.log({param: req.query.userId});
   let userId = req.query.userId;
   if(userId){
-     let queryResult = userStudy.getVideoByUserId(userId);
+     //let queryResult = userStudy.getVideoByUserId(userId);
+     let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id WHERE u.user_id = $1`,[userId]);
       queryResult
         .then(result => {
           res.send(result);

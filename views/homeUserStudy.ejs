@@ -35,7 +35,7 @@ function fetchUsers() {
         let users = '';
        
         for (let i = 0; i < rows.length; i++) {
-             users +=  `<a href="/userStudy/video?userId=${rows[i].id}" class="list-group-item"> ${rows[i].name} </a>`
+             users +=  `<a href="/userStudy/video?userId=${rows[i].uuid}" class="list-group-item"> ${rows[i].name} </a>`
         }
          console.log({users});
          $( ".list-group" ).append( users);

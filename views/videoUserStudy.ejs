@@ -53,7 +53,7 @@ function fetchVideo() {
         let videos = '';
         for (let i = 0; i < rows.length; i++) {
             let val = rows[i].ai_support===true ? 'With AI support' : 'Start from scratch';
-            videos +=  `<a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >${rows[i].title} (${val})</a>`
+            videos +=  `<a href="/playvideo/${rows[i].video_id}" class="list-group-item" >${rows[i].title} (${val})</a>`
            // videos +=  ` <a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>`
         }
         videos += `<a href="https://docs.google.com/forms/d/e/1FAIpQLSfQO6z0lrsHfgj5iR797uHUM-b6gXVz0BfTQT3Oj2HY9tYd1g/viewform?entry.2005620554=${rows[0].user_id}" class="list-group-item" >Survey Link</a>`;  
