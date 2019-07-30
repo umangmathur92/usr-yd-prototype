@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
+const userStudy = require('../model/userStudy');
 
 router.get('/', function(req, res, next) {
   res.render('home', { title: 'Express' });
@@ -91,5 +92,39 @@ router.post('/updateBlockAndScene', function(req, res, next) {
     res.send({success: result});  
   });
 })
+//vaishali
+router.get('/userStudy', function (req, res) {
+  res.render('homeUserStudy', { title: 'User Study' });
+});
+//list of video for a user
+router.get('/userStudy/video', function (req, res) {
+  res.render('videoUserStudy', { title: 'User Study Video' });
+});
+
+//list of users
+router.get('/userStudy/users/', function (req, res) {
+  console.log({param: req.query.userId});
+  let userId = req.query.userId;
+  if(userId){
+     let queryResult = userStudy.getVideoByUserId(userId);
+      queryResult
+        .then(result => {
+          res.send(result);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+  }else{
+      let queryResult = userStudy.getAllUsers();
+      console.log({ queryResult });
+      queryResult
+        .then(result => {
+          res.send(result);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+  }
+});
 
 module.exports = router;

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+    <title>User Study</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <div class="container">
+      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe</a>
+    </div>
+</nav>
+<div class = "container"> 
+        <div>
+            <h1>User Study</h1>
+            <p>Please click the link below to start</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="list-group">     
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    fetchUsers();
+});
+
+function fetchUsers() {
+    $.get('/userStudy/users', function (rows) {
+        let users = '';
+       
+        for (let i = 0; i < rows.length; i++) {
+             users +=  `<a href="/userStudy/video?userId=${rows[i].id}" class="list-group-item"> ${rows[i].name} </a>`
+        }
+         console.log({users});
+         $( ".list-group" ).append( users);
+    });
+}
+
+
+</script>
+
+</body>
+</html>

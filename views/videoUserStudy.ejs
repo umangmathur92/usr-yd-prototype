@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+    <title>User Study</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>       
+</head>
+<body>
+<nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <div class="container">
+      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe</a>
+    </div>
+</nav>
+<div class="container">
+    <div>
+        <h1>List of Video</h1>
+        <p id="date"> </p>
+        <p>Please select the video</p>
+    </div>
+    <div class="container">
+        <div class="list-group"> 
+          
+    </div>
+</div>
+
+<script>
+
+  //get parameters from query string
+let url = location.search.substring(1);
+let urlParams = new URLSearchParams(url);
+let userId = urlParams.get('userId');
+let targetUrl = '/userStudy/users?userId=' + userId;
+console.log('target URL:' +  targetUrl);
+
+
+$(document).ready(function () {
+    getDateTime();
+    fetchVideo();
+});
+
+
+function getDateTime(){
+    let date = new Date(Date.now()).toLocaleString();
+     document.getElementById('date').innerHTML = date;
+    console.log(date);
+}
+
+function fetchVideo() {
+    $.get(targetUrl, function (rows) {
+        console.log({rows});
+        let videos = '';
+        for (let i = 0; i < rows.length; i++) {
+            let val = rows[i].ai_support===true ? 'With AI support' : 'Start from scratch';
+            videos +=  `<a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >${rows[i].title} (${val})</a>`
+           // videos +=  ` <a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>`
+        }
+        videos += `<a href="https://docs.google.com/forms/d/e/1FAIpQLSfQO6z0lrsHfgj5iR797uHUM-b6gXVz0BfTQT3Oj2HY9tYd1g/viewform?entry.2005620554=${rows[0].user_id}" class="list-group-item" >Survey Link</a>`;  
+        $( ".list-group" ).append( videos);
+    });
+}
+</script>
+
+</body>
+</html>
