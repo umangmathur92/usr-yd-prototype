@@ -45,7 +45,6 @@ a {
   border:none;
   width:75%;
   min-height: 25px;
-  max-height: 100px;
   resize: none;
   outline: none; /*add this to stop highlight on focus*/
   overflow: hidden;

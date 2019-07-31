@@ -11,6 +11,7 @@ let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 let enableAi = false;
+let newTimerUpdater = null;
 
 $(document).ready(function() {
     userId = getUrlVars()["u"];
