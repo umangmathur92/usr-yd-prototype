@@ -10,9 +10,11 @@ let userId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
+let enableAi = false;
 
 $(document).ready(function() {
     userId = getUrlVars()["u"];
+    enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
@@ -52,7 +54,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let blockNum = currBlock.block_num;
         let blStartTime = currBlock.start_time;
         let blFinishTime = currBlock.finish_time;
-        let baselineDesc = $.trim(currBlock.baseline_des);
+        let baselineDesc = enableAi ? $.trim(currBlock.baseline_des) : '';
         let childSceneArr = currBlock.child_scenes;
         outputHtml = outputHtml + '<li class="li-block-header"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
         for(let j=0; j<childSceneArr.length; j++) {
@@ -61,17 +63,17 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneNum = currScene.sc_num;
             let scStartTime = currScene.start_time;
             let scFinishTime = currScene.finish_time;
-            let sceneOcr = $.trim(currScene.original_ocr);
-            let sceneDesc = $.trim(currScene.original_description);
+            let sceneOcr = enableAi ? $.trim(currScene.original_ocr) : '';
+            let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
             outputHtml = outputHtml
             + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs</td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'">Update Description</button>'
-            + '<textarea class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
             + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
             + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'">Update Text</button>'
-            + '<textarea class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
             + '<div style="text-align: center; margin-bottom: -20px; margin-top: 10px;">';
             // if(j!=childSceneArr.length-1) {
             //     outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
@@ -84,7 +86,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         + '<li class="li-block-footer"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
         + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
         + '<button class="btn-update-block-description" data-blockid="'+ blockId +'">Update Description</button>'
-        + '<textarea class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
+        + '<textarea onkeyup="auto_grow(this)" class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
         + '</div></td></tr></table></div>'
         + '</li>';
     }
@@ -107,6 +109,9 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let modifiedDescription = $(blockDescTxtId).val();
         console.log(blockDescTxtId + ', ' +blockId, ', ' + modifiedDescription);
         sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription);
+    });
+    $("textarea").each(function(){
+        auto_grow(this);
     });
 }
 
@@ -421,4 +426,9 @@ function getUrlVars() {
         vars[key] = value;
     });
     return vars;
+}
+
+function auto_grow(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight)+"px";
 }

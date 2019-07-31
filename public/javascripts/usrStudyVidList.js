@@ -24,7 +24,8 @@ function fetchVideo() {
         let videos = '';
         for (let i = 0; i < rows.length; i++) {
             let val = rows[i].ai_support===true ? 'With AI support' : 'Without AI support';
-            videos +=  `<b><a href="/playvideo/${rows[i].video_id}?u=${userId}" class="list-group-item" ><img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${rows[i].video_id}/hqdefault.jpg">Video ${i+1}: ${rows[i].title} (${val})</a></b>`
+            let aiParam = rows[i].ai_support===true ? 'yes' : 'no';
+            videos +=  `<b><a href="/playvideo/${rows[i].video_id}?u=${userId}&ai=${aiParam}" class="list-group-item" ><img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${rows[i].video_id}/hqdefault.jpg">Video ${i+1}: ${rows[i].title} (${val})</a></b>`
             // videos +=  ` <a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>`
         }
         videos += `<br><b><a href="https://docs.google.com/forms/d/e/1FAIpQLSfQO6z0lrsHfgj5iR797uHUM-b6gXVz0BfTQT3Oj2HY9tYd1g/viewform?entry.2005620554=${rows[0].name} - ${rows[0].user_id}" class="list-group-item" ><img src="../images/survey.png" class="img-survey">User Survey for ${rows[0].name}</a></b>`;  
