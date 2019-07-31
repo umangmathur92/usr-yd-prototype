@@ -6,12 +6,13 @@ let allSceneArr = [];
 let allBlockArr = [];
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId = '90812bd9-ac4f-4637-9b52-02b821d61995';
+let userId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 
 $(document).ready(function() {
+    userId = getUrlVars()["u"];
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
@@ -39,7 +40,7 @@ function fetchVideoInfo(youtubeId) {
         populateAllSceneArrAndAllBlockArr(blocksJsonArr);
         sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
         initializeDescriptionsUI(blocksJsonArr);
-        setInterval(updateAll, 1000*60*2);
+        //setInterval(updateAll, 1000*60*2);
     });
 }
 
@@ -216,14 +217,14 @@ function onProgress(currentTime) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
         if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
-            // let blockId = sceneToBlockMap.get(sceneId);
-            // let blockElementId = '#bl_cont_' + blockId;
-        }
-        let sceneElementId = '#sc_cont_' + sceneId;
-        $(previouslyHighlightedContainerId).removeClass('highlight');
-        $(sceneElementId).addClass('highlight');
-        previouslyHighlightedContainerId = sceneElementId;
+        // let blockId = sceneToBlockMap.get(sceneId);
+        // let blockElementId = '#bl_cont_' + blockId;
     }
+    let sceneElementId = '#sc_cont_' + sceneId;
+    $(previouslyHighlightedContainerId).removeClass('highlight');
+    $(sceneElementId).addClass('highlight');
+    previouslyHighlightedContainerId = sceneElementId;
+}
 }
 
 function onPlayerStateChange(event) {
@@ -412,4 +413,12 @@ function getIndexOfInputArrForTargetVal(target, inputArr) {
         }
     }
     return index;
+}
+
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
 }

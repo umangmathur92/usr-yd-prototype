@@ -10,8 +10,8 @@ const KeyframeObject = require('../model/keyframeobject');
 const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
-const PredefVid1 = require('../backend/predef/nqXz8hhAYGo');
-const PredefVid2 = require('../backend/predef/cNj3aOTYdQQ');
+const PredefVid1 = require('./predef/_1DDhUnyvwY');
+const PredefVid2 = require('./predef/EQoJS8Pkmj0');
 const pgp = require('pg-promise')({
     capSQL: true // capitalize all generated SQL
 });
@@ -104,7 +104,7 @@ async function updateSceneOcr(inputJson) {
 
 async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
     try {
-        let truncateModSceTableQuery = db.any('TRUNCATE TABLE scene_modification restart IDENTITY CASCADE');
+        //let truncateModSceTableQuery = db.any('TRUNCATE TABLE scene_modification restart IDENTITY CASCADE');
         let sceneVidParam = videoId + '%';
         let sceneArr = await db.any("SELECT * FROM scene", [sceneVidParam]);
         for(let i=0; i<sceneArr.length; i++) {
@@ -144,9 +144,9 @@ async function addVideoDataToDb(inputJson) {
         //Parse and insert Blocks
         // let blockJsonArr = video.insights_json.blocks;
         let blockJsonArr = [];
-        if(video.youtube_id == 'nqXz8hhAYGo') {
+        if(video.youtube_id == '_1DDhUnyvwY') {
             blockJsonArr = PredefVid1.predefBlockArrJson;
-        } else if (video.youtube_id == 'cNj3aOTYdQQ') {
+        } else if (video.youtube_id == 'EQoJS8Pkmj0') {
             blockJsonArr = PredefVid2.predefBlockArrJson;
         }
         let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
