@@ -44,7 +44,8 @@ a {
   position:relative;
   border:none;
   width:75%;
-  min-height: 10px;
+  min-height: 25px;
+  max-height: 100px;
   resize: none;
   outline: none; /*add this to stop highlight on focus*/
   overflow: hidden;
