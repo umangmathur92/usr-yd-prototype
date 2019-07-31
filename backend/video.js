@@ -12,6 +12,8 @@ const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
 const PredefVid1 = require('./predef/_1DDhUnyvwY');
 const PredefVid2 = require('./predef/EQoJS8Pkmj0');
+const PredefVid3 = require('./predef/cNj3aOTYdQQ');
+const PredefVid4 = require('./predef/nqXz8hhAYGo');
 const pgp = require('pg-promise')({
     capSQL: true // capitalize all generated SQL
 });
@@ -118,7 +120,7 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
             let modified_ocr = scene.original_ocr;
             await db.one('INSERT INTO scene_modification(scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr) VALUES ( $1, $2, $3, $4, $5, $6, $7 ) RETURNING id', [scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr]);
         }
-        let truncateModBlockTableQuery = db.any('TRUNCATE TABLE block_modification restart IDENTITY CASCADE');
+        // let truncateModBlockTableQuery = db.any('TRUNCATE TABLE block_modification restart IDENTITY CASCADE');
         let blockVidParam = videoId + '%';
         let blockArr = await db.any("SELECT * FROM block", [blockVidParam]);
         for(let i=0; i<blockArr.length; i++) {
@@ -148,6 +150,10 @@ async function addVideoDataToDb(inputJson) {
             blockJsonArr = PredefVid1.predefBlockArrJson;
         } else if (video.youtube_id == 'EQoJS8Pkmj0') {
             blockJsonArr = PredefVid2.predefBlockArrJson;
+        } else if(video.youtube_id == 'cNj3aOTYdQQ') {
+            blockJsonArr = PredefVid3.predefBlockArrJson;
+        } else if(video.youtube_id == 'nqXz8hhAYGo') {
+            blockJsonArr = PredefVid4.predefBlockArrJson;
         }
         let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         await Block.insertIntoBlockTable(blockArr);
