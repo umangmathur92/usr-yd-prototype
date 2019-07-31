@@ -212,14 +212,17 @@ function onProgress(currentTime) {
     if(timeAtWhichLastPaused > currentTime) {
         timeAtWhichLastPaused = currentTime;
     }
-    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && sceneToBlockMap.has(sceneId)) {
+    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
-        let blockId = sceneToBlockMap.get(sceneId);
-        let blockElementId = '#bl_cont_' + blockId;
+        if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
+            // let blockId = sceneToBlockMap.get(sceneId);
+            // let blockElementId = '#bl_cont_' + blockId;
+        }
+        let sceneElementId = '#sc_cont_' + sceneId;
         $(previouslyHighlightedContainerId).removeClass('highlight');
-        $(blockElementId).addClass('highlight');
-        previouslyHighlightedContainerId = blockElementId;
+        $(sceneElementId).addClass('highlight');
+        previouslyHighlightedContainerId = sceneElementId;
     }
 }
 

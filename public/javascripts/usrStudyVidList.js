@@ -23,7 +23,7 @@ function fetchVideo() {
         console.log({rows});
         let videos = '';
         for (let i = 0; i < rows.length; i++) {
-            let val = rows[i].ai_support===true ? 'With AI support' : 'Start from scratch';
+            let val = rows[i].ai_support===true ? 'With AI support' : 'Without AI support';
             videos +=  `<b><a href="/playvideo/${rows[i].video_id}" class="list-group-item" ><img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${rows[i].video_id}/hqdefault.jpg">Video ${i+1}: ${rows[i].title} (${val})</a></b>`
             // videos +=  ` <a href="/playvideo/${rows[i].youtube_id}" class="list-group-item" >Participant ${rows[i].user_id} ----  ${rows[i].youtube_id}----AI support: ${rows[i].ai_support}</a>`
         }
