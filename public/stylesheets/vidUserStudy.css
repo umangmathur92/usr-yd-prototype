@@ -33,3 +33,6 @@ a {
     margin: auto;
 }
 
+a:hover { 
+    background-color: lightgray;
+}
