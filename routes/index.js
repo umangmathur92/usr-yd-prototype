@@ -29,7 +29,12 @@ router.get('/getAllVideos', function(req, res, next) {
 });
 
 router.get('/playvideo/:youtubeId', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  let isAiEnabled = req.query.ai === 'yes';
+  if(isAiEnabled) {
+    res.render('withai', { title: 'Express' });
+  } else {
+    res.render('withoutai', { title: 'Express' });
+  }
 });
 
 router.get('/fetchVideoData', function(req, res, next) {

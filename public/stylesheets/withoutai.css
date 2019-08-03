@@ -1,0 +1,107 @@
+body {
+    font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+    color: #00B7FF;
+}
+
+.scene-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow:auto;
+    height: 100%;
+    background-color: #e0e0e0;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.scene-container {
+    text-align: left;
+    padding: 10px;
+    background: #eeeeee;
+    border: 1px solid #a0a0a0;
+    margin-bottom: 5px;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-top: 8px;
+}
+
+.scene-description-container, .scene-ocr-container, .block-description-container {
+    position:relative;
+    width: 100%;
+    border: 1px solid #ddd;
+    background: #ffffff;
+}
+
+.start-time-container {
+    position:relative;
+    border: 1px solid #ddd;
+    background: #ffffff;
+}
+.btn-update-scene-description, .btn-update-scene-ocr, .btn-update-block-description {
+    position:absolute;
+    bottom: 0.1px;
+    right:0.1px;
+    width: 25%;
+}
+
+.txt-scene-description, .txt-scene-ocr, .txt-block-description {
+    position:relative;
+    border:none;
+    width:100%;
+    min-height: 50px;
+    outline: none; /*add this to stop highlight on focus*/
+    overflow: hidden;
+    resize: none;
+}
+
+.sceneTimeEntry {
+    margin: auto;
+}
+
+.delete-button-container {
+    margin: auto;
+    height: 22px; 
+    width: 22px;
+}
+
+.btn-add-scene {
+    background-color: #1a4b6e;
+    border: none;
+    color: white;
+    padding: 3px 4px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+tr td:first-child{
+    width:1%;
+    white-space:nowrap;
+}
+
+.list-container {
+    height: 700px;
+    max-height: 700px;
+    background-color: darkgray;
+}
+
+.li-block-header {
+    border-top: 10px solid darkgray;
+}
+
+.block-footer-container {
+    text-align: left;
+    padding: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
+    border-bottom: 10px solid darkgray;
+}
+
+.highlight {
+    background-color: cyan;
+    font-weight: bold;
+}
+
+#stopWatch { width: 280px; height: auto; text-align: center; display: block; padding: 5px; margin: 0 auto; } #timer, #fulltime { width: auto; height: auto; padding: 10px; font-weight: bold; font-family: tahoma; display: block; border: 1px solid #eee; text-align: center; box-shadow: 0 0 5px #ccc; background: #fbfbf0; color: darkblue; border-bottom:4px solid darkgrey; } button { cursor: pointer; font-weight: 700; } #fulltime { display:none; font-size:16px; font-weight:bold; } 
