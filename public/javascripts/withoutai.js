@@ -30,9 +30,11 @@ $(document).ready(function() {
     $('#btnTemp').click(async function() {
         updateMainTables();
     });
-    $('#defaultEntry').timeEntry().change(function() { 
-        var log = $('#log'); 
-        log.val(log.val() + ($('#defaultEntry').val() || 'blank') + '\n'); 
+    $('.txt-scene-description').keyup(function() {
+        auto_grow(this);
+    });
+    $('#btnAddScene').click(function() {
+        addSceneListItemToUi();
     });
     $('.sceneTimeEntry').timeEntry({
         spinnerImage: '../images/spinnerUpDown.png', 
@@ -42,142 +44,171 @@ $(document).ready(function() {
         unlimitedHours: true, 
         showSeconds: true, 
         spinnerIncDecOnly: true, 
-        useMouseWheel: true});
+        useMouseWheel: true
     });
-    $('.txt-scene-description').keyup(function() {
-        auto_grow(this);
+});
+
+function addSceneListItemToUi() {
+    let sceneHtml = `<li>
+    <div class="scene-container row">
+    <div>
+    <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> 
+    </div>
+    <div class="col">
+    <textarea class="txt-scene-description"></textarea>
+    </div>
+    <div class="delete-button-container">
+    <img class="btn-delete" src="/images/trash.png" style="width: 100%;" onclick="onDeleteButtonClicked(this)" > 
+    </div>
+    </div>
+    </li>`;
+    $('#ul-scene-list').append(sceneHtml);
+    $('.sceneTimeEntry').timeEntry({
+        spinnerImage: '../images/spinnerUpDown.png', 
+        spinnerBigImage: '../images/spinnerUpDownBig.png',
+        spinnerSize: [15, 16, 0], 
+        spinnerBigSize: [30, 32, 0],
+        unlimitedHours: true, 
+        showSeconds: true, 
+        spinnerIncDecOnly: true, 
+        useMouseWheel: true
     });
-    
-    function fetchVideoInfo(youtubeId) {
-        let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
-        $.get(targetUrl, function (response) {
-            let vidJson = response;
-            let vidTitle = vidJson.title;
-            let vidLength = vidJson.duration;
-            let blocksJsonArr = vidJson.info;
-            $('#txtVidtitle').html(vidTitle);
-            //populateAllSceneArrAndAllBlockArr(blocksJsonArr);
-            //sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
-            //initializeDescriptionsUI(blocksJsonArr);
-            //setInterval(updateAll, 1000*60*2);
-        });
-    }
-    
-    function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
-        const body = {
-            userId: userId,
-            sceneId: sceneId,
-            modifiedDescription: modifiedDescription,
-        };
-        $.post( '/updateSceneDescription', body, function(response) {
-            window.alert(JSON.stringify(response));
-        });
-    }
-    
-    function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
-        const body = {
-            userId: userId,
-            sceneId: sceneId,
-            modifiedOcr: modifiedOcr,
-        };
-        $.post( '/updateSceneOCR', body, function(response) {
-            window.alert(JSON.stringify(response));
-        });
-    }
-    
-    function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
-        const body = {
-            userId: userId,
-            blockId: blockId,
-            modifiedDescription: modifiedDescription,
-        };
-        $.post( '/updateBlockDescription', body, function(response) {
-            window.alert(JSON.stringify(response));
-        });
-    }
-    
-    
-    function scrollToPosition(position) {
-        $('#ul-scene-list').animate({
-            scrollTop: $('#ul-scene-list li:nth-child(' + position + ')').position().top - $('#ul-scene-list li:first').position().top
-        }, 'slow');
-        $(previouslyHighlightedContainerId).removeClass('highlight');
-        $('#ul-scene-list li:nth-child(' + position + ')' + ' .scene-container').addClass('highlight');
-        previouslyHighlightedContainerId = '#ul-scene-list li:nth-child(' + position + ')' + ' .scene-container';
-    }
-    
-    function resetVidModifiedTableData() {
-        let url = '/reset/' + youtubeId + '/' + userId;
-        $.get(url, function(response) {
-            window.alert(JSON.stringify(response));
-        });
-    }
-    
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            height: '270',
-            width: '480',
-            videoId: youtubeId,
-            playerVars: {
-                autoplay: 1,
-                enablejsapi: 1,
-                cc_load_policy: 1,
-                controls: 1,
-                fs: 0,
-                iv_load_policy: 3,
-                modestbranding: 1,
-                rel: 0,
-                showinfo: 0,
-                wmode: 'opaque'
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
-    
-    function onPlayerReady(event) {
-        timeupdater = setInterval(updateTime, 100);
-    }
-    
-    function updateTime() {
-        var oldTime = videotime;
-        if(player && player.getCurrentTime) {
-            videotime = player.getCurrentTime();
+}
+
+function onDeleteButtonClicked(element) {
+    $(element).parent().parent().parent().remove();
+}
+
+function fetchVideoInfo(youtubeId) {
+    let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
+    $.get(targetUrl, function (response) {
+        let vidJson = response;
+        let vidTitle = vidJson.title;
+        let vidLength = vidJson.duration;
+        let blocksJsonArr = vidJson.info;
+        $('#txtVidtitle').html(vidTitle);
+        //populateAllSceneArrAndAllBlockArr(blocksJsonArr);
+        //sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
+        //initializeDescriptionsUI(blocksJsonArr);
+        //setInterval(updateAll, 1000*60*2);
+    });
+}
+
+function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
+    const body = {
+        userId: userId,
+        sceneId: sceneId,
+        modifiedDescription: modifiedDescription,
+    };
+    $.post( '/updateSceneDescription', body, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}
+
+function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
+    const body = {
+        userId: userId,
+        sceneId: sceneId,
+        modifiedOcr: modifiedOcr,
+    };
+    $.post( '/updateSceneOCR', body, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}
+
+function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
+    const body = {
+        userId: userId,
+        blockId: blockId,
+        modifiedDescription: modifiedDescription,
+    };
+    $.post( '/updateBlockDescription', body, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}
+
+
+function scrollToPosition(position) {
+    $('#ul-scene-list').animate({
+        scrollTop: $('#ul-scene-list li:nth-child(' + position + ')').position().top - $('#ul-scene-list li:first').position().top
+    }, 'slow');
+    $(previouslyHighlightedContainerId).removeClass('highlight');
+    $('#ul-scene-list li:nth-child(' + position + ')' + ' .scene-container').addClass('highlight');
+    previouslyHighlightedContainerId = '#ul-scene-list li:nth-child(' + position + ')' + ' .scene-container';
+}
+
+function resetVidModifiedTableData() {
+    let url = '/reset/' + youtubeId + '/' + userId;
+    $.get(url, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: '270',
+        width: '480',
+        videoId: youtubeId,
+        playerVars: {
+            autoplay: 1,
+            enablejsapi: 1,
+            cc_load_policy: 1,
+            controls: 1,
+            fs: 0,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            wmode: 'opaque'
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
         }
-        if(videotime !== oldTime) {
-            onProgress(videotime);
-        }
+    });
+}
+
+function onPlayerReady(event) {
+    timeupdater = setInterval(updateTime, 100);
+}
+
+function updateTime() {
+    var oldTime = videotime;
+    if(player && player.getCurrentTime) {
+        videotime = player.getCurrentTime();
     }
-    
-    // when the time changes, this will be called.
-    function onProgress(currentTime) {
-        currentTime = currentTime.toFixed(3);
-        let currScene = getSceneFromTime(currentTime, allSceneArr);
-        let sceneId = currScene.sc_id;
-        let sceneNum = currScene.sc_num;
-        let sceneEndTime = currScene.finish_time;
-        if(prevSceneNum != sceneNum) {
-            let listPosition = sceneIdToListPositionMap.get(sceneId);
-            scrollToPosition(listPosition);
-        }
-        prevSceneNum = sceneNum;
-        if(timeAtWhichLastPaused > currentTime) {
-            timeAtWhichLastPaused = currentTime;
-        }
-        if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5) {
-            pauseVideo();
-            timeAtWhichLastPaused = currentTime;
-            if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
-            // let blockId = sceneToBlockMap.get(sceneId);
-            // let blockElementId = '#bl_cont_' + blockId;
-        }
-        let sceneElementId = '#sc_cont_' + sceneId;
-        $(previouslyHighlightedContainerId).removeClass('highlight');
-        $(sceneElementId).addClass('highlight');
-        previouslyHighlightedContainerId = sceneElementId;
+    if(videotime !== oldTime) {
+        onProgress(videotime);
     }
+}
+
+// when the time changes, this will be called.
+function onProgress(currentTime) {
+    currentTime = currentTime.toFixed(3);
+    let currScene = getSceneFromTime(currentTime, allSceneArr);
+    let sceneId = currScene.sc_id;
+    let sceneNum = currScene.sc_num;
+    let sceneEndTime = currScene.finish_time;
+    if(prevSceneNum != sceneNum) {
+        let listPosition = sceneIdToListPositionMap.get(sceneId);
+        scrollToPosition(listPosition);
+    }
+    prevSceneNum = sceneNum;
+    if(timeAtWhichLastPaused > currentTime) {
+        timeAtWhichLastPaused = currentTime;
+    }
+    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5) {
+        pauseVideo();
+        timeAtWhichLastPaused = currentTime;
+        if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
+        // let blockId = sceneToBlockMap.get(sceneId);
+        // let blockElementId = '#bl_cont_' + blockId;
+    }
+}
+let sceneElementId = '#sc_cont_' + sceneId;
+$(previouslyHighlightedContainerId).removeClass('highlight');
+$(sceneElementId).addClass('highlight');
+previouslyHighlightedContainerId = sceneElementId;
 }
 
 function onPlayerStateChange(event) {
@@ -211,6 +242,7 @@ function pauseVideo() {
 function stopVideo() {
     player.stopVideo();
 }
+
 async function updateAll(shoudShowAlert) {
     let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
     await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
