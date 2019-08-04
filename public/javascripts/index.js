@@ -73,14 +73,16 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let scFinishTime = currScene.finish_time;
             let sceneOcr = enableAi ? $.trim(currScene.original_ocr) : '';
             let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
+            let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
+            let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
             outputHtml = outputHtml
             + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
-            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs <img src="/images/reset.jpg" style="width:10px; height: 10px;" onclick="resetVideoTo('+scStartTime+')"></td></tr>'
+            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
-            + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'">Update Description</button>'
+            + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Description</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
             + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
-            + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'">Update Text</button>'
+            + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
             + '<div style="text-align: center; margin-bottom: -20px; margin-top: 10px;">';
             // if(j!=childSceneArr.length-1) {
@@ -122,6 +124,12 @@ function initializeDescriptionsUI(blocksJsonArr) {
         auto_grow(this);
     });
 }
+
+function millisToMinutesAndSeconds(secs) {
+    var minutes = Math.floor(secs / 60);
+    var seconds = ((secs % 60) / 1).toFixed(1);
+    return minutes + "." + (seconds < 10 ? '0' : '') + Math.round(seconds);
+  }  
 
 function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
     const body = {
