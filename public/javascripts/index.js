@@ -57,7 +57,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         let blFinishTime = currBlock.finish_time;
         let baselineDesc = enableAi ? $.trim(currBlock.baseline_des) : '';
         let childSceneArr = currBlock.child_scenes;
-        outputHtml = outputHtml + '<li class="li-block-header"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
+        outputHtml = outputHtml + '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
         for(let j=0; j<childSceneArr.length; j++) {
             let currScene = childSceneArr[j];
             let sceneId = currScene.sc_id;
@@ -84,7 +84,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
             + '</div></li>';
         }
         outputHtml = outputHtml
-        + '<li class="li-block-footer"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
+        + '<li class="li-block-footer" style="visibility: hidden; height: 0px;"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
         + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
         + '<button class="btn-update-block-description" data-blockid="'+ blockId +'">Update Description</button>'
         + '<textarea onkeyup="auto_grow(this)" class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
