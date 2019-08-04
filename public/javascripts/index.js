@@ -11,7 +11,7 @@ let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 let enableAi = false;
-let newTimerUpdater = null;
+let shouldAllowVideoBreakpoints = true;
 
 $(document).ready(function() {
     userId = getUrlVars()["u"];
@@ -29,7 +29,14 @@ $(document).ready(function() {
     });
     $('#btnTemp').click(async function() {
         updateMainTables();
-    })
+    });
+    $('#btn-video-breakpoint-toggle').change(function() {
+        if($(this).is(":checked")) {
+            shouldAllowVideoBreakpoints = false;
+        } else {
+            shouldAllowVideoBreakpoints = true;
+        }
+    });
 });
 
 function fetchVideoInfo(youtubeId) {
@@ -68,7 +75,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
             outputHtml = outputHtml
             + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
-            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs</td></tr>'
+            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTime + ' to ' + scFinishTime + 'secs <img src="/images/reset.jpg" style="width:10px; height: 10px;" onclick="resetVideoTo('+scStartTime+')"></td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'">Update Description</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
@@ -219,10 +226,10 @@ function onProgress(currentTime) {
     if(timeAtWhichLastPaused > currentTime) {
         timeAtWhichLastPaused = currentTime;
     }
-    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5) {
+    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && shouldAllowVideoBreakpoints) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
-        if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
+        //if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
         // let blockId = sceneToBlockMap.get(sceneId);
         // let blockElementId = '#bl_cont_' + blockId;
     }
@@ -230,7 +237,6 @@ function onProgress(currentTime) {
     $(previouslyHighlightedContainerId).removeClass('highlight');
     $(sceneElementId).addClass('highlight');
     previouslyHighlightedContainerId = sceneElementId;
-}
 }
 
 function onPlayerStateChange(event) {
@@ -432,4 +438,10 @@ function getUrlVars() {
 function auto_grow(element) {
     element.style.height = "5px";
     element.style.height = (element.scrollHeight)+"px";
+}
+
+function resetVideoTo(time) {
+    let timeInSecs = parseFloat(time);
+    player.seekTo(timeInSecs);
+    player.playVideo();
 }
