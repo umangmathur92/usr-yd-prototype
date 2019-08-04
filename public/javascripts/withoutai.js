@@ -55,7 +55,7 @@ function addSceneListItemToUi() {
     <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> <span>Scene ${$('#ul-scene-list li').length}</span>
     </div>
     <div class="col">
-    <textarea class="txt-scene-description"></textarea>
+    <textarea class="txt-scene-description" onkeyup="auto_grow(this)"></textarea>
     </div>
     <div class="delete-button-container">
     <img class="btn-delete" src="/images/trash.png" style="width: 100%;" onclick="onDeleteButtonClicked(this)" > 
