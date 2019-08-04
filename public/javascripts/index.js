@@ -11,9 +11,10 @@ let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 let enableAi = false;
-let shouldAllowVideoBreakpoints = true;
+let autoPauseAtEachScene = true;
 
 $(document).ready(function() {
+    $('#btn-video-breakpoint-toggle').prop( "checked", true );
     userId = getUrlVars()["u"];
     enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     let href = location.href;
@@ -32,14 +33,11 @@ $(document).ready(function() {
     });
     $('#btn-video-breakpoint-toggle').change(function() {
         if($(this).is(":checked")) {
-            shouldAllowVideoBreakpoints = false;
+            autoPauseAtEachScene = true;
         } else {
-            shouldAllowVideoBreakpoints = true;
+            autoPauseAtEachScene = false;
         }
     });
-    // $("#btn-stop").click(function() {
-    //     stopVideo();
-    // });
     $("#btn-play-pause").click(function() {
         onPlayPauseButtonClick();
     });
@@ -212,7 +210,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    $('#total_time').text(formatTime(player.getDuration()-1));
+    $('#total_time').text(formatTime(player.getDuration()));
     timeupdater = setInterval(updateTime, 100);
 }
 
@@ -242,7 +240,7 @@ function onProgress(currentTime) {
     if(timeAtWhichLastPaused > currentTime) {
         timeAtWhichLastPaused = currentTime;
     }
-    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && shouldAllowVideoBreakpoints) {
+    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
         //if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
@@ -259,11 +257,11 @@ function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
-        $("#btn-play-pause").html('pause');
         console.log('i was called: playing state')
+        $("#btn-play-pause").html('<img src = "/images/pause.png" style="height: 25px; width: 25px;">');
         break;
         case YT.PlayerState.PAUSED:
-        $("#btn-play-pause").html('play_arrow');
+        $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log(timeAtWhichLastPaused);
         console.log('i was called: paused state')
@@ -271,7 +269,7 @@ function onPlayerStateChange(event) {
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
         case YT.PlayerState.CUED:
-        $("#btn-play-pause").html('play_arrow');
+        $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log('i was called: cued state')
         break;
@@ -472,4 +470,19 @@ function formatTime(time) {
     seconds = seconds < 10 ? '0' + seconds : seconds;
     var s = parseFloat(seconds).toFixed(1);
     return minutes + ":" + s;
+}
+
+function onPlayPauseButtonClick() {
+    let playerState = player.getPlayerState();
+    switch (playerState) {
+        case YT.PlayerState.PLAYING:
+        pauseVideo();
+        break;
+        case YT.PlayerState.PAUSED:
+        case YT.PlayerState.UNSTARTED:
+        case YT.PlayerState.ENDED:
+        case YT.PlayerState.CUED:
+        playVideo();
+        break;
+    }
 }
