@@ -52,7 +52,7 @@ function addSceneListItemToUi() {
     let sceneHtml = `<li>
     <div class="scene-container row">
     <div>
-    <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> 
+    <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> <span>Scene ${$('#ul-scene-list li').length}</span>
     </div>
     <div class="col">
     <textarea class="txt-scene-description"></textarea>
@@ -158,8 +158,9 @@ function onYouTubeIframeAPIReady() {
             iv_load_policy: 3,
             modestbranding: 1,
             rel: 0,
-            showinfo: 0,
-            wmode: 'opaque'
+            showinfo: 1,
+            wmode: 'opaque',
+            autohide: 0
         },
         events: {
             'onReady': onPlayerReady,
