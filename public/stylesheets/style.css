@@ -141,3 +141,8 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+.material-icons {
+  font-size: 36px;
+  color: #000000;
+  cursor: pointer;
+}

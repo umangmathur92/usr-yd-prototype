@@ -37,6 +37,12 @@ $(document).ready(function() {
             shouldAllowVideoBreakpoints = true;
         }
     });
+    // $("#btn-stop").click(function() {
+    //     stopVideo();
+    // });
+    $("#btn-play-pause").click(function() {
+        onPlayPauseButtonClick();
+    });
 });
 
 function fetchVideoInfo(youtubeId) {
@@ -128,7 +134,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
 function millisToMinutesAndSeconds(secs) {
     var minutes = Math.floor(secs / 60);
     var seconds = ((secs % 60) / 1).toFixed(1);
-    return minutes + "." + (seconds < 10 ? '0' : '') + Math.round(seconds);
+    return minutes + ":" + seconds;
   }  
 
 function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
@@ -206,6 +212,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
+    $('#total_time').text(formatTime(player.getDuration()-1));
     timeupdater = setInterval(updateTime, 100);
 }
 
@@ -217,6 +224,7 @@ function updateTime() {
     if(videotime !== oldTime) {
         onProgress(videotime);
     }
+    $('#elapsed_time').text(formatTime(player.getCurrentTime()));
 }
 
 // when the time changes, this will be called.
@@ -251,9 +259,11 @@ function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
+        $("#btn-play-pause").html('pause');
         console.log('i was called: playing state')
         break;
         case YT.PlayerState.PAUSED:
+        $("#btn-play-pause").html('play_arrow');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log(timeAtWhichLastPaused);
         console.log('i was called: paused state')
@@ -261,6 +271,7 @@ function onPlayerStateChange(event) {
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
         case YT.PlayerState.CUED:
+        $("#btn-play-pause").html('play_arrow');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log('i was called: cued state')
         break;
@@ -452,4 +463,13 @@ function resetVideoTo(time) {
     let timeInSecs = parseFloat(time);
     player.seekTo(timeInSecs);
     player.playVideo();
+}
+
+function formatTime(time) {
+    console.log(time);
+    var minutes = Math.floor(time / 60);
+    var seconds = time - minutes * 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    var s = parseFloat(seconds).toFixed(1);
+    return minutes + ":" + s;
 }
