@@ -12,9 +12,11 @@ let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 let enableAi = false;
 let autoPauseAtEachScene = true;
+let timeElapsedOnPage = 0;
+let isTimerPaused = false;
 
 $(document).ready(function() {
-    $('#btn-video-breakpoint-toggle').prop( "checked", true );
+    $('#btn-video-breakpoint-toggle').prop("checked", true);
     userId = getUrlVars()["u"];
     enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     let href = location.href;
@@ -41,7 +43,23 @@ $(document).ready(function() {
     $("#btn-play-pause").click(function() {
         onPlayPauseButtonClick();
     });
+    $('#btn-timer').click(function () {
+        isTimerPaused = !isTimerPaused;
+        if(isTimerPaused) {
+            $('#btn-timer').attr('src', '/images/play_white.png');
+        } else {
+            $('#btn-timer').attr('src', '/images/pause_white.png');
+        }
+    });
+    setInterval(incrementSeconds, 1000);
 });
+
+function incrementSeconds() {
+    if(!isTimerPaused) {
+        timeElapsedOnPage += 1;
+        $('#txt-timeElaspsed').html(formatTimeForTimer(timeElapsedOnPage));
+    }
+}
 
 function fetchVideoInfo(youtubeId) {
     let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
@@ -469,6 +487,14 @@ function formatTime(time) {
     var seconds = time - minutes * 60;
     seconds = seconds < 10 ? '0' + seconds : seconds;
     var s = parseFloat(seconds).toFixed(1);
+    return minutes + ":" + s;
+}
+
+function formatTimeForTimer(time) {
+    var minutes = Math.floor(time / 60);
+    var seconds = time - minutes * 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    var s = parseFloat(seconds).toFixed(0);
     return minutes + ":" + s;
 }
 

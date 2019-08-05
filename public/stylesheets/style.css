@@ -146,3 +146,8 @@ input:checked + .slider:before {
   color: #000000;
   cursor: pointer;
 }
+
+.img-header {
+  float: left;
+  height: 30px;
+}
