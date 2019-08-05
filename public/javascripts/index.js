@@ -233,6 +233,7 @@ function onPlayerReady(event) {
 }
 
 function updateTime() {
+    console.log('I was called');
     var oldTime = videotime;
     if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();

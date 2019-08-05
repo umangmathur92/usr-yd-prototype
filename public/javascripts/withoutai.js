@@ -12,6 +12,8 @@ let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 let enableAi = false;
 let newTimerUpdater = null;
+let timeElapsedOnPage = 0;
+let isTimerPaused = false;
 
 $(document).ready(function() {
     userId = getUrlVars()["u"];
@@ -46,7 +48,30 @@ $(document).ready(function() {
         spinnerIncDecOnly: true, 
         useMouseWheel: true
     });
+    $("#btn-play-pause").click(function() {
+        onPlayPauseButtonClick();
+    });
+    $('#btn-timer').click(function () {
+        isTimerPaused = !isTimerPaused;
+        if(isTimerPaused) {
+            $('#btn-timer').attr('src', '/images/play_white.png');
+        } else {
+            $('#btn-timer').attr('src', '/images/pause_white.png');
+        }
+    });
+    setInterval(incrementSeconds, 1000);
+    $('#btnSubmit').click(async function() {
+        alert('Submitted Successfully\nYou will be redirected to the Video List Page');
+        window.history.back();
+    });
 });
+
+function incrementSeconds() {
+    if(!isTimerPaused) {
+        timeElapsedOnPage += 1;
+        $('#txt-timeElaspsed').html(formatTimeForTimer(timeElapsedOnPage));
+    }
+}
 
 function addSceneListItemToUi() {
     let sceneHtml = `<li>
@@ -170,6 +195,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
+    $('#total_time').text(formatTime(player.getDuration()));
     timeupdater = setInterval(updateTime, 100);
 }
 
@@ -179,8 +205,9 @@ function updateTime() {
         videotime = player.getCurrentTime();
     }
     if(videotime !== oldTime) {
-        onProgress(videotime);
+        //onProgress(videotime);
     }
+    $('#elapsed_time').text(formatTime(player.getCurrentTime()));
 }
 
 // when the time changes, this will be called.
@@ -201,32 +228,34 @@ function onProgress(currentTime) {
     if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
-        if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
+        //if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
         // let blockId = sceneToBlockMap.get(sceneId);
         // let blockElementId = '#bl_cont_' + blockId;
     }
-}
-let sceneElementId = '#sc_cont_' + sceneId;
-$(previouslyHighlightedContainerId).removeClass('highlight');
-$(sceneElementId).addClass('highlight');
-previouslyHighlightedContainerId = sceneElementId;
+    let sceneElementId = '#sc_cont_' + sceneId;
+    $(previouslyHighlightedContainerId).removeClass('highlight');
+    $(sceneElementId).addClass('highlight');
+    previouslyHighlightedContainerId = sceneElementId;
 }
 
 function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
-        console.log('i was called: playing state')
+        console.log('i was called: playing state');
+        $("#btn-play-pause").html('<img src = "/images/pause.png" style="height: 25px; width: 25px;">');
         break;
         case YT.PlayerState.PAUSED:
+        $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log(timeAtWhichLastPaused);
-        console.log('i was called: paused state')
+        console.log('i was called: paused state');
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
         case YT.PlayerState.CUED:
         timeAtWhichLastPaused = player.getCurrentTime();
+        $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         console.log('i was called: cued state')
         break;
     }
@@ -279,7 +308,6 @@ async function updateMainTables() {
         }
     });
 }
-
 
 function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     let parentJsonBody = {};
@@ -381,4 +409,36 @@ function getUrlVars() {
 function auto_grow(element) {
     element.style.height = "5px";
     element.style.height = (element.scrollHeight)+"px";
+}
+
+function formatTime(time) {
+    console.log(time);
+    var minutes = Math.floor(time / 60);
+    var seconds = time - minutes * 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    var s = parseFloat(seconds).toFixed(1);
+    return minutes + ":" + s;
+}
+
+function formatTimeForTimer(time) {
+    var minutes = Math.floor(time / 60);
+    var seconds = time - minutes * 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    var s = parseFloat(seconds).toFixed(0);
+    return minutes + ":" + s;
+}
+
+function onPlayPauseButtonClick() {
+    let playerState = player.getPlayerState();
+    switch (playerState) {
+        case YT.PlayerState.PLAYING:
+        pauseVideo();
+        break;
+        case YT.PlayerState.PAUSED:
+        case YT.PlayerState.UNSTARTED:
+        case YT.PlayerState.ENDED:
+        case YT.PlayerState.CUED:
+        playVideo();
+        break;
+    }
 }
