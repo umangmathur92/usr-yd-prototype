@@ -61,10 +61,37 @@ $(document).ready(function() {
     });
     setInterval(incrementSeconds, 1000);
     $('#btnSubmit').click(async function() {
-        alert('Submitted Successfully\nYou will be redirected to the Video List Page');
-        window.history.back();
+        let sceneDataJson = fetchDataFromAllFields();
+        $.post( '/saveNonAiDescription', sceneDataJson, function(response) {
+            if(response.success) {
+                alert('Submitted Successfully\nYou will be redirected to the Video List Page');
+                window.history.back();
+            } else {
+                alert('Update Failed: ' + response.success);
+            }
+        });
     });
 });
+
+function fetchDataFromAllFields() {
+    let listItems = $("#ul-scene-list li");
+    let numItems = listItems.length;
+    let parentJsonObj = {};
+    parentJsonObj.user_id = userId;
+    let sceneArr = [];
+    for(let i=0; i<numItems; i++) {
+        let sceneJsonObj = {};
+        sceneJsonObj.scene_id = 'sc_'+i;
+        sceneJsonObj.scene_num = i;
+        let sceneTimeElementId = '#sc_time_'+i;
+        sceneJsonObj.scene_time = $(sceneTimeElementId).val();
+        let sceneDescElementId = '#sc_desc_'+i;
+        sceneJsonObj.scene_desc = $(sceneDescElementId).val();
+        sceneArr.push(sceneJsonObj);
+    }
+    parentJsonObj.scenes = sceneArr;
+    return parentJsonObj;
+}
 
 function incrementSeconds() {
     if(!isTimerPaused) {
@@ -77,10 +104,10 @@ function addSceneListItemToUi() {
     let sceneHtml = `<li>
     <div class="scene-container row">
     <div class="time-scene-container">
-    <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> <span>Scene&nbsp;</span><span class="scene-num">${$('#ul-scene-list li').length}</span>
+    <input type="text" id="sc_time_${$('#ul-scene-list li').length}" class="sceneTimeEntry start-time-container" size="10" value="00:00:00"> <span>Scene&nbsp;</span><span class="scene-num" id="sc_${$('#ul-scene-list li').length}">${$('#ul-scene-list li').length}</span>
     </div>
-    <div class="col">
-    <textarea class="txt-scene-description" onkeyup="auto_grow(this)"></textarea>
+    <div class="col scene-desc-container">
+    <textarea id="sc_desc_${$('#ul-scene-list li').length}" class="txt-scene-description" onkeyup="auto_grow(this)"></textarea>
     </div>
     <div class="delete-button-container">
     <img class="btn-delete" src="/images/trash.png" style="width: 100%;" onclick="onDeleteButtonClicked(this)" > 
@@ -106,8 +133,9 @@ function onDeleteButtonClicked(element) {
     for (let i=0; i<listItems.length; i++) {
         let currLi = listItems[i];
         $(currLi).find('.scene-container').find('.time-scene-container').find('.scene-num').text(i+'');
-        //let product = $(li).find('.scene-container').find('.time-scene-container').find('.scene-num').text();
-        //console.log(product);
+        $(currLi).find('.scene-container').find('.time-scene-container').find('.scene-num').attr('id', 'sc_'+i);
+        $(currLi).find('.scene-container').find('.time-scene-container').find('.start-time-container').attr('id', 'sc_time_'+i);
+        $(currLi).find('.scene-container').find('.scene-desc-container').find('.txt-scene-description').attr('id', 'sc_desc_'+i);
     }    
 }
 

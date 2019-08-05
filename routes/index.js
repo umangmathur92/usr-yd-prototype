@@ -113,26 +113,37 @@ router.get('/userStudy/users/', function (req, res) {
   console.log({param: req.query.userId});
   let userId = req.query.userId;
   if(userId){
-     //let queryResult = userStudy.getVideoByUserId(userId);
-     let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1`,[userId]);
-      queryResult
-        .then(result => {
-          res.send(result);
-        })
-        .catch((err) => {
-          res.send(err);
-        });
+    //let queryResult = userStudy.getVideoByUserId(userId);
+    let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1`,[userId]);
+    queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
   }else{
-      let queryResult = userStudy.getAllUsers();
-      console.log({ queryResult });
-      queryResult
-        .then(result => {
-          res.send(result);
-        })
-        .catch((err) => {
-          res.send(err);
-        });
+    let queryResult = userStudy.getAllUsers();
+    console.log({ queryResult });
+    queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
   }
 });
+
+router.post('/saveNonAiDescription', function(req, res, next) {
+  let inputJson = req.body;
+  console.log(inputJson);
+  let queryResult = db.query(`INSERT INTO temp_table(temp_column) VALUES($1)`,[inputJson]);
+  queryResult.then(result => {
+    res.send({success: true});  
+  }).catch((err) => {
+    res.send({success: false});
+  });
+})
 
 module.exports = router;
