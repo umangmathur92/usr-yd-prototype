@@ -76,8 +76,8 @@ function incrementSeconds() {
 function addSceneListItemToUi() {
     let sceneHtml = `<li>
     <div class="scene-container row">
-    <div>
-    <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> <span>Scene ${$('#ul-scene-list li').length}</span>
+    <div class="time-scene-container">
+    <input type="text" class="sceneTimeEntry" class="start-time-container" size="10" value="00:00:00"> <span>Scene&nbsp;</span><span class="scene-num">${$('#ul-scene-list li').length}</span>
     </div>
     <div class="col">
     <textarea class="txt-scene-description" onkeyup="auto_grow(this)"></textarea>
@@ -102,6 +102,13 @@ function addSceneListItemToUi() {
 
 function onDeleteButtonClicked(element) {
     $(element).parent().parent().parent().remove();
+    let listItems = $("#ul-scene-list li");
+    for (let i=0; i<listItems.length; i++) {
+        let currLi = listItems[i];
+        $(currLi).find('.scene-container').find('.time-scene-container').find('.scene-num').text(i+'');
+        //let product = $(li).find('.scene-container').find('.time-scene-container').find('.scene-num').text();
+        //console.log(product);
+    }    
 }
 
 function fetchVideoInfo(youtubeId) {
