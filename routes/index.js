@@ -114,7 +114,7 @@ router.get('/userStudy/users/', function (req, res) {
   let userId = req.query.userId;
   if(userId){
     //let queryResult = userStudy.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1`,[userId]);
+    let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1 ORDER by u.id`,[userId]);
     queryResult
     .then(result => {
       res.send(result);
