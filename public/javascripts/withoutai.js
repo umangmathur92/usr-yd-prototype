@@ -104,7 +104,9 @@ function addSceneListItemToUi() {
     let sceneHtml = `<li>
     <div class="scene-container row">
     <div class="time-scene-container">
+    <span style="font-size:9px;">Scene Start Time</span><br>
     <input type="text" id="sc_time_${$('#ul-scene-list li').length}" class="sceneTimeEntry start-time-container" size="10" value="00:00:00"> <span>Scene&nbsp;</span><span class="scene-num" id="sc_${$('#ul-scene-list li').length}">${$('#ul-scene-list li').length}</span>
+    <p style="font-size:10px;">(hh:mm:ss)</p>
     </div>
     <div class="col scene-desc-container">
     <textarea id="sc_desc_${$('#ul-scene-list li').length}" class="txt-scene-description" onkeyup="auto_grow(this)"></textarea>
