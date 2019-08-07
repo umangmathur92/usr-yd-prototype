@@ -78,6 +78,7 @@ function fetchDataFromAllFields() {
     let numItems = listItems.length;
     let parentJsonObj = {};
     parentJsonObj.user_id = userId;
+    parentJsonObj.time_taken = timeElapsedOnPage;
     let sceneArr = [];
     for(let i=0; i<numItems; i++) {
         let sceneJsonObj = {};
