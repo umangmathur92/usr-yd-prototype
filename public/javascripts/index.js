@@ -151,7 +151,7 @@ function millisToMinutesAndSeconds(secs) {
     var minutes = Math.floor(secs / 60);
     var seconds = ((secs % 60) / 1).toFixed(1);
     return minutes + ":" + seconds;
-  }  
+}  
 
 function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
     const body = {
@@ -308,17 +308,8 @@ function stopVideo() {
 }
 async function updateAll(shoudShowAlert) {
     let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
-    await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
-        var currentdate = new Date(); 
-        var datetime = "Last Sync: " + currentdate.getDate() + "/"
-        + (currentdate.getMonth()+1)  + "/" 
-        + currentdate.getFullYear() + " @ "  
-        + currentdate.getHours() + ":"  
-        + currentdate.getMinutes() + ":" 
-        + currentdate.getSeconds();
-        if(response.success) {
-            $('#txtSyncTime').html(datetime);
-        }
+    // await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
+    await $.post('/saveAiDescription', postJson, function (response) {
         if(shoudShowAlert) {
             if(response.success) {
                 alert('Submitted Successfully\nYou will be redirected to the Video List Page');
@@ -370,6 +361,7 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     parentJsonBody.user_id = userId;
     parentJsonBody.scene_arr = sceneArrJson;
     parentJsonBody.block_arr = blockArrJson;
+    parentJsonBody.time_taken = timeElapsedOnPage;
     return parentJsonBody;
 }
 

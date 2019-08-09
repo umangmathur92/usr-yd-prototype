@@ -374,6 +374,7 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     parentJsonBody.user_id = userId;
     parentJsonBody.scene_arr = sceneArrJson;
     parentJsonBody.block_arr = blockArrJson;
+    parentJsonBody.time_taken = timeElapsedOnPage;
     return parentJsonBody;
 }
 

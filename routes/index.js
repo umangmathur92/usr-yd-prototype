@@ -144,6 +144,17 @@ router.post('/saveNonAiDescription', function(req, res, next) {
   }).catch((err) => {
     res.send({success: false});
   });
+});
+
+router.post('/saveAiDescription', function(req, res, next) {
+  let inputJson = req.body;
+  console.log(inputJson);
+  let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+  queryResult.then(result => {
+    res.send({success: true});  
+  }).catch((err) => {
+    res.send({success: false});
+  });
 })
 
 module.exports = router;
