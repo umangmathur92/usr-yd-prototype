@@ -36,13 +36,13 @@ function updateUI(vidArr) {
         Video ${i+1}: ${videoTitle} (${aiSupportStr})</a></b>`;
         generatedHtml += `<b><a href="${surveyLink}" class="list-group-item" target="_blank" >
         <input type="checkbox" style="margin-right: 8px;">
-        <img src="../images/survey.png" class="img-survey">User Survey for Video ${i+1}</a></b>`;  
+        <img src="../images/survey.png" class="img-survey">User Survey for Video ${i+1} (Google Form)</a></b>`;  
         generatedHtml += `<b><a href="#" class="list-group-item" >
         <input type="checkbox" style="margin-right: 8px;">
-        <img src="../images/survey.png" class="img-survey">NASA TLX Survey for Video ${i+1}</a></b><br>`;  
+        <img src="../images/survey.png" class="img-survey">NASA TLX Survey for Video ${i+1} (Not clickable - You'll be given a physical form to fill out)</a></b><br>`;  
     }
     generatedHtml += `<b><a href="https://forms.gle/aEpEpjFyjrBP64sW9" class="list-group-item" target="_blank">
     <input type="checkbox" style="margin-right: 8px;">
-    <img src="../images/survey.png" class="img-survey">General Survey</a></b>`;  
+    <img src="../images/survey.png" class="img-survey">General Survey (Google Form)</a></b>`;  
     $( ".list-group").append(generatedHtml);
 }
