@@ -44,9 +44,10 @@ a {
   position:relative;
   border:none;
   width:75%;
-  min-height: 50px;
+  min-height: 25px;
   resize: none;
   outline: none; /*add this to stop highlight on focus*/
+  overflow: hidden;
 }
 
 tr td:first-child{
@@ -60,9 +61,9 @@ tr td:first-child{
   background-color: darkgray;
 }
 
-.li-block-header {
+/* .li-block-header {
   border-top: 10px solid darkgray;
-}
+} */
 
 .block-footer-container {
   text-align: left;
@@ -75,4 +76,78 @@ tr td:first-child{
 .highlight {
   background-color: cyan;
   font-weight: bold;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 17px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 4px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.material-icons {
+  font-size: 36px;
+  color: #000000;
+  cursor: pointer;
+}
+
+.img-header {
+  float: left;
+  height: 30px;
 }

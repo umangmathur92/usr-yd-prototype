@@ -1,0 +1,9 @@
+a {
+    color: black;
+    text-align: center;
+    font-weight: bold;
+}
+
+a:hover { 
+    background-color: lightgray;
+}

@@ -10,6 +10,48 @@ const KeyframeObject = require('../model/keyframeobject');
 const KeyframeTag = require('../model/keyframetag');
 const Environment = require('../model/environment');
 const ApiRepository = require('../backend/apirepository');
+const PredefVid1 = require('./predef/_1DDhUnyvwY');
+const PredefVid2 = require('./predef/EQoJS8Pkmj0');
+const PredefVid3 = require('./predef/cNj3aOTYdQQ');
+const PredefVid4 = require('./predef/nqXz8hhAYGo');
+const pgp = require('pg-promise')({
+    capSQL: true // capitalize all generated SQL
+});
+
+async function updateBlockAndScene(inputJson) {
+    try {
+        let sceneJsonArr = inputJson.scene_arr;
+        let blockJsonArr = inputJson.block_arr;
+        const sceneModColumnSet = new pgp.helpers.ColumnSet(['scene_id', 'original_description', 'original_ocr'], {table: 'scene'});
+        const sceneUpdatequery = pgp.helpers.update(sceneJsonArr, sceneModColumnSet) + ` WHERE t.scene_id = v.scene_id`;
+        const blockModColumnSet = new pgp.helpers.ColumnSet(['block_id', 'original_description'], {table: 'block'});
+        const blockUpdateQuery = pgp.helpers.update(blockJsonArr, blockModColumnSet) + ` WHERE t.block_id = v.block_id`;
+        await db.any(sceneUpdatequery);
+        await db.any(blockUpdateQuery);
+        return true;
+    } catch(e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function updateMultipleScenesAndBlocksForUser(inputJson) {
+    try {
+        let userId = inputJson.user_id;
+        let sceneJsonArr = inputJson.scene_arr;
+        let blockJsonArr = inputJson.block_arr;
+        const sceneModColumnSet = new pgp.helpers.ColumnSet(['scene_id', 'modified_description', 'modified_ocr'], {table: 'scene_modification'});
+        const sceneUpdatequery = pgp.helpers.update(sceneJsonArr, sceneModColumnSet) + ` WHERE t.scene_id = v.scene_id AND t.user_id = '${userId}'`;
+        const blockModColumnSet = new pgp.helpers.ColumnSet(['block_id', 'modified_description'], {table: 'block_modification'});
+        const blockUpdateQuery = pgp.helpers.update(blockJsonArr, blockModColumnSet) + ` WHERE t.block_id = v.block_id AND t.user_id = '${userId}'`;
+        await db.any(sceneUpdatequery);
+        await db.any(blockUpdateQuery);
+        return true;
+    } catch(e) {
+        console.log(e);
+        throw e;
+    }
+}
 
 async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
@@ -21,6 +63,18 @@ async function fetchVideoDataFromDb(videoId) {
         let queryResult = await db.one("SELECT jsonb_pretty(jsonb_agg(js_object)) custom_nested_json_data FROM (select jsonb_build_object( 'block_id', block_id, 'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 'baseline_des', original_description, 'child_scenes', jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num', s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description, 'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s GROUP BY start_time, end_time, block_id, original_description, block_num, video_id ORDER BY block_num ASC ) s", [videoId]);
         vidQueryResult.info = JSON.parse(queryResult.custom_nested_json_data);
         return vidQueryResult;
+    } catch(e) {
+        throw e;
+    }
+}
+
+async function updateBlockDescription(inputJson) {
+    try {
+        let uuid = inputJson.userId;
+        let block_id = inputJson.blockId;
+        let modifiedDescription = inputJson.modifiedDescription;
+        let updateQueryResponse = await db.one("UPDATE block_modification SET modified_description = $1 WHERE block_id = $2 AND user_id = $3 RETURNING id", [modifiedDescription, block_id, uuid], a => + a.id);
+        return true;
     } catch(e) {
         throw e;
     }
@@ -52,9 +106,9 @@ async function updateSceneOcr(inputJson) {
 
 async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
     try {
-        let truncateModSceTableQuery = db.any('TRUNCATE TABLE scene_modification restart IDENTITY CASCADE');
-        let param = videoId + '%';
-        let sceneArr = await db.any("SELECT * FROM scene", [param]);
+        //let truncateModSceTableQuery = db.any('TRUNCATE TABLE scene_modification restart IDENTITY CASCADE');
+        let sceneVidParam = videoId + '%';
+        let sceneArr = await db.any("SELECT * FROM scene", [sceneVidParam]);
         for(let i=0; i<sceneArr.length; i++) {
             let scene = sceneArr[i];
             let scene_id = scene.scene_id;
@@ -66,6 +120,17 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
             let modified_ocr = scene.original_ocr;
             await db.one('INSERT INTO scene_modification(scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr) VALUES ( $1, $2, $3, $4, $5, $6, $7 ) RETURNING id', [scene_modification_id, scene_id, user_id, modified_start_time, modified_end_time, modified_description, modified_ocr]);
         }
+        // let truncateModBlockTableQuery = db.any('TRUNCATE TABLE block_modification restart IDENTITY CASCADE');
+        let blockVidParam = videoId + '%';
+        let blockArr = await db.any("SELECT * FROM block", [blockVidParam]);
+        for(let i=0; i<blockArr.length; i++) {
+            let block = blockArr[i];
+            let block_id = block.block_id;
+            let user_id = userId;
+            let block_modification_id = block_id + '_' + user_id;
+            let modified_description = block.original_description;
+            await db.one('INSERT INTO block_modification(block_modification_id, block_id, user_id, modified_description) VALUES ( $1, $2, $3, $4 ) RETURNING id', [block_modification_id, block_id, user_id, modified_description]);
+        }
         return true;
     } catch(e) {
         throw e;
@@ -75,20 +140,32 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     try {
-        //Parse and insert Video
+        // //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
         await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
         // let blockJsonArr = video.insights_json.blocks;
+        let blockJsonArr = [];
+        if(video.youtube_id == '_1DDhUnyvwY') {
+            blockJsonArr = PredefVid1.predefBlockArrJson;
+        } else if (video.youtube_id == 'EQoJS8Pkmj0') {
+            blockJsonArr = PredefVid2.predefBlockArrJson;
+        } else if(video.youtube_id == 'cNj3aOTYdQQ') {
+            blockJsonArr = PredefVid3.predefBlockArrJson;
+        } else if(video.youtube_id == 'nqXz8hhAYGo') {
+            blockJsonArr = PredefVid4.predefBlockArrJson;
+        }
+        let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        await Block.insertIntoBlockTable(blockArr);
         // let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         // blockArr = modifyLastElementsOfBlockArray(blockArr);
         // await Block.insertIntoBlockTable(blockArr);
         //Parse Scenes
         let sceneJsonArr = video.insights_json.scenes;
         let sceneArr = Scene.parseSceneArr(sceneJsonArr);
-        //Genrate blocks from scenes using logic - TODO: change this
-        let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
-        await Block.insertIntoBlockTable(blockArr);
+        //Generate blocks from scenes using logic - TODO: change this
+        //let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
+        //await Block.insertIntoBlockTable(blockArr);
         //insert Scenes
         sceneArr = setBlockIdForAllScenes(sceneArr, blockArr);
         await Scene.insertIntoSceneTable(sceneArr);
@@ -114,7 +191,30 @@ async function addVideoDataToDb(inputJson) {
         let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
         await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
         //Aggregate OCR data from the Shot table and insert it into the scene table
-        await Scene.aggregateShotOcrIntoSceneOcr(video);
+        for(let i=0; i<sceneArr.length; i++) {
+            try {
+                let currScene = sceneArr[i];
+                let currSceneId = currScene.scene_id;
+                let shotsOcrJsonArr = await db.any('SELECT original_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
+                let ocrArrForScene = [];
+                for(let j=0; j<shotsOcrJsonArr.length; j++) {
+                    ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
+                }
+                ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
+                let finalSceneOcr = '';
+                for (let j=0; j<ocrArrForScene.length; j++) {
+                    if(ocrArrForScene[j] != '' || ocrArrForScene[j] != undefined || ocrArrForScene[j] != ' ' || ocrArrForScene[j] != '\n') {
+                        finalSceneOcr = finalSceneOcr + '\n' + ocrArrForScene[j];
+                    }
+                }
+                finalSceneOcr = finalSceneOcr.trim();
+                await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
+            }catch(e) {
+                console.log(e);
+            }
+        }
+        //await Scene.aggregateShotOcrIntoSceneOcr(video);
+        
         //Fetch captions for all keyframes and update the keyframes table
         let imgAnalysisResult = await fetchImageAnalysisForAllKeyFrames(allKeyframesArr);
         allKeyframesArr = imgAnalysisResult.allKeyframesArr;
@@ -134,12 +234,21 @@ async function addVideoDataToDb(inputJson) {
         //Fetch environment for all keyframes and update the keyframes table
         let kfEnvironmentArr = await fetchEnvironmentForAllKeyFrames(allKeyframesArr);
         await Environment.insertIntoKeyframeEnvironmentTable(kfEnvironmentArr);
+        for(let i=0; i<blockArr.length; i++) {
+            let currBlock = blockArr[i];
+            let currBlockId = currBlock.block_id;
+            let envDataForBlock = await db.any('SELECT distinct ke.environment_id, (COUNT(ke.environment_id)*AVG(ke.probability)) as score, env.category_name FROM environment env, keyframe_environment ke, keyframe k, shot sh, scene sc, block b, video v WHERE ke.environment_id = env.environment_id AND ke.keyframe_id = k.keyframe_id AND k.shot_id=sh.shot_id AND sh.scene_id = sc.scene_id AND sc.block_id = b.block_id AND b.block_id = $1 GROUP BY ke.environment_id, env.category_name ORDER BY score DESC', [currBlockId]);
+            currBlock.setOriginalDescription('The environment is either ' + envDataForBlock[0].category_name + ' or ' + envDataForBlock[1].category_name);
+            console.log(currBlock);
+        }
+        Block.updateBlockTableDescription(blockArr);
         return true;
     } catch(e) {
         console.log(e);
         return false;
     }
 }
+
 
 //Temporary block generation logic - TODO: completely change this
 function generateBlocksFromScenes(sceneArr, youtubeId) {
@@ -282,6 +391,7 @@ function concatOcrWithinSameShot(ocrArr) {
         }
         customOcrObj.text = customOcrObj.text + currOcrObj.text + ' ';
     }
+    customOcrObj.text = customOcrObj.text.trim();
     outputArr.push(customOcrObj);
     return outputArr;
 }
@@ -407,7 +517,10 @@ module.exports = {
     clearDb: clearDb,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,
+    updateBlockDescription: updateBlockDescription,
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,
-    replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable
+    replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
+    updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser,
+    updateBlockAndScene: updateBlockAndScene
 }

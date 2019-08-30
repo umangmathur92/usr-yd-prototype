@@ -1,0 +1,37 @@
+.vid-thumbnail {
+    height: 50px;
+    width: 75px;
+    margin-right: 16px;
+}
+
+a {
+    color: black;
+}
+
+.img-survey {
+    height: 30px;
+    width: 30px;
+    margin-right: 16px;
+}
+
+.list-group-item {
+    background-color: white;
+}
+
+.img-header {
+    float: left;
+    height: 30px;
+}
+
+.img-footer {
+    height: 20px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+a:hover { 
+    background-color: lightgray;
+}
