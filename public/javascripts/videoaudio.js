@@ -15,6 +15,7 @@ let autoPauseAtEachScene = false;
 let timeElapsedOnPage = 0;
 let isTimerPaused = false;
 let audioArr = [];
+let currAudio;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", false);
@@ -108,12 +109,12 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
             let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
             outputHtml = outputHtml
-            + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
-            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
-            + '<tr><td>Description</td><td><div class="scene-description-container">'
+            + '<li style="height: 30px;"><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
+            + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button style="visibility: hidden; height: 0px;" type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
+            + '<tr style="visibility: hidden; height: 0px;"><td>Description</td><td><div class="scene-description-container">'
             + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Description</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
-            + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
+            + '<tr style="visibility: hidden; height: 0px;"><td>Text On-Screen</td><td><div class="scene-ocr-container">'
             + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
             + '<div style="text-align: center; margin-bottom: -20px; margin-top: 10px;">';
@@ -270,7 +271,11 @@ function onProgress(currentTime) {
         // let src = `../audio/${youtubeId}/${descType}/${userId}/${sceneNum}.mp3` + '?random='+randomNum;
         // let audio = new Audio(src);
         // audio.play();
-        audioArr[sceneNum].play();
+        currAudio = udioArr[sceneNum].play();
+        const playPromise = currAudio.play();
+        if (playPromise !== null){
+            playPromise.catch(() => { currAudio.play(); })
+        }
         //$('body').append('<audio controls id="yd-audio"><source src="'+src+'" type="audio/mpeg" id="#mp3-source"></audio>');
     }
     prevSceneNum = sceneNum;
