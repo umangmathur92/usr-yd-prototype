@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
 const userStudy = require('../model/userStudy');
-const textToSpeech = require('../backend/textToSpeech.js');
+const textToSpeech = require('../backend/texttospeech.js');
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
