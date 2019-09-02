@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
 const userStudy = require('../model/userStudy');
+const textToSpeech = require('../backend/textToSpeech.js');
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
@@ -155,6 +156,26 @@ router.post('/saveAiDescription', function(req, res, next) {
   }).catch((err) => {
     res.send({success: false});
   });
-})
+});
+
+router.post('/texttospeech', function(req, res, next) {
+  let inputJson = req.body;
+  let inputText = inputJson.inputText;
+  let task = textToSpeech.generateMp3ForText(inputText);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateMp3FromDescriptions', function(req, res, next) {
+  let task = textToSpeech.generateMp3ForAllDescriptionsInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/playVideoAudio/:youtubeId', function(req, res, next) {
+  res.render('videoaudio');
+});
 
 module.exports = router;
