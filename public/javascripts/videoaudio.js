@@ -262,27 +262,32 @@ function onProgress(currentTime) {
     let sceneNum = currScene.sc_num;
     let sceneEndTime = currScene.finish_time;
     if(prevSceneNum != sceneNum) {
-        //$('#yd-audio').detach();
-        let listPosition = sceneIdToListPositionMap.get(sceneId);
-        scrollToPosition(listPosition);
-        // let randomNum = Math.random();
-        // //enableAi
-        // let descType = enableAi ? 'ai' : 'non_ai';
-        // let src = `../audio/${youtubeId}/${descType}/${userId}/${sceneNum}.mp3` + '?random='+randomNum;
-        // let audio = new Audio(src);
-        // audio.play();
-        currAudio = audioArr[sceneNum];
-        const playPromise = currAudio.play();
-        if (playPromise !== null){
-            playPromise.catch(() => { currAudio.play(); })
+        if((currAudio !== null) && (sceneNum !==0) && (isPlaying(currAudio))) {
+            pauseVideo();
+            prevSceneNum = sceneNum-1;
+        } else {
+            let listPosition = sceneIdToListPositionMap.get(sceneId);
+            scrollToPosition(listPosition);
+
+            currAudio = audioArr[sceneNum];
+            currAudio.play();
+            currAudio.onended = function() {
+                console.log('player state is: ' + player.getPlayerState());
+                if(player.getPlayerState() == YT.PlayerState.PAUSED) {
+                    console.log('I was called');
+                    playVideo();
+                } else {
+                    prevSceneNum = sceneNum;
+                }
+            };
+            prevSceneNum = sceneNum;
         }
-        //$('body').append('<audio controls id="yd-audio"><source src="'+src+'" type="audio/mpeg" id="#mp3-source"></audio>');
     }
-    prevSceneNum = sceneNum;
+    //prevSceneNum = sceneNum;
     if(timeAtWhichLastPaused > currentTime) {
         timeAtWhichLastPaused = currentTime;
     }
-    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
+    if((currAudio !== null) && (sceneNum !==0) && (isPlaying(currAudio)) && sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
         //if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
