@@ -220,7 +220,7 @@ function onYouTubeIframeAPIReady() {
         width: '480',
         videoId: youtubeId,
         playerVars: {
-            autoplay: 1,
+            autoplay: 0,
             enablejsapi: 1,
             cc_load_policy: 1,
             controls: 1,
