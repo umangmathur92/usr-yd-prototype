@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
 const userStudy = require('../model/userStudy');
+const userStudy2 = require('../model/userStudy2');
+
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
@@ -103,6 +105,12 @@ router.post('/updateBlockAndScene', function(req, res, next) {
 router.get('/userStudy', function (req, res) {
   res.render('homeUserStudy', { title: 'User Study' });
 });
+
+//poorva
+router.get('/userStudy2', function (req, res) {
+  res.render('homeUserStudy2', { title: 'User Study 2' });
+});
+
 //list of video for a user
 router.get('/userStudy/video', function (req, res) {
   res.render('videoUserStudy', { title: 'User Study Video' });
@@ -133,6 +141,7 @@ router.get('/userStudy/helper/video', function (req, res) {
 
 
 //list of users
+//list of users study 1
 router.get('/userStudy/users/', function (req, res) {
   console.log({param: req.query.userId});
   let userId = req.query.userId;
@@ -157,6 +166,23 @@ router.get('/userStudy/users/', function (req, res) {
       res.send(err);
     });
   }
+});
+
+
+//list of users study 2
+router.get('/userStudy2/users/', function (req, res) {
+ // let userId = req.query.userId;
+ // if(userId){
+    //let queryResult = userStudy2.getVideoByUserId(userId);
+    let queryResult = db.query(`SELECT * from us_user_blind`);
+    queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+ // }
 });
 
 router.post('/saveNonAiDescription', function(req, res, next) {
