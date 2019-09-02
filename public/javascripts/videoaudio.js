@@ -271,7 +271,7 @@ function onProgress(currentTime) {
         // let src = `../audio/${youtubeId}/${descType}/${userId}/${sceneNum}.mp3` + '?random='+randomNum;
         // let audio = new Audio(src);
         // audio.play();
-        currAudio = audioArr[sceneNum].play();
+        currAudio = audioArr[sceneNum];
         const playPromise = currAudio.play();
         if (playPromise !== null){
             playPromise.catch(() => { currAudio.play(); })
