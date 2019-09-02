@@ -108,6 +108,30 @@ router.get('/userStudy/video', function (req, res) {
   res.render('videoUserStudy', { title: 'User Study Video' });
 });
 
+//list of video for visually impaired users
+router.get('/userStudy/videoHelper', function (req, res) {
+  res.render('videoHelper', { title: 'User Study Video Helper' });
+});
+
+
+//list of visually impaired users
+router.get('/userStudy/helper/video', function (req, res) {
+  console.log({ param: req.query.userId });
+  let userId = req.query.userId;
+  if (userId) {
+    let queryResult = userStudy.getHelperVideo();
+    queryResult
+      .then(result => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.send(err);
+      });
+  }
+});
+
+
+
 //list of users
 router.get('/userStudy/users/', function (req, res) {
   console.log({param: req.query.userId});
