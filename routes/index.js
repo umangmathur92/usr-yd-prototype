@@ -3,6 +3,8 @@ var router = express.Router();
 const video = require('../backend/video');
 const userStudy = require('../model/userStudy');
 const textToSpeech = require('../backend/texttospeech.js');
+const userStudy2 = require('../model/userStudy2');
+
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
@@ -104,12 +106,43 @@ router.post('/updateBlockAndScene', function(req, res, next) {
 router.get('/userStudy', function (req, res) {
   res.render('homeUserStudy', { title: 'User Study' });
 });
+
+//poorva
+router.get('/userStudy2', function (req, res) {
+  res.render('homeUserStudy2', { title: 'User Study 2' });
+});
+
 //list of video for a user
 router.get('/userStudy/video', function (req, res) {
   res.render('videoUserStudy', { title: 'User Study Video' });
 });
 
+//list of video for visually impaired users
+router.get('/userStudy/videoHelper', function (req, res) {
+  res.render('videoHelper', { title: 'User Study Video Helper' });
+});
+
+
+//list of visually impaired users
+router.get('/userStudy/helper/video', function (req, res) {
+  console.log({ param: req.query.userId });
+  let userId = req.query.userId;
+  if (userId) {
+    let queryResult = userStudy.getHelperVideo();
+    queryResult
+      .then(result => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.send(err);
+      });
+  }
+});
+
+
+
 //list of users
+//list of users study 1
 router.get('/userStudy/users/', function (req, res) {
   console.log({param: req.query.userId});
   let userId = req.query.userId;
@@ -134,6 +167,23 @@ router.get('/userStudy/users/', function (req, res) {
       res.send(err);
     });
   }
+});
+
+
+//list of users study 2
+router.get('/userStudy2/users/', function (req, res) {
+ // let userId = req.query.userId;
+ // if(userId){
+    //let queryResult = userStudy2.getVideoByUserId(userId);
+    let queryResult = db.query(`SELECT * from us_user_blind`);
+    queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+ // }
 });
 
 router.post('/saveNonAiDescription', function(req, res, next) {
