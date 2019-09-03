@@ -64,8 +64,20 @@ function fetchVideo() {
             let aiParam = vid.ai_support == 'true' ? 'yes' : 'no';
             videos += `<b><a href="/playvideo/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg" alt=${videoTitle} style="width:100px;height:100px;">
-                Video ${i+1}: ${videoTitle} (${aiSupportStr})</a></b>`;
+            
+                Video ${i+1}: ${videoTitle} (${aiSupportStr})</a></b>  
+                <form>
+                   <b><font color="1a4b6e"> Please Rate the above video from 1 to 5:</b></font> <input type="text"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating"><br>
+                   <br>
+                   <b><font color="1a4b6e"> Any other comments:</b></font> <input type="text" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                   <br>
+                   <input type="submit" style= "  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="Submit">
+                   
+                </form><br>`;
+
+
         }
+
         $( ".list-group" ).append( videos);
     });
 }
