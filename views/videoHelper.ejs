@@ -67,11 +67,10 @@ function fetchVideo() {
             
                 Video ${i+1}: ${videoTitle} (${aiSupportStr})</a></b>  
                 <form>
-                   <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating"><br>
+                   <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
                    <br>
                    <b><font color="1a4b6e"> Any other comments:</b></font> <input type="text" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                    <br>
-                   <input type="submit" style= "  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="Submit">
                    
                 </form><br>`;
 
@@ -81,7 +80,10 @@ function fetchVideo() {
         $( ".list-group" ).append( videos);
     });
 }
+
 </script>
+<input type="submit" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="I completed"></input>
+
 
 </body>
 </html>
