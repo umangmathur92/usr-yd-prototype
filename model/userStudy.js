@@ -21,11 +21,12 @@ let userStudy = {
     addVideo : function(data, callback){
         return db.query(`INSERT into us_user_video (user_id,youtube_id, ai_support) VALUES ($1, $2, $3)`, [data.id, data.youtube_id, data.ai_support], callback);
     },
-    getHelperVideo: function (callback) {
-        return db.query(`SELECT u.volunteer_id, u.video_id, v.title, u.ai_support 
+    getHelperVideo: function (id, callback) {
+        return db.query(`SELECT u.vi_user_id, u.id, u.volunteer_id, u.video_id, v.title, u.ai_support 
                             FROM us_helper_video u 
                             JOIN video v 
                             ON u.video_id = v.youtube_id 
+                            WHERE u.vi_user_id = '${id}'
                             order by u.id`, callback);
     },
 };

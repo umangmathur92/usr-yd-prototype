@@ -128,7 +128,7 @@ router.get('/userStudy/helper/video', function (req, res) {
   console.log({ param: req.query.userId });
   let userId = req.query.userId;
   if (userId) {
-    let queryResult = userStudy.getHelperVideo();
+    let queryResult = userStudy.getHelperVideo(userId);
     queryResult
       .then(result => {
         res.send(result);
