@@ -207,16 +207,6 @@ router.post('/saveAiDescription', function(req, res, next) {
   });
 
 
-router.post('/submitform', function(req, res, next) {
-  console.log(req.body.rating);
-  console.log(req.body.comment);
-let queryResult = db.query(`INSERT INTO rating&comment(rating,comment) VALUES ('"+req.body.rating+"','"+req.body.comment+"');`)
-queryResult.then(result => {
-  res.send({success: true});  
-}).catch((err) => {
-  res.send({success: false});
-});
-})
 
 res.render('index', { title: 'Express' });
 });
