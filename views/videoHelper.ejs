@@ -68,6 +68,7 @@ function fetchVideo() {
             let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
 
             let aiParam = vid.ai_support ? 'yes' : 'no';
+            console.log(aiParam)
             let formid = ""+videoId + volunteerId + aiParam
 
 
@@ -109,9 +110,7 @@ function fetchVideo() {
             $.ajax({
                 type: "POST",
 
-
-                url:"#",
-
+                url:"/updatefeedback",
 
                 data: {
                     
@@ -139,31 +138,7 @@ function fetchVideo() {
             })
 
 
-/*
-            $.ajax({
-                type: "POST",
-                url:"/test",
-                data: {
-                    video_id:videoId,
-                    volunteer_id:volunteerId,
-                    ai_support:aiParam,
-                    rating: values["rating"], 
-                    comment: values["comment"]
-                },
-                beforeSend: function() {
-                    console.log("Before send.")
-                    
-                },
-                success: function(){
-                    console.log("success connected");
-                },
-                fail: function() {
-                    console.log("Failed.")
-                },
-                datatype: "json"
 
-            })
-*/
             return false;
         })
     });
