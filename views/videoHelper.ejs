@@ -3,7 +3,8 @@
     <title>User Study</title>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
+   <script src="https://code.jquery.com/jquery-3.4.1.js"   integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="   crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>       
 </head>
@@ -51,6 +52,8 @@ function getDateTime(){
 }
 
 
+
+
 function fetchVideo() {
 
     $.get(targetUrl, function (rows) {
@@ -60,15 +63,21 @@ function fetchVideo() {
             let videoId = vid.video_id;
             let videoTitle = vid.title;
             let volunteerId = vid.volunteer_id
+            let vi_userId= vid.vi_user_id
           
             let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
+
             let aiParam = vid.ai_support ? 'yes' : 'no';
+            let formid = ""+videoId + volunteerId + aiParam
+
+
+
             videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
 
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg" alt=${videoTitle} style="width:100px;height:100px;">
                 Video ${i+1}: ${videoTitle}</a></b>
                   
-                <form action="/submitform/" method="POST">
+                <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
                    <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1" id="rating"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
                    <br>
                    <b><font color="1a4b6e"> Any other comments:</b></font> <input type="text" id="comment" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
@@ -76,7 +85,87 @@ function fetchVideo() {
                    <input type="submit" style= "width:5%;  background-color: #1a4b6e; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="OK">
                   </form><br>`;            
         }
-        $( ".list-group" ).append( videos);
+        $( ".list-group " ).append( videos);
+        $(".video-form").submit(function(event) {
+            console.log("Form submitted.")
+
+            let videoId = $(this).data("videoid")
+            let volunteerId = $(this).data("volunteer_id")
+            let aiParam = $(this).data("aiParam")
+            let vi_userId = $(this).data("viuserid")
+
+
+
+
+            
+
+
+            var values ={}
+            $.each($(this).serializeArray(), function(i, field) {
+                values[field.name] = field.value;
+            })
+
+
+            $.ajax({
+                type: "POST",
+
+
+                url:"#",
+
+
+                data: {
+                    
+                    vi_user_id: vi_userId,
+                    video_id: videoId,
+                    volunteer_id: volunteerId,
+                    ai_support: aiParam,
+                    
+                    rating: values["rating"], 
+                    comment: values["comment"]
+                },
+
+
+                beforeSend: function() {
+                    console.log("Before send.")
+                    
+                },
+                success: function(){
+                    console.log("success connected");
+                },
+                fail: function() {
+                    console.log("Failed.")
+                },
+                dataType: "json"
+            })
+
+
+/*
+            $.ajax({
+                type: "POST",
+                url:"/test",
+                data: {
+                    video_id:videoId,
+                    volunteer_id:volunteerId,
+                    ai_support:aiParam,
+                    rating: values["rating"], 
+                    comment: values["comment"]
+                },
+                beforeSend: function() {
+                    console.log("Before send.")
+                    
+                },
+                success: function(){
+                    console.log("success connected");
+                },
+                fail: function() {
+                    console.log("Failed.")
+                },
+                datatype: "json"
+
+            })
+*/
+            return false;
+        })
     });
 }
 </script>

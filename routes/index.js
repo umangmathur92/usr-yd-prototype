@@ -197,6 +197,26 @@ router.post('/saveNonAiDescription', function(req, res, next) {
   });
 });
 
+router.post('/userStudy/videoHelper?userId=:uuid&pid=:id', function(req, res, next) {
+  let rating = req.body.rating;
+  let comment = req.body.comment;
+  let vi_user_id = req.body.vi_user_id;
+  let video_id = req.body.video_id;
+  let volunteer_id = req.body.volunteer_id;
+  let ai_support = req.body.ai_support;
+
+  console.log("Rating: " + rating + "\ncomment: " + comment)
+
+  let queryResult = db.query(`INSERT INTO us_helper_video(rating,comment) values($1, $2) WHERE video_id=${video_id} AND volunteer_id=${volunteer_id} AND ai_support=${ai_support} AND vi_user_id=${vi_user_id},`,[rating],[comment]);
+  queryResult.then(result => {
+    res.send({success: true});  
+  }).catch((err) => {
+    res.send({success: false});
+  });
+});
+
+
+
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;
   console.log(inputJson);
