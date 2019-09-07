@@ -92,15 +92,14 @@ function fetchVideo() {
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
                    <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1" id="rating"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
                    <br>
-                   <b><font color="1a4b6e"> Any other comments:</b></font> <input type="text" id="comment" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                   <b><font color="1a4b6e"> Comment:</b></font> <input type="text" id="comment" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                    <br>
-                   </form>`;   
+                </form>
+                <p><font size = '4'>Rating: ${vi_rating}</font></p>
+                <p><font size = '4'>Comment: ${vi_comment}</font></p>`;   
                            
         }
         $( ".list-group " ).append( videos);
-
-
-
         $(".video-form").bind('focusout',function() {
             //$( "#rating", "#comment" ).blur();
            // $( "#input" ).blur();
