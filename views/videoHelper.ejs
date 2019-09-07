@@ -7,7 +7,6 @@
    <script src="https://code.jquery.com/jquery-3.4.1.js"   integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="   crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> 
-    <script src="../javascripts /auto_submit.js"></script>
       
 </head>
 <body>
@@ -70,8 +69,12 @@ function fetchVideo() {
             let vid = rows[i];
             let videoId = vid.video_id;
             let videoTitle = vid.title;
-            let volunteerId = vid.volunteer_id
-            let vi_userId= vid.vi_user_id
+            let volunteerId = vid.volunteer_id;
+            let vi_userId= vid.vi_user_id;
+            let vi_comment= vid.comment;
+            let vi_rating=vid.rating;
+
+            
           
             let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
 
@@ -91,23 +94,25 @@ function fetchVideo() {
                    <br>
                    <b><font color="1a4b6e"> Any other comments:</b></font> <input type="text" id="comment" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                    <br>
-                   <input type="submit" style= "width:5%;  background-color: #1a4b6e; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="OK">
-                  </form><br>`;            
+                   </form>`;   
+                           
         }
         $( ".list-group " ).append( videos);
-        $(".video-form").submit(function(event) {
+
+
+
+        $(".video-form").bind('focusout',function() {
+            //$( "#rating", "#comment" ).blur();
+           // $( "#input" ).blur();
+           $(this).toggleClass("#rating").toggleClass("#comment");
+
+
             console.log("Form submitted.")
 
             let videoId = $(this).data("videoid")
             let volunteerId = $(this).data("volunteer_id")
             let aiParam = $(this).data("aiParam")
             let vi_userId = $(this).data("viuserid")
-
-
-
-
-            
-
 
             var values ={}
             $.each($(this).serializeArray(), function(i, field) {
@@ -145,12 +150,15 @@ function fetchVideo() {
                 dataType: "json"
             })
 
-
-
             return false;
         })
     });
+
+    
 }
+
+
+
 </script>
 <input type="submit" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="I completed"></input>
 
