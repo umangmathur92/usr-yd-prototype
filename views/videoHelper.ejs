@@ -133,11 +133,7 @@ function fetchVideo() {
                 Video ${i+1}: ${videoTitle}</a></b>
                   
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
-                   if (parseInt(this.value) > max) {
-            this.value = max; 
-        }
-                   
-                   <label   class="edit-rating"   id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> <input aria-describedby="label_rating_${i+1}" 
+                   <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> <input aria-describedby="label_rating_${i+1}" 
                    type="number" min="0" max="5" step="1" 
                    id="rating_${i+1}" value=${vi_rating} 
                    style="width: 5%; border: 1px solid #ccc; padding: 10px
