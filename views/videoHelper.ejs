@@ -19,9 +19,7 @@
     <div>
         <h1>List of Video</h1>
         <p id="date"> </p>
-        <h5> Thank you for your time for participating in this user study. Here are 22 videos we are asking you to watch and rate them in range of 1 through 5 (5 as the best).
-            Each video is 2 minute long. Among these 22 videos, there are only 2 different videos described by 11 different describers. Even though they are repetitive, please 
-            listen to each description and rate the description quality and leave comments for each video. At the end, there is a button confirming that I completed all videos. </h5> 
+        <h5 id="intro">   </h5> 
         <br><p><h5>Please select the video</h5></p>
         <br>
           
@@ -35,10 +33,30 @@
      <!--iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfwGYCxzlpzy05nsvR74vqMRqUt6DPvIDI2Sy4hsQDktRSwug/viewform?embedded=true" width="640" height="1015" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe-->
 </div>
 
+
+<script>
+let url = location.search.substring(1);
+let pid = new URLSearchParams(url).get('pid');
+let num_videos = (pid % 2 == 0) ? 20 : 22;
+let num_describers = (pid % 2 == 0) ? 10 : 11;
+
+let intro = `Thank you for your time for participating in this user study. Here are ${num_videos} videos we are 
+            asking you to watch and rate them in range of 1 through 5 (5 as the best). Is the audio 
+            description well describing the video contents? Please consider that the volunteer describers 
+            are all first time doing video descriptions. Each video is 2 minute long. These ${num_videos} videos are 
+            actually only 2 different videos described by ${num_describers} different describers. Even though they are 
+            repetitive, please listen to each description and rate the description quality and leave 
+            comments for each video. At the end, there is a button confirming that you completed all videos. 
+            For each video, there is a link to YouTube video, so click the play button. The YouTube video will be 
+            played along with description audios.`;
+$("#intro").append(intro);
+</script>
+
+
 <script>
 
   //get parameters from query string
-let url = location.search.substring(1);
+//let url = location.search.substring(1);
 let urlParams = new URLSearchParams(url);
 let userId = urlParams.get('userId');
 let targetUrl = '/userStudy/helper/video?userId=' + userId;
@@ -115,7 +133,7 @@ function fetchVideo() {
                 Video ${i+1}: ${videoTitle}</a></b>
                   
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
-                   <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1" id="rating" value=${vi_rating} style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
+                   <b><font color="1a4b6e"> Please Rate the clarity of video description of this video from 0 to 5 (5 as best):</b></font> <input type="number" min="0" max="5" step="1" id="rating" value=${vi_rating} style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating"><br>
                    <br>
                    <b><font color="1a4b6e"> Comment:</b></font> <input type="text" id="comment" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                    <br>
@@ -123,7 +141,7 @@ function fetchVideo() {
                            
         }
         $(".list-group ").append( videos);
-        $(".list-group ").append(`<button type="button" onclick= "getVideoData1('${userId}')"> Done and send me Amazon Gift Card!</button>`);
+        $(".list-group ").append(`<button type="button" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px;" onclick= "getVideoData1('${userId}')"> Done and send me Amazon Gift Card!</button>`);
         
 
 
@@ -145,6 +163,9 @@ function fetchVideo() {
                 values[field.name] = field.value;
             })
 
+            if (values["rating"] == '') {
+                values["rating"] = 0;
+            }
 
             $.ajax({
                 type: "POST",
