@@ -284,4 +284,22 @@ router.get('/playVideoAudio/:youtubeId', function(req, res, next) {
   res.render('videoaudio');
 });
 
+router.get('/playvideodescription/:youtubeId', function(req, res, next) {
+  res.render('playvideodescription');
+});
+
+router.get('/getDescriptionData', function(req, res, next) {
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+  let aiType = req.query.aiType;
+  let queryResult = db.query(`select * from descriptions where video_id = '${videoId}' and volunteer_id = '${volunteerId}' and has_ai=${aiType} order by scene_num`);
+  queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+});
+
 module.exports = router;
