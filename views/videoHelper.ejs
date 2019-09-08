@@ -133,7 +133,11 @@ function fetchVideo() {
                 Video ${i+1}: ${videoTitle}</a></b>
                   
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
-                   <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> <input aria-describedby="label_rating_${i+1}" 
+                   if (parseInt(this.value) > max) {
+            this.value = max; 
+        }
+                   
+                   <label   class="edit-rating"   id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> <input aria-describedby="label_rating_${i+1}" 
                    type="number" min="0" max="5" step="1" 
                    id="rating_${i+1}" value=${vi_rating} 
                    style="width: 5%; border: 1px solid #ccc; padding: 10px
@@ -146,8 +150,13 @@ function fetchVideo() {
         }
         $(".list-group ").append( videos);
         $(".list-group ").append(`<button type="button" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px;" onclick= "getVideoData1('${userId}')"> Done and send me Amazon Gift Card!</button>`);
-        
-
+        // debugger;
+        document.getElementsByClassName('list-group')[0].oninput = function (e) {
+            // debugger;
+            if (parseInt(e.target.value) > 5) {
+                e.target.value = 5; 
+            }
+        }
 
         $(".video-form").bind('focusout',function() {
             //$( "#rating", "#comment" ).blur();
@@ -179,7 +188,6 @@ function fetchVideo() {
                     video_id: videoId,
                     volunteer_id: volunteerId,
                     ai_support: aiParam,
-                    
                     rating: values["rating"], 
                     comment: values["comment"]
                 },
