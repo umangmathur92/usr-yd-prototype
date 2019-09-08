@@ -11,16 +11,15 @@
 </head>
 <body>
 <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
-    <div class="container">
-      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe User Study</a>
+    <div class="container" style="
+text-align: center;display: inline-block;" >
+      <h1><a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe User Study</a><h1>
     </div>
 </nav>
 <div class="container">
     <div>
-        <h1>List of Video</h1>
         <p id="date"> </p>
-        <h5 id="intro">   </h5> 
-        <br><p><h5>Please select the video</h5></p>
+        <h2 id="intro">   </h2> 
         <br>
           
     </div>
@@ -71,7 +70,7 @@ $(document).ready(function () {
 
 function getDateTime(){
     let date = new Date(Date.now()).toLocaleString();
-     document.getElementById('date').innerHTML = date;
+     document.getElementById('date').innerHTML = `Current time: ${date}`;
     // console.log(date);
 }
 
@@ -126,6 +125,7 @@ function fetchVideo() {
             let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
             let aiParam = vid.ai_support ? 'yes' : 'no';
             let formid = ""+videoId + volunteerId + aiParam
+            const stepperMsg = 'Please Rate the clarity of video description of this video from 0 to 5 (5 as best)';
 
             videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
 
@@ -133,9 +133,13 @@ function fetchVideo() {
                 Video ${i+1}: ${videoTitle}</a></b>
                   
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
-                   <b><font color="1a4b6e"> Please Rate the clarity of video description of this video from 0 to 5 (5 as best):</b></font> <input type="number" min="0" max="5" step="1" id="rating" value=${vi_rating} style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating"><br>
+                   <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> <input aria-describedby="label_rating_${i+1}" 
+                   type="number" min="0" max="5" step="1" 
+                   id="rating_${i+1}" value=${vi_rating} 
+                   style="width: 5%; border: 1px solid #ccc; padding: 10px
+                    7px;border-radius: 4px; box-sizing: border-box;" name="rating"><br>
                    <br>
-                   <b><font color="1a4b6e"> Comment:</b></font> <input type="text" id="comment" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                   <label id="label_comment_${i+1}" for="comment_${i+1}">Comment:</label> <input name="comment${i+1}" aria-describedby="label_comment_${i+1}" type="text" id="comment_${i+1}" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                    <br>
                 </form>`;   
                            

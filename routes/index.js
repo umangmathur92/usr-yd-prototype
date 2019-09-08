@@ -247,9 +247,13 @@ router.get('/userStudy/getCountHelper', function (req, res) {
 router.put('/userStudy/updateStatus', function (req, res, next) {
   let task = userStudy.updateStatus_VIUser(req.body);
   task.then(result => {
-    res.send('Successfully inserted' );
+      res.status(200).json({'message': 'Thank you for you participation' });
+    })
+      .catch((err) => {
+        console.log(err)
+        res.send({ success: false });
+      });;
   });
-});
 
 
 router.post('/saveAiDescription', function(req, res, next) {
