@@ -125,7 +125,7 @@ router.get('/userStudy/videoHelper', function (req, res) {
 
 //list of visually impaired users
 router.get('/userStudy/helper/video', function (req, res) {
-  console.log({ param: req.query.userId });
+  // console.log({ param: req.query.userId });
   let userId = req.query.userId;
   if (userId) {
     let queryResult = userStudy.getHelperVideo(userId);
@@ -138,8 +138,6 @@ router.get('/userStudy/helper/video', function (req, res) {
       });
   }
 });
-
-
 
 //list of users
 //list of users study 1
@@ -168,6 +166,23 @@ router.get('/userStudy/users/', function (req, res) {
     });
   }
 });
+
+router.get('/userStudy/helperStatus', function (req, res) {
+  let userId= req.query.userId;
+  console.log({ userId});
+  
+  if (userId) {
+    let queryResult = db.query(`SELECT * from us_helper_video where vi_user_id = '${userId}' and rating IS NOT NULL`);
+    queryResult
+      .then(result => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.send(err);
+      });
+  }
+});
+
 
 
 //list of users study 2
@@ -216,7 +231,25 @@ router.post('/updatefeedback', function(req, res, next) {
   });
 });
 
+router.get('/userStudy/getCountHelper', function (req, res) {
+  let queryResult = db.query(`SELECT * from us_user_blind`);
+  queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+  // }
+});
 
+
+router.put('/userStudy/updateStatus', function (req, res, next) {
+  let task = userStudy.updateStatus_VIUser(req.body);
+  task.then(result => {
+    res.send('Successfully inserted' );
+  });
+});
 
 
 router.post('/saveAiDescription', function(req, res, next) {
@@ -238,6 +271,7 @@ router.post('/texttospeech', function(req, res, next) {
     res.send({success: result});
   });
 });
+
 
 router.get('/generateMp3FromDescriptions', function(req, res, next) {
   let task = textToSpeech.generateMp3ForAllDescriptionsInDb();

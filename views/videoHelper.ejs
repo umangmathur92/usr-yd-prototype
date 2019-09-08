@@ -39,11 +39,10 @@
 
   //get parameters from query string
 let url = location.search.substring(1);
-console.log('URL:' +  url);
 let urlParams = new URLSearchParams(url);
 let userId = urlParams.get('userId');
 let targetUrl = '/userStudy/helper/video?userId=' + userId;
-console.log('target URL:' +  targetUrl);
+// console.log('target URL:' +  targetUrl);
 
 
 $(document).ready(function () {
@@ -55,14 +54,46 @@ $(document).ready(function () {
 function getDateTime(){
     let date = new Date(Date.now()).toLocaleString();
      document.getElementById('date').innerHTML = date;
-    console.log(date);
+    // console.log(date);
 }
 
 
+function submitVideoData(userId, status) {
+    let jsonBody = {
+        "id": userId,
+        "status": status,
+    };
+    $.ajax({
+        type: 'PUT',
+        url : "/userStudy/updateStatus",
+        dataType: "json",
+        async:true,
+        crossDomain:true,
+        data: jsonBody,
+        success: function (response) {
+            window.alert(JSON.stringify(response));
+        },
+        error: function (response, textStatus, errorThrown) {
+            window.alert(JSON.stringify(response));
+        }
+      });
+}
 
+
+function getVideoData1(userId){
+    let url = "/userStudy/helperStatus?userId="+ userId;
+      console.log({URL: url});
+    $.get(url, function (rows) {
+        console.log({LENGTH: rows.length});
+        if(rows.length === 22){
+            submitVideoData(userId, true);
+        }else{
+             window.alert("Please fill the data ");
+        }
+    });
+}
 
 function fetchVideo() {
-
     $.get(targetUrl, function (rows) {
         let videos = '';
         for (let i = 0; i < rows.length; i++) {
@@ -74,15 +105,9 @@ function fetchVideo() {
             let vi_comment= vid.comment;
             let vi_rating=vid.rating;
 
-            
-          
             let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
-
             let aiParam = vid.ai_support ? 'yes' : 'no';
-            console.log(aiParam)
             let formid = ""+videoId + volunteerId + aiParam
-
-
 
             videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
 
@@ -90,14 +115,18 @@ function fetchVideo() {
                 Video ${i+1}: ${videoTitle}</a></b>
                   
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-aiParam="${aiParam}"  class="video-form" method="POST">
-                   <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1" id="rating"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
+                   <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1" id="rating" value=${vi_rating} style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
                    <br>
-                   <b><font color="1a4b6e"> Comment:</b></font> <input type="text" id="comment" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                   <b><font color="1a4b6e"> Comment:</b></font> <input type="text" id="comment" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                    <br>
                 </form>`;   
                            
         }
-        $( ".list-group " ).append( videos);
+        $(".list-group ").append( videos);
+         $(".list-group ").append(`<button type="button" onclick= "getVideoData1('${userId}')" >Click Me!</button>`);
+        
+
+
         $(".video-form").bind('focusout',function() {
             //$( "#rating", "#comment" ).blur();
            // $( "#input" ).blur();
@@ -123,7 +152,6 @@ function fetchVideo() {
                 url:"/updatefeedback",
 
                 data: {
-                    
                     vi_user_id: vi_userId,
                     video_id: videoId,
                     volunteer_id: volunteerId,
@@ -153,11 +181,8 @@ function fetchVideo() {
 
     
 }
-
-
-
 </script>
-<input type="submit" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="Done and send me Amazon Gift Card"></input>
+ <input type="submit" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="Done and send me Amazon Gift Card"></input>
 
 </body>
 </html>
