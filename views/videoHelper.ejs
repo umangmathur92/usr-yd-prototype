@@ -39,15 +39,13 @@ let pid = new URLSearchParams(url).get('pid');
 let num_videos = (pid % 2 == 0) ? 20 : 22;
 let num_describers = (pid % 2 == 0) ? 10 : 11;
 
-let intro = `Thank you for your time for participating in this user study. Here are ${num_videos} videos we are 
-            asking you to watch and rate them in range of 1 through 5 (5 as the best). Is the audio 
-            description well describing the video contents? Please consider that the volunteer describers 
-            are all first time doing video descriptions. Each video is 2 minute long. These ${num_videos} videos are 
-            actually only 2 different videos described by ${num_describers} different describers. Even though they are 
-            repetitive, please listen to each description and rate the description quality and leave 
-            comments for each video. At the end, there is a button confirming that you completed all videos. 
-            For each video, there is a link to YouTube video, so click the play button. The YouTube video will be 
-            played along with description audios.`;
+let intro = `Thank you for participating in this user study. Please answer the questions below, 
+            watch each video below and answer a couple of questions about each video. There are ${num_videos} videos, 
+            each video is about 2 minutes long. The ${num_videos} videos are actually only 2 different videos described 
+            by ${num_describers} different describers. Even though they are repetitive, please listen to each description 
+            and rate the description quality and leave comments for each video. At the end, there is a button 
+            confirming that you completed all videos. For each video, there is a link to YouTube video, so click 
+            the play button. The YouTube video will be played along with the audio description.`;
 $("#intro").append(intro);
 </script>
 
