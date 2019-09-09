@@ -33,17 +33,16 @@ let userStudy = {
         console.log({'IINSIE US': data});
         return db.query(`UPDATE us_user_blind set submitted = $1 where uuid= $2`, [data.status, data.id], callback);
     },
-
+    updateVIUserInfo: function (data, callback) {
+        return db.query(`UPDATE us_user_blind set email= $2, vid_desc_frequency=$3, access_preference=$4, access_pref_other= $5 where uuid= $1`, [data.id, data.email, data.vid_desc_frequency, data.access_preference, data.access_pref_other], callback);
+    },
     getUsers_VIStatus: function (status, callback) {
         return db.query(`SELECT * FROM us_user_blind where status= ${status}`, callback);
     },
     //get count of users
-    getCount_VI: function (callback) {
-        return db.query(`select count(*) from us_user_blind;`, callback);
+    getAllUser_VI: function (id, callback) {
+        return db.query(`select * from us_user_blind where uuid = '${id}';`, callback);
     },
-
-
-
 };
 
 

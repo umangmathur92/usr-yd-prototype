@@ -16,19 +16,40 @@ text-align: center;display: inline-block;" >
     </div>
 </nav>
 <div class="container">
+
+    <div class="container">
     <div>
-        <p id="date"> </p>
-        <h2 id="intro">   </h2> 
+        <!--p id="date"> </p-->
+        <h5 style= "margin: 20px" id="intro">   </h5> 
+        <p style= "margin: 20px"><b>Please play each video once all the way through to the end (there are no pause or rewind functions)</b></p>
         <br>
-          
+        <form name= "userInfo" id="userInfo">
+        Please enter your email address: <input type="email" name="email" id="email"><br>
+        <br>
+        <label id="label_access" for="rating_access"> How do you typically prefer to access images?</label> 
+        <fieldset class='rating_access' id="rating_access" name="rating">
+                <input type="radio" name="rating_access" value="With magnification" >  With magnification<br> </input>
+                <input type="radio" name="rating_access" value="Rely on description">  Rely on description<br> </input>
+                <input type="radio" name="rating_access" value="Tactile graphic">  Tactile graphic<br> </input>
+                <input type="radio" name="rating_access" value="Other" />  Other : <input name="other" id="other" /> <br>
+        </fieldset>
+        <br>
+        <label id="label_freq" for="frequency"> How regularly do you use video descriptions?</label> 
+        <fieldset class='freq' id="frequency" name="video_understanding">
+                <input type="radio" name="freq" value="never"> Never<br>
+                <input type="radio" name="freq" value="infrequently"> Very infrequently (a few times a year)<br>
+                <input type="radio" name="freq" value="sometimes"> Sometimes (a few times a month)<br>
+                <input type="radio" name="freq" value="frequently"> Very Frequently (several times a week)<br>
+                <input type="radio" name="freq" value="daily"> Almost daily or daily<br>
+        </fieldset>
+    </form>
+        <br>
     </div>
     <br>
     <div class="container">
         <div class="list-group"> 
-          
     </div>
     </b>
-     <!--iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfwGYCxzlpzy05nsvR74vqMRqUt6DPvIDI2Sy4hsQDktRSwug/viewform?embedded=true" width="640" height="1015" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe-->
 </div>
 
 
@@ -42,9 +63,10 @@ let intro = `Thank you for participating in this user study. Please answer the q
             watch each video below and answer a couple of questions about each video. There are ${num_videos} videos, 
             each video is about 2 minutes long. The ${num_videos} videos are actually only 2 different videos described 
             by ${num_describers} different describers. Even though they are repetitive, please listen to each description 
-            and rate the description quality and leave comments for each video. At the end, there is a button 
-            confirming that you completed all videos. For each video, there is a link to YouTube video, so click 
-            the play button. The YouTube video will be played along with the audio description.`;
+            and rate the description quality and leave comments for each video. At the end, there is a button confirming 
+            that you completed all videos. For each video, there is a link to YouTube video, so click the play button. 
+            The YouTube video will be played along with the audio description.`
+            ;
 $("#intro").append(intro);
 </script>
 
@@ -60,19 +82,46 @@ let targetUrl = '/userStudy/helper/video?userId=' + userId;
 
 
 $(document).ready(function () {
-    getDateTime();
+    // getDateTime();
     fetchVideo();
+    getAllVIUsers(userId);
 });
 
 
 function getDateTime(){
     let date = new Date(Date.now()).toLocaleString();
      document.getElementById('date').innerHTML = `Current time: ${date}`;
-    // console.log(date);
 }
 
+function getAllVIUsers(userId){
+    let url = '/userStudy/getUserHelper?userId='+ userId;
+    $.get(url , function (body) {
+        console.log({body});
+        if(body.length === 1) {
+        let val = body[0];
+        let email = $('#email').val(val.email);
+        let frequency = $(`[name="freq"][value="${val.vid_desc_frequency||" "}"]`).prop("checked", true);
+        
+        let validAccess = ['With magnification', 'Rely on description', 'Tactile graphic'];
+        if(validAccess.includes(val.access_preference)) {
+            $(`[name="rating_access"][value="${val.access_preference||" "}"]`).prop("checked", true);
+        } else if(val.access_preference === 'Other') {
+            $(`[name="rating_access"][value="${val.access_preference||" "}"]`).prop("checked", true);
+            $('#other').val(val.access_pref_other)
+        }
 
-function submitVideoData(userId, status) {
+        let access = $(`[name="rating_access"]`)
+        access.each(function(sel, el) {
+            console.log({sel, el});
+        });
+        
+            
+        }
+        //  $('[name="freq"]').val(rows[0].vid_desc_frequency);
+    });
+}
+
+function submitVideoData(userId, status, email, frequency,access_preference) {
     let jsonBody = {
         "id": userId,
         "status": status,
@@ -94,18 +143,48 @@ function submitVideoData(userId, status) {
 }
 
 
-function getVideoData1(userId){
-    let url = "/userStudy/helperStatus?userId="+ userId;
-      console.log({URL: url});
-    $.get(url, function (rows) {
-        console.log({LENGTH: rows.length});
-        if(rows.length === 22){
-            submitVideoData(userId, true);
-        }else{
-             window.alert("Please rate all the 22 videos");
+function submitUserInfo(userId, email, frequency,access_preference, access_pref_other) {
+    let jsonBody = {
+        "id": userId,
+        "vid_desc_frequency" : frequency,
+        "email": email,
+        "access_preference" : access_preference,
+        "access_pref_other" : access_pref_other,
+    };
+    $.ajax({
+        type: 'PUT',
+        url : '/userStudy/updateUserInfo',
+        dataType: "json",
+        async:true,
+        crossDomain:true,
+        data: jsonBody,
+        success: function (response) {
+            console.log('success');
+        },
+        error: function (response, textStatus, errorThrown) {
+            console.log(JSON.stringify(response));
         }
-    });
+      });
 }
+
+function getVideoData1(userId, num_videos){
+    if($("#email").val()){
+        let url = "/userStudy/helperStatus?userId="+ userId;
+        $.get(url, function (rows) {
+            console.log({LENGTH: rows.length});
+            if(rows.length === num_videos){
+                submitVideoData(userId,true);
+            }else{
+                window.alert(`Please rate all the ${num_videos} videos`);
+            }
+        });
+    }else{
+        window.alert(`Please provide the email address`);
+    }
+}
+
+
+
 
 function fetchVideo() {
     $.get(targetUrl, function (rows) {
@@ -137,31 +216,32 @@ function fetchVideo() {
 
                 <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> 
                 <fieldset class='rating' id="group1_${i+1}" name="rating">
-                    <input type="radio" name="rating" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}">5 - Excellent<br>
-                    <input type="radio" name="rating" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}">4 - Good<br>
-                    <input type="radio" name="rating" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}">3 - Average<br>
-                    <input type="radio" name="rating" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}">2 - Fair<br>
-                    <input type="radio" name="rating" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}">1 - Poor<br>
+                    <input type="radio" name="rating" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"> 5 - Excellent<br>
+                    <input type="radio" name="rating" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}"> 4 - Good<br>
+                    <input type="radio" name="rating" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}"> 3 - Average<br>
+                    <input type="radio" name="rating" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}"> 2 - Fair<br>
+                    <input type="radio" name="rating" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> 1 - Poor<br>
                 </fieldset>
                 <br>
 
                 <label id="label_video_understanding_${i+1}" for="video_understanding${i+1}"> ${understanding}:</label> 
                 <fieldset class='video_understanding' id="group2_${i+1}" name="video_understanding">
-                    <input type="radio" name="video_understanding" ${vi_understanding==5?"checked":""} value="5" name="group2_${i+1}">Strongly Agree<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==4?"checked":""} value="4" name="group2_${i+1}">Agree<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==3?"checked":""} value="3" name="group2_${i+1}">Neutral<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==2?"checked":""} value="2" name="group2_${i+1}">Disagree<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==1?"checked":""} value="1" name="group2_${i+1}">Strongly Disagree<br>
+                    <input type="radio" name="video_understanding" ${vi_understanding==5?"checked":""} value="5" name="group2_${i+1}"> Strongly Agree<br>
+                    <input type="radio" name="video_understanding" ${vi_understanding==4?"checked":""} value="4" name="group2_${i+1}"> Agree<br>
+                    <input type="radio" name="video_understanding" ${vi_understanding==3?"checked":""} value="3" name="group2_${i+1}"> Neutral<br>
+                    <input type="radio" name="video_understanding" ${vi_understanding==2?"checked":""} value="2" name="group2_${i+1}"> Disagree<br>
+                    <input type="radio" name="video_understanding" ${vi_understanding==1?"checked":""} value="1" name="group2_${i+1}"> Strongly Disagree<br>
                 </fieldset>
                 <br>
                 
-                <label id="label_comment_${i+1}" for="comment_${i+1}">Comment:</label> <input name="comment" aria-describedby="label_comment_${i+1}" type="text" id="comment_${i+1}" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                <label id="label_comment_${i+1}" for="comment_${i+1}">Comment:</label> 
+                <input name="comment" aria-describedby="label_comment_${i+1}" type="text" id="comment_${i+1}" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 90%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
                 <br>
                 </form>`;   
                            
         }
         $(".list-group ").append( videos);
-        $(".list-group ").append(`<button type="button" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px;" onclick= "getVideoData1('${userId}')"> Done and send me Amazon Gift Card!</button>`);
+        $(".list-group ").append(`<button type="button" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px;" onclick= "getVideoData1('${userId}', ${num_videos})"> Done and send me Amazon Gift Card!</button>`);
     
         $(document).on("click", "list-group", function () {
             var a = $('input[name=active_status]:checked').val();  
@@ -219,6 +299,35 @@ function fetchVideo() {
 
             return false;
         })
+    });
+
+    $('#userInfo').change(function(e){
+        let email = $('#email');
+        let frequency = $('[name="freq"]:checked');
+        let ratingAccess = $('[name="rating_access"]:checked');
+        let otherText= '';
+
+        let emailVal = '';
+        let frequencyVal = '';
+        let ratingAccessVal = '';
+        if(frequency.length === 1) {
+            frequencyVal = frequency[0].value;
+        }
+
+        if(email.length === 1) {
+            emailVal = email[0].value;
+        }
+
+        if(ratingAccess.length === 1) {
+            ratingAccessVal = ratingAccess[0].value;
+            if(ratingAccessVal === 'Other') {
+                otherText = $('#other')[0].value || '';
+            }
+        }
+
+        console.log({ email, frequency: frequency, ratingAccess })
+        console.log({  emailVal,  frequencyVal, ratingAccessVal})
+        submitUserInfo(userId, emailVal, frequencyVal,ratingAccessVal, otherText);
     });
 
     

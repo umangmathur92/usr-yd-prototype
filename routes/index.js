@@ -175,15 +175,48 @@ router.get('/userStudy/helperStatus', function (req, res) {
     let queryResult = db.query(`SELECT * from us_helper_video where vi_user_id = '${userId}' and rating IS NOT NULL`);
     queryResult
       .then(result => {
-        res.send(result);
+        res.json(result);
       })
       .catch((err) => {
-        res.send(err);
+        res.send({err});
       });
   }
 });
 
+router.get('/userStudy/getUserHelper', function (req, res) {
+  let userId = req.query.userId;
+  let queryResult = userStudy.getAllUser_VI(userId);
+  queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+});
 
+
+router.put('/userStudy/updateStatus', function (req, res, next) {
+  let task = userStudy.updateStatus_VIUser(req.body);
+  task.then(result => {
+    res.status(200).json({ 'message': 'Thank you for you participation' });
+  })
+    .catch((err) => {
+      console.log(err)
+      res.send({ success: false });
+    });;
+});
+
+router.put('/userStudy/updateUserInfo', function (req, res, next) {
+  let task = userStudy.updateVIUserInfo(req.body);
+  task.then(result => {
+    res.status(200).json({ 'success': 'true' });
+  })
+    .catch((err) => {
+      console.log(err)
+      res.send({ success: false });
+    });;
+});
 
 //list of users study 2
 router.get('/userStudy2/users/', function (req, res) {
@@ -212,6 +245,7 @@ router.post('/saveNonAiDescription', function(req, res, next) {
   });
 });
 
+
 router.post('/updatefeedback', function(req, res, next) {
   let rating = req.body.rating;
   let comment = req.body.comment;
@@ -230,29 +264,7 @@ router.post('/updatefeedback', function(req, res, next) {
   });
 });
 
-router.get('/userStudy/getCountHelper', function (req, res) {
-  let queryResult = db.query(`SELECT * from us_user_blind`);
-  queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-  // }
-});
 
-
-router.put('/userStudy/updateStatus', function (req, res, next) {
-  let task = userStudy.updateStatus_VIUser(req.body);
-  task.then(result => {
-      res.status(200).json({'message': 'Thank you for you participation' });
-    })
-      .catch((err) => {
-        console.log(err)
-        res.send({ success: false });
-      });;
-  });
 
 
 router.post('/saveAiDescription', function(req, res, next) {
@@ -265,6 +277,7 @@ router.post('/saveAiDescription', function(req, res, next) {
     res.send({success: false});
   });
 });
+
 
 router.post('/texttospeech', function(req, res, next) {
   let inputJson = req.body;
