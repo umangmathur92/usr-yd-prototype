@@ -222,7 +222,7 @@ function onYouTubeIframeAPIReady() {
         playerVars: {
             autoplay: 0,
             enablejsapi: 1,
-            cc_load_policy: 1,
+            cc_load_policy: 0,
             controls: 1,
             fs: 0,
             iv_load_policy: 3,

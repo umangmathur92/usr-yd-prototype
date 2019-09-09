@@ -18,14 +18,14 @@
         <div class="container">
             <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe User Study</a>
         </div>
-        <img id="btn-timer" src="/images/pause_white.png" style="height: 20px; width:20px; color: white; margin-right: 10px;">
-        <b><span style="color: white">Time Elapsed:&nbsp;</span>
-            <span style="color: white" id="txt-timeElaspsed">00:00</span></b>
+        <img id="btn-timer" src="/images/pause_white.png" style="height: 20px; width:20px; color: white; margin-right: 10px;visibility: hidden;">
+        <b><span style="color: white; visibility: hidden;">Time Elapsed:&nbsp;</span>
+            <span style="color: white; visibility: hidden;" id="txt-timeElaspsed">00:00</span></b>
         </nav>
         <br>
         <div class="container-fluid" style="position: absolute;top: 60px;">
             <div class="row" style="text-align: center; height:100%;">
-                <div class="col-5">
+                <div class="col-12">
                     <div style="background-color: #1a4b6e; color:#fff; font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
                     <div id="player"></div>
                     <br>
@@ -35,7 +35,7 @@
                                 <span id="btn-play-pause" style="visibility: visible;"></span>
                                 <b><span id="elapsed_time">0:00</span>/<span id="total_time">0:00</span></b>
                             </div>
-                            <div style="visibility: hidden; float: right; margin: auto; align-content: center; text-align: center;">
+                            <div style="float: right; margin: auto; align-content: center; text-align: center; visibility: hidden;">
                                 <span><b>Auto-Pause at each scene: </b></span>
                                 <span>
                                     <label class="switch">
@@ -47,8 +47,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-7">
-                    <div style="background-color: #1a4b6e;color:#fff;font-size: 15px;"><b>Scene List</b></div>
+                <div class="col-0" style="visibility: hidden;">
+                    <div style="background-color: #1a4b6e;color:#fff;font-size: 15px; "><b>Scene List</b></div>
                     <div style="height:80%; background-color:#fff;">
                         <div class="list-container" style="height: 100%">      
                             <ul id="ul-scene-list" class="scene-list">
@@ -60,8 +60,6 @@
                     <br>
                     <button style="visibility: hidden;" class="btn btn-danger btn-l" id="btnSubmit">Save &amp; Close Window</button>
                 </div>
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfTg9iSU323_q4tEAeljikQTt54-lVELmsbTe35gs4YraXwEA/viewform" style="height: 350px; width: 400px; margin-left: 60px;"></iframe>
-
             </div>
         </div>
         <script src="/javascripts/videoaudio.js"></script>
