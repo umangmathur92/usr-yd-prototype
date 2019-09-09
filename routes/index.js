@@ -219,10 +219,9 @@ router.post('/updatefeedback', function(req, res, next) {
   let video_id = req.body.video_id;
   let volunteer_id = req.body.volunteer_id;
   let ai_support = req.body.ai_support;
-
-  console.log("Rating: " + rating + "\ncomment: " + comment + "\nvi_user_id: " + vi_user_id + "\nvideo_id: " + video_id + "\nvolunteer_id: " + volunteer_id + "\nai_support: " + ai_support)
-
-  let queryResult = db.query(`UPDATE us_helper_video SET rating = ($1), comment = ($2) WHERE video_id='${video_id}' AND volunteer_id='${volunteer_id}'  AND vi_user_id='${vi_user_id}'`,[rating,comment]);
+  let video_unstd = req.body.video_understanding;
+   console.log("Rating: " + rating + "\ncomment: " + comment + "\nvi_user_id: " + vi_user_id + "\nvideo_id: " + video_id + "\nvolunteer_id: " + volunteer_id + "\nai_support: " + ai_support)
+   let queryResult = db.query(`UPDATE us_helper_video SET rating = ($1), comment = ($2) , video_understanding = ($3) WHERE video_id='${video_id}' AND volunteer_id='${volunteer_id}'  AND vi_user_id='${vi_user_id}' ANd ai_support = '${ai_support}'` , [rating, comment, video_unstd]);
   queryResult.then(result => {
     res.send({success: true});   
   }).catch((err) => {
