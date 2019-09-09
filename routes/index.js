@@ -8,8 +8,9 @@ const userStudy2 = require('../model/userStudy2');
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
-  res.render('homeUserStudy', { title: 'Express' });
+  //res.render('homeUserStudy', { title: 'Express' });
   //res.render('home', { title: 'Express' });
+  res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
 router.get('/addvideo', function(req, res, next) {
@@ -190,7 +191,7 @@ router.get('/userStudy2/users/', function (req, res) {
  // let userId = req.query.userId;
  // if(userId){
     //let queryResult = userStudy2.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT * from us_user_blind`);
+    let queryResult = db.query(`SELECT * from us_user_blind order by id`);
     queryResult
     .then(result => {
       res.send(result);
