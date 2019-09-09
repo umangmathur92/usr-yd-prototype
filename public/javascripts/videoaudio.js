@@ -239,7 +239,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    player.setVolume(65);
+    player.setVolume(50);
     $('#total_time').text(formatTime(player.getDuration()));
     timeupdater = setInterval(updateTime, 100);
 }
