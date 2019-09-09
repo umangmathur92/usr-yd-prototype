@@ -216,8 +216,8 @@ function resetVidModifiedTableData() {
 
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
-        height: '270',
-        width: '480',
+        height: '450',
+        width: '800',
         videoId: youtubeId,
         playerVars: {
             autoplay: 0,
