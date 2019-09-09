@@ -28,20 +28,20 @@ text-align: center;display: inline-block;" >
         Please enter your email address: <input type="email" name="email" id="email"><br>
         <br>
         <label id="label_access" for="rating_access"> How do you typically prefer to access images?</label> 
-        <fieldset class='rating_access' id="rating_access" name="rating">
-                <input type="radio" name="rating_access" value="With magnification" >  With magnification<br> </input>
-                <input type="radio" name="rating_access" value="Rely on description">  Rely on description<br> </input>
-                <input type="radio" name="rating_access" value="Tactile graphic">  Tactile graphic<br> </input>
-                <input type="radio" name="rating_access" value="Other" />  Other : <input name="other" id="other" /> <br>
+        <fieldset class='rating_access' tab-index="0" id="rating_access" aria-describedby="How do you typically prefer to access images?" name="rating">
+                <input type="radio" name="rating_access"  aria-labelledby="gdesc1" value="With magnification" > <label id="gdesc1"> With magnification</label><br> </input>
+                <input type="radio" name="rating_access"  aria-labelledby="idRely" value="Rely on description">  <label id= "idRely">Rely on description</label><br> </input>
+                <input type="radio" name="rating_access" aria-labelledby="idtac" value="Tactile graphic">  <label id="idtac">Tactile graphic</label><br> </input>
+                <input type="radio" name="rating_access" value="Other" />  Other : <input name="other" style= "width: 50%" placeholder= "Please enter text for other" id="other" /> <br>
         </fieldset>
         <br>
         <label id="label_freq" for="frequency"> How regularly do you use video descriptions?</label> 
         <fieldset class='freq' id="frequency" name="video_understanding">
-                <input type="radio" name="freq" value="never"> Never<br>
-                <input type="radio" name="freq" value="infrequently"> Very infrequently (a few times a year)<br>
-                <input type="radio" name="freq" value="sometimes"> Sometimes (a few times a month)<br>
-                <input type="radio" name="freq" value="frequently"> Very Frequently (several times a week)<br>
-                <input type="radio" name="freq" value="daily"> Almost daily or daily<br>
+                <input type="radio" name="freq" aria-labelledby="1" value="never"> <label id="1">Never</label><br>
+                <input type="radio" name="freq" aria-labelledby="2" value="infrequently"> <label id="2">Very infrequently (a few times a year)</label><br>
+                <input type="radio" name="freq" aria-labelledby="3" value="sometimes"> <label id="3">Sometimes (a few times a month)</label><br>
+                <input type="radio" name="freq" aria-labelledby="4" value="frequently"> <label id="4">Very Frequently (several times a week)</label><br>
+                <input type="radio" name="freq" aria-labelledby="5" value="daily"> <label id="5"> Almost daily or daily</label><br>
         </fieldset>
     </form>
         <br>
@@ -256,7 +256,6 @@ function fetchVideo() {
            // $( "#input" ).blur();
            $(this).toggleClass("#rating").toggleClass("#comment");
             // console.log( 'DATA', this.data);
-            // debugger;
             let videoId = $(this).data("videoid")
             let volunteerId = $(this).data("volunteer_id")
             let vi_ai_support = $(this).data("vi_ai_support")
@@ -264,7 +263,6 @@ function fetchVideo() {
 
             var values ={}
             $.each($(this).serializeArray(), function(i, field) {
-                // debugger;
                 values[field.name] = field.value;
             })
 
