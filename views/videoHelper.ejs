@@ -12,7 +12,7 @@
 <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
     <div class="container" style="
 text-align: center;display: inline-block;" >
-      <h1><a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe User Study</a><h1>
+      <h1><a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a><h1>
     </div>
 </nav>
 <div class="container">
@@ -216,21 +216,21 @@ function fetchVideo() {
 
                 <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> 
                 <fieldset class='rating' id="group1_${i+1}" name="rating">
-                    <input type="radio" name="rating" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"> 5 - Excellent<br>
-                    <input type="radio" name="rating" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}"> 4 - Good<br>
-                    <input type="radio" name="rating" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}"> 3 - Average<br>
-                    <input type="radio" name="rating" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}"> 2 - Fair<br>
-                    <input type="radio" name="rating" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> 1 - Poor<br>
+                    <input type="radio" name="rating" aria-labelledby="r1" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"><label id="r1"> 5 - Excellent</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r2" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}"><label id="r2"> 4 - Good</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r3" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}"> <label id="r3">3 - Average</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r4" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}"> <label id="r4">2 - Fair</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r5" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> <label id="r5">1 - Poor</label><br>
                 </fieldset>
                 <br>
 
                 <label id="label_video_understanding_${i+1}" for="video_understanding${i+1}"> ${understanding}:</label> 
                 <fieldset class='video_understanding' id="group2_${i+1}" name="video_understanding">
-                    <input type="radio" name="video_understanding" ${vi_understanding==5?"checked":""} value="5" name="group2_${i+1}"> Strongly Agree<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==4?"checked":""} value="4" name="group2_${i+1}"> Agree<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==3?"checked":""} value="3" name="group2_${i+1}"> Neutral<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==2?"checked":""} value="2" name="group2_${i+1}"> Disagree<br>
-                    <input type="radio" name="video_understanding" ${vi_understanding==1?"checked":""} value="1" name="group2_${i+1}"> Strongly Disagree<br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v1" ${vi_understanding==5?"checked":""} value="5" name="group2_${i+1}"> <label id="v1">Strongly Agree</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v2" ${vi_understanding==4?"checked":""} value="4" name="group2_${i+1}"> <label id="v2">Agree</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v3" ${vi_understanding==3?"checked":""} value="3" name="group2_${i+1}"> <label id="v3">Neutral</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v4" ${vi_understanding==2?"checked":""} value="2" name="group2_${i+1}"> <label id="v4">Disagree</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v5" ${vi_understanding==1?"checked":""} value="1" name="group2_${i+1}"> <label id="v5">Strongly Disagree</label><br>
                 </fieldset>
                 <br>
                 
