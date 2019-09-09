@@ -8,8 +8,9 @@ const userStudy2 = require('../model/userStudy2');
 const db = require('../db/database');
 
 router.get('/', function(req, res, next) {
-  res.render('homeUserStudy', { title: 'Express' });
+  //res.render('homeUserStudy', { title: 'Express' });
   //res.render('home', { title: 'Express' });
+  res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
 router.get('/addvideo', function(req, res, next) {
@@ -223,7 +224,7 @@ router.get('/userStudy2/users/', function (req, res) {
  // let userId = req.query.userId;
  // if(userId){
     //let queryResult = userStudy2.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT * from us_user_blind`);
+    let queryResult = db.query(`SELECT * from us_user_blind order by id`);
     queryResult
     .then(result => {
       res.send(result);
@@ -298,6 +299,24 @@ router.get('/generateMp3FromDescriptions', function(req, res, next) {
 
 router.get('/playVideoAudio/:youtubeId', function(req, res, next) {
   res.render('videoaudio');
+});
+
+router.get('/playvideodescription/:youtubeId', function(req, res, next) {
+  res.render('playvideodescription');
+});
+
+router.get('/getDescriptionData', function(req, res, next) {
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+  let aiType = req.query.aiType;
+  let queryResult = db.query(`select * from descriptions where video_id = '${videoId}' and volunteer_id = '${volunteerId}' and has_ai=${aiType} order by scene_num`);
+  queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
 });
 
 module.exports = router;

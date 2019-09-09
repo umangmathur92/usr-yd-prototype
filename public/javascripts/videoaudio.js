@@ -216,13 +216,13 @@ function resetVidModifiedTableData() {
 
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
-        height: '270',
-        width: '480',
+        height: '450',
+        width: '800',
         videoId: youtubeId,
         playerVars: {
             autoplay: 0,
             enablejsapi: 1,
-            cc_load_policy: 1,
+            cc_load_policy: 0,
             controls: 1,
             fs: 0,
             iv_load_policy: 3,
@@ -239,6 +239,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
+    player.setVolume(65);
     $('#total_time').text(formatTime(player.getDuration()));
     timeupdater = setInterval(updateTime, 100);
 }
