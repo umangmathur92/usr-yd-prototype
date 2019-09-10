@@ -55,7 +55,7 @@ async function generateMp3ForAllDescriptionsInDb() {
             let descriptionText = currDescription.description;
             let ocrText = currDescription.ocr;
             let sceneNum = currDescription.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen for this scene is as follows: " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}.mp3`;
