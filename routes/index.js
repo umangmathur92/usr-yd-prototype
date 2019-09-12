@@ -33,7 +33,7 @@ router.get('/getAllVideos', function(req, res, next) {
 });
 
 router.get('/playvideo/:youtubeId', function(req, res, next) {
-  let isAiEnabled = req.query.ml === 'yes';
+  let isAiEnabled = req.query.ai === 'yes';
   if(isAiEnabled) {
     res.render('withai', { title: 'Express' });
   } else {

@@ -30,7 +30,7 @@ function updateUI(vidArr) {
         } else {
             surveyLink = 'https://forms.gle/ftZNSuNnEKaQGG3D9';
         }
-        generatedHtml += `<b><a href="/playvideo/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
+        generatedHtml += `<b><a href="/playvideo/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
         <input type="checkbox" style="margin-right: 8px;">
         <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
         Video ${i+1}: ${videoTitle} (${aiSupportStr})</a></b>`;

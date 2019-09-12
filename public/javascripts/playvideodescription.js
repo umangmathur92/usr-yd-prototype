@@ -10,7 +10,7 @@ let currAudioElapsedTime = 0;
 
 $(document).ready(function() {
     userId = getUrlVars()["u"];
-    enableAi = (getUrlVars()["ml"] == 'yes') ? true : false;
+    enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
