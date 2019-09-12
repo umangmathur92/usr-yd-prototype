@@ -17,7 +17,7 @@ let isTimerPaused = false;
 
 $(document).ready(function() {
     userId = getUrlVars()["u"];
-    enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
+    enableAi = (getUrlVars()["ml"] == 'yes') ? true : false;
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
