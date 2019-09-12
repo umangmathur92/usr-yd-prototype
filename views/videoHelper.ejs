@@ -207,7 +207,7 @@ function fetchVideo() {
             const stepperMsg = 'Please rate the description of this video on a scale of 1 to 5, with 1 being the poorest and 5 being the best';
             const understanding = 'I feel I have a good understanding of the topic covered in this video due to the video.';
 
-            videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
+            videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ml=${aiParam}" class="list-group-item" >
 
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg" alt=${videoTitle} style="width:100px;height:100px;">
                 Video ${i+1}: ${videoTitle}</a></b>
