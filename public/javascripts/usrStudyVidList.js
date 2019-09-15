@@ -22,7 +22,7 @@ function updateUI(vidArr) {
         let videoId = vid.video_id;
         let videoTitle = vid.title;
         let isAiSupported = vid.ai_support;
-        let aiSupportStr = isAiSupported ? 'With AI support' : 'Without AI support';
+        let aiSupportStr = isAiSupported ? 'With Interface Support' : 'Without Interface Support';
         let aiParam = vid.ai_support===true ? 'yes' : 'no';
         let surveyLink = "#";
         if(isAiSupported) {
@@ -39,7 +39,7 @@ function updateUI(vidArr) {
         <img src="../images/survey.png" class="img-survey">User Survey for Video ${i+1} (Google Form)</a></b>`;  
         generatedHtml += `<b><a href="#" class="list-group-item" >
         <input type="checkbox" style="margin-right: 8px;">
-        <img src="../images/survey.png" class="img-survey">NASA TLX Survey for Video ${i+1} (Not clickable - You'll be given a physical form to fill out)</a></b><br>`;  
+        <img src="../images/survey.png" class="img-survey">NASA TLX Survey for Video ${i + 1} (Not Clickable – You Will Be Given a Physical Form to Fill Out)</a></b><br>`;  
     }
     generatedHtml += `<b><a href="https://forms.gle/aEpEpjFyjrBP64sW9" class="list-group-item" target="_blank">
     <input type="checkbox" style="margin-right: 8px;">

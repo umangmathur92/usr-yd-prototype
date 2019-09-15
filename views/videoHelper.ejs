@@ -20,9 +20,8 @@ text-align: center;display: inline-block;" >
     <div class="container">
     <div>
         <!--p id="date"> </p-->
-        <h5 style= "margin: 20px" id="intro">   </h5> 
-        <p style= "margin: 20px"><b>Please play each video once all the way through to the end (there are no pause or rewind functions)</b>
-        You are welcome to take a break in between videos. If Youtube video fails to load, then please click on refresh, then the problem goes away. Thank you so much for participating!</p>
+        <p style= "margin: 20px 20px 0px 0px" id="intro">   </p> 
+        <p style= "margin: 20px 20px 20px 0px">Please play each video once all the way through to the end (there are no pause or rewind functions). You are welcome to take a break in between videos. If the Youtube video fails to load, please click the refresh button on your browser. Thank you again for participating.</p>
         <br>
         <form name= "userInfo" id="userInfo">
         Please enter your email address: <input type="email" name="email" id="email"><br>
@@ -60,13 +59,11 @@ let pid = new URLSearchParams(url).get('pid');
 let num_videos = (pid % 2 == 0) ? 20 : 22;
 let num_describers = (pid % 2 == 0) ? 10 : 11;
 
-let intro = `Thank you for participating in this user study. Please answer the questions below, 
-            watch each video below and answer a couple of questions about each video. There are ${num_videos} videos, 
-            each video is about 2 minutes long. The ${num_videos} videos are actually only 2 different videos described 
-            by ${num_describers} different describers. Even though they are repetitive, please listen to each description 
-            and rate the description quality and leave comments for each video. At the end, there is a button confirming 
-            that you completed all videos. For each video, there is a link to YouTube video, so click the play button. 
-            The YouTube video will be played along with the audio description.`;
+let intro = `Thank you for participating in this user study. Please answer the questions below, and then watch the videos, and answer the questions about each video. 
+            There are ${num_videos} videos, and each video is about 2 minutes long. The ${num_videos} videos are in fact only 2 different videos described by ${num_describers} different describers. 
+            Even though they are repetitive, please listen to each description, rate the description quality, and leave comments for each video. 
+            At the end, there is a button confirming that you completed all the videos. For each video, there is a link to the video on YouTube. 
+            Open the link and click the play button. The YouTube video will be played along with the audio description.`
 $("#intro").append(intro);
 </script>
 
