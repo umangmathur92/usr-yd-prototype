@@ -20,7 +20,7 @@ text-align: center;display: inline-block;" >
     <div class="container">
     <div>
         <!--p id="date"> </p-->
-        <p style= "margin: 20px 20px 0px 0px" id="intro">   </p> 
+        <p style= "margin: 20px 20px 0px 0px; text-align:justify;" id="intro">   </p> 
         <p style= "margin: 20px 20px 20px 0px">Please play each video once all the way through to the end (there are no pause or rewind functions). You are welcome to take a break in between videos. If the Youtube video fails to load, please click the refresh button on your browser. Thank you again for participating.</p>
         <br>
         <form name= "userInfo" id="userInfo">
@@ -213,11 +213,11 @@ function fetchVideo() {
 
                 <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> 
                 <fieldset class='rating' id="group1_${i+1}" name="rating">
-                    <input type="radio" name="rating" aria-labelledby="r1" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"><label id="r1"> 5 - Excellent</label><br>
-                    <input type="radio" name="rating" aria-labelledby="r2" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}"><label id="r2"> 4 - Good</label><br>
-                    <input type="radio" name="rating" aria-labelledby="r3" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}"> <label id="r3">3 - Average</label><br>
-                    <input type="radio" name="rating" aria-labelledby="r4" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}"> <label id="r4">2 - Fair</label><br>
-                    <input type="radio" name="rating" aria-labelledby="r5" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> <label id="r5">1 - Poor</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r1" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"> <label id="r1"> 5 - Excellent</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r2" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}"> <label id="r2"> 4 - Good</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r3" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}"> <label id="r3"> 3 - Average</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r4" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}"> <label id="r4"> 2 - Fair</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r5" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> <label id="r5"> 1 - Poor</label><br>
                 </fieldset>
                 <br>
 

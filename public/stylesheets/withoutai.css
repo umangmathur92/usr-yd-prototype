@@ -9,12 +9,10 @@ a {
 .scene-list {
     list-style-type: none;
     padding: 0;
-    margin: 0;
     overflow:auto;
     height: 100%;
     background-color: #e0e0e0;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin: 1px;
 }
 
 .scene-container {
