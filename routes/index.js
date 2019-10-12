@@ -4,8 +4,10 @@ const video = require('../backend/video');
 const userStudy = require('../model/userStudy');
 const textToSpeech = require('../backend/texttospeech.js');
 const userStudy2 = require('../model/userStudy2');
-
+const questionAnswer = require('./question_answer');
 const db = require('../db/database');
+
+router.use('/us3/question', questionAnswer);
 
 router.get('/', function(req, res, next) {
   //res.render('homeUserStudy', { title: 'Express' });

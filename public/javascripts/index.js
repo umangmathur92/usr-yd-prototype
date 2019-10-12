@@ -106,7 +106,26 @@ function initializeDescriptionsUI(blocksJsonArr) {
             + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
             + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
-            + '<div style="text-align: center; margin-bottom: -20px; margin-top: 10px;">';
+            + '<tr><td>Question 1</td></td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Answer 1</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Question 2</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Answer 2</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Question 3</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Answer 3</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Question 4</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Answer 4</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Question 5</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
+            + '<tr><td>Answer 5</td><td><div class="scene-ocr-container">'
+            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
             // if(j!=childSceneArr.length-1) {
             //     outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
             // }

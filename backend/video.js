@@ -142,20 +142,26 @@ async function addVideoDataToDb(inputJson) {
     try {
         // //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
+        console.log({VIDEO: video});
         await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
-        // let blockJsonArr = video.insights_json.blocks;
-        let blockJsonArr = [];
-        if(video.youtube_id == '_1DDhUnyvwY') {
-            blockJsonArr = PredefVid1.predefBlockArrJson;
-        } else if (video.youtube_id == 'EQoJS8Pkmj0') {
-            blockJsonArr = PredefVid2.predefBlockArrJson;
-        } else if(video.youtube_id == 'cNj3aOTYdQQ') {
-            blockJsonArr = PredefVid3.predefBlockArrJson;
-        } else if(video.youtube_id == 'nqXz8hhAYGo') {
-            blockJsonArr = PredefVid4.predefBlockArrJson;
-        }
-        let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        let blockJsonArr = video.insights_json.blocks;
+        // let blockJsonArr = [];
+        //commented by vaishali to have the default behavior for the blocks
+
+        //the blockJsonArr is hardcoded for user study 2
+        // if(video.youtube_id == '_1DDhUnyvwY') {
+        //     blockJsonArr = PredefVid1.predefBlockArrJson;
+        // } else if (video.youtube_id == 'EQoJS8Pkmj0') {
+        //     blockJsonArr = PredefVid2.predefBlockArrJson;
+        // } else if(video.youtube_id == 'cNj3aOTYdQQ') {
+        //     blockJsonArr = PredefVid3.predefBlockArrJson;
+        // } else if(video.youtube_id == 'nqXz8hhAYGo') {
+        //     blockJsonArr = PredefVid4.predefBlockArrJson;
+        // }
+
+       let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        console.log({blockArr});
         await Block.insertIntoBlockTable(blockArr);
         // let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         // blockArr = modifyLastElementsOfBlockArray(blockArr);
@@ -347,7 +353,10 @@ async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
     let keyframeTagArr = [];
     for(const keyFrameImg of allKeyframesArr) {
         let imgUrl = keyFrameImg.thumbnail_url;
+        console.log({imgUrl});
         let imgAnalysisJson = await ApiRepository.getImageAnalysis(imgUrl);
+        console.log({imgAnalysisJson});
+
         let captionText = '';
         let confidenceScore = 0;
         if(imgAnalysisJson.description.captions.length>0) {

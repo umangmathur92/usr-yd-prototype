@@ -31,6 +31,7 @@ class Video {
             let videoEntry = await db.one('INSERT INTO video (youtube_id, indexer_video_id, title, duration, summarised_insights_json, insights_json) VALUES ( $1, $2, $3, $4, $5, $6 ) RETURNING id', [newVid.youtube_id, newVid.indexer_video_id, newVid.title, newVid.duration, newVid.summarised_insights_json, newVid.insights_json]);
             return videoEntry.id;
         } catch(e) {
+            console.log({'error': e});
             throw e;
         }
     }
