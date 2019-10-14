@@ -60,8 +60,18 @@ async function fetchAllVideos() {
 async function fetchVideoDataFromDb(videoId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
-        let queryResult = await db.one("SELECT jsonb_pretty(jsonb_agg(js_object)) custom_nested_json_data FROM (select jsonb_build_object( 'block_id', block_id, 'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 'baseline_des', original_description, 'child_scenes', jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num', s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description, 'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s GROUP BY start_time, end_time, block_id, original_description, block_num, video_id ORDER BY block_num ASC ) s", [videoId]);
+        let queryResult = await db.one(`SELECT jsonb_pretty(jsonb_agg(js_object))
+         custom_nested_json_data FROM (select jsonb_build_object( 'block_id', block_id,
+          'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 
+         'baseline_des', original_description, 'child_scenes',
+          jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num',
+           s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description,
+            'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON
+             s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
+             GROUP BY start_time, end_time, block_id, original_description, block_num,
+              video_id ORDER BY block_num ASC ) s`, [videoId]);
         vidQueryResult.info = JSON.parse(queryResult.custom_nested_json_data);
+        // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
         return vidQueryResult;
     } catch(e) {
         throw e;

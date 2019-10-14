@@ -21,6 +21,17 @@ router.get('/', function (req, res) {
 });
 
 
+//addQuestionAnswer with scene id and user id 
+router.post('/addQuesAns', function(req, res, next) {
+  let queryResult = questionAnswer.addQuestionAnswer(req.body);
+  queryResult.then(result => {
+    res.send('Q&A, user, sceneid, inserted successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
 router.post('/addQuestion', function(req, res, next) {
     let queryResult = questionAnswer.createQuestion(req.body);
     queryResult.then(result => {

@@ -6,6 +6,7 @@ const textToSpeech = require('../backend/texttospeech.js');
 const userStudy2 = require('../model/userStudy2');
 const questionAnswer = require('./question_answer');
 const db = require('../db/database');
+const quesAns = require('../model/questionAnswer');
 
 router.use('/us3/question', questionAnswer);
 
@@ -44,10 +45,15 @@ router.get('/playvideo/:youtubeId', function(req, res, next) {
 });
 
 router.get('/fetchVideoData', function(req, res, next) {
-  let videoId = req.query.videoid;
-  let queryResult = video.fetchVideoDataFromDb(videoId);
+  console.log('req.query', req.query)
+  let {videoid, userId} = req.query;
+  let queryResult = video.fetchVideoDataFromDb(videoid);
   queryResult.then(result => {
-    res.send(result);
+    quesAns.getQuestionAnswerByUserId(userId).then( qnaList =>{
+      console.log({ resdata: qnaList});
+      result.qnaList = qnaList;
+      res.send(result);
+    });
   });
 });
 
@@ -267,18 +273,46 @@ router.post('/updatefeedback', function(req, res, next) {
   });
 });
 
-
-
-
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;
-  console.log(inputJson);
-  let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
-  queryResult.then(result => {
-    res.send({success: true});  
-  }).catch((err) => {
+  console.log('Save AI:', inputJson);
+  console.log('Save AI user:', inputJson.user_id);
+  console.log('qna data', inputJson.qnaData);
+  let {qnaData, user_id} = inputJson;
+
+  // let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+  // queryResult.then(result => {
+  //   res.send({success: true});  
+  // }).catch((err) => {
+  //   res.send({success: false});
+  // });
+
+  //saving Q&A for user study phase 3
+  let resArr = [];
+  for (let key in qnaData) {
+    if (qnaData.hasOwnProperty(key)) {
+        console.log("KEY:", key);
+        for(let i= 0; i< qnaData[key].length; i++){
+          console.log("value" ," -> " , qnaData[key][i].question);
+          resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
+        }
+    }
+
+  }
+
+  Promise.all(resArr).then(() => {
+    let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+    queryResult.then(result => {
+      res.send({success: true});  
+    }).catch((err) => {
+      res.send({success: false});
+    });
+    // res.send({success: true});
+  
+  }).catch(() => {
     res.send({success: false});
-  });
+  })
+
 });
 
 

@@ -61,20 +61,69 @@ function incrementSeconds() {
     }
 }
 
+/*
+created by Vaishali 
+renders Question answer on withAi page
+*/
+const renderQnaList = (qnaList) => {  
+    qnaList.forEach(qa => {
+        let { answerId, sceneId, questionId, question, answer } = qa;
+        let currentContainer = `qna_container:${sceneId}`
+        let cont = document.getElementById(currentContainer);
+        const qaElement = getNewQnA(question, answer);
+        qaElement.dataset.jsonData = JSON.stringify(qa);
+        cont.appendChild(qaElement);
+    });
+}
+
 function fetchVideoInfo(youtubeId) {
-    let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
+    console.log(userId);
+    debugger;
+    // let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
+    let targetUrl = `/fetchVideoData?videoid=${youtubeId}&userId=${userId}`
     $.get(targetUrl, function (response) {
         let vidJson = response;
         let vidTitle = vidJson.title;
         let vidLength = vidJson.duration;
         let blocksJsonArr = vidJson.info;
+        debugger;
         $('#txtVidtitle').html(vidTitle);
         populateAllSceneArrAndAllBlockArr(blocksJsonArr);
         sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
         initializeDescriptionsUI(blocksJsonArr);
+        renderQnaList(response.qnaList)
         //setInterval(updateAll, 1000*60*2);
     });
 }
+
+
+
+/*
+created by Vaishali 
+create Question answer on click of button "addQuestion"
+*/
+function getNewQnA (ques, ans) {
+    debugger;
+    let qa = document.createElement('div');
+    qa.innerHTML = `<label>Question:</label>
+                            <input value="${ques || ''}" >
+                            <label>Answer:</label> 
+                            <input value="${ans || ''}" />`;
+    return qa;
+};
+
+/*
+created by Vaishali 
+adding eventListener on aqq question btn click
+*/
+document.getElementById('ul-scene-list').addEventListener('click', (e) => {
+    console.log('click', e.target.previousSibling);
+    if(!e.target.id.includes('create_question:')) {
+        return;
+    }
+    e.target.previousSibling.appendChild(getNewQnA()); 
+});
+
 
 function initializeDescriptionsUI(blocksJsonArr) {
     let outputHtml = '';
@@ -89,6 +138,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
         outputHtml = outputHtml + '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
         for(let j=0; j<childSceneArr.length; j++) {
             let currScene = childSceneArr[j];
+            console.log({currScene})
             let sceneId = currScene.sc_id;
             let sceneNum = currScene.sc_num;
             let scStartTime = currScene.start_time;
@@ -97,6 +147,7 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
             let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
             let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
+            let newQuestion = `<div id="qna_container:${sceneId}"></div><input type="button" id="create_question:${sceneId}" value="Create New Question"/>`;
             outputHtml = outputHtml
             + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
@@ -106,26 +157,10 @@ function initializeDescriptionsUI(blocksJsonArr) {
             + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
             + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
-            + '<tr><td>Question 1</td></td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Answer 1</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Question 2</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Answer 2</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Question 3</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Answer 3</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Question 4</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Answer 4</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Question 5</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>'
-            + '<tr><td>Answer 5</td><td><div class="scene-ocr-container">'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
+            + newQuestion;
+           
+            // + '<tr><td>Question and Answer</td></td><div class="scene-ocr-container">'
+            // + '<text area onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
             // if(j!=childSceneArr.length-1) {
             //     outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
             // }
@@ -252,7 +287,7 @@ function onPlayerReady(event) {
 }
 
 function updateTime() {
-    console.log('I was called');
+    // console.log('I was called');
     var oldTime = videotime;
     if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
@@ -325,15 +360,52 @@ function pauseVideo() {
 function stopVideo() {
     player.stopVideo();
 }
+
+/* 
+created by Vaishali
+iterating over all QnAcontainers, saving entire info for the ques and answers that already exists
+in the DB, sending new qnAs
+*/
+const getNewQnAData = () =>{
+    const qnaData = {}
+    var allQAContainer = $('div[id^="qna_container:"]');
+
+    for(let i=0; i< allQAContainer.length; i++) {
+        const qaList = allQAContainer[i].children;
+        for(let childIndex = 0; childIndex< qaList.length; childIndex++){
+            console.log('id of parent', allQAContainer[i].id.substring(14));
+            let sceneId = allQAContainer[i].id.substring(14)
+            const currentElement = qaList[childIndex];
+            // console.log('child', qaList[childIndex]);
+            var question = currentElement.children[1].value;
+            var answer = currentElement.children[3].value;
+            console.log({question, answer})
+
+            qnaData[sceneId] = qnaData[sceneId] || [];
+            if(currentElement.dataset.jsonData) {
+                const tempData = JSON.parse(currentElement.dataset.jsonData); //saving coming json data  for the exisiting qnA
+                qnaData[sceneId].push({question, answer, answerId: tempData.answerId, questionId: tempData.questionId });
+            } else {
+                qnaData[sceneId].push({question, answer })//pushing only questio and answer value to the exisiting qnA.
+            }
+        }
+    }
+    return qnaData;
+}
+
 async function updateAll(shoudShowAlert) {
     let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
     // await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
+        // return;
+    const qnaData = getNewQnAData();    
+    postJson.qnaData = qnaData;
     await $.post('/saveAiDescription', postJson, function (response) {
         if(shoudShowAlert) {
             if(response.success) {
                 alert('Submitted Successfully\nYou will be redirected to the Video List Page');
                 window.history.back();
             } else {
+                console.log(response);
                 alert('Update Failed: ' + response.success);
             }
         }
@@ -343,6 +415,8 @@ async function updateAll(shoudShowAlert) {
 
 async function updateMainTables() {
     let postJson = fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr);
+
+    console.log({postJson})
     await $.post('/updateBlockAndScene', postJson, function (response) {
         if(response.success) {
             window.alert('Updated Successfully');
@@ -366,6 +440,7 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
         sceneJsonObj.scene_id = currSceneId;
         sceneJsonObj.modified_description = $(currSceneDescTextId).val().trim();
         sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+
         sceneArrJson.push(sceneJsonObj);
     }
     for(let i=0; i<allBlockArr.length; i++) {
@@ -494,7 +569,7 @@ function resetVideoTo(time) {
 }
 
 function formatTime(time) {
-    console.log(time);
+    // console.log(time);
     var minutes = Math.floor(time / 60);
     var seconds = time - minutes * 60;
     seconds = seconds < 10 ? '0' + seconds : seconds;
@@ -524,3 +599,4 @@ function onPlayPauseButtonClick() {
         break;
     }
 }
+
