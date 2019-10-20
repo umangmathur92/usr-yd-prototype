@@ -5,7 +5,6 @@ body {
 a {
   color: #00B7FF;
 }
-
 .scene-list {
   list-style-type: none;
   padding: 0;
@@ -38,7 +37,7 @@ a {
   width: 25%;
 }
 
-.txt-scene-description, .txt-scene-ocr, .txt-block-description {
+.txt-scene-description, .txt-scene-ocr, .txt-block-description, .qnATextArea {
   position:relative;
   border:none;
   width:75%;
@@ -46,6 +45,20 @@ a {
   resize: none;
   outline: none; /*add this to stop highlight on focus*/
   overflow: hidden;
+}
+
+.qnATextArea {
+  margin: 3px 0px 0px 42px;
+  width: 77%;
+  border: 1px solid rgb(221, 221, 221);
+  /* min-height: 15px; */
+  height: 20px;
+
+}
+
+.qnALabel {
+  width: 12%;
+  margin: 0px;
 }
 
 tr td:first-child{
