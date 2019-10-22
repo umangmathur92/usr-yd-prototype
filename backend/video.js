@@ -57,7 +57,7 @@ async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
 }
 
-async function fetchVideoDataFromDb(videoId) {
+async function fetchVideoDataFromDb(videoId, userId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
         let queryResult = await db.one(`SELECT jsonb_pretty(jsonb_agg(js_object))
@@ -70,8 +70,14 @@ async function fetchVideoDataFromDb(videoId) {
              s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
              GROUP BY start_time, end_time, block_id, original_description, block_num,
               video_id ORDER BY block_num ASC ) s`, [videoId]);
+
+        let modifiedDesc = await db.query( `Select * from us3_description_modified where user_id=$1 and video_id=$2`, [userId, videoId]);
+        console.log({modifiedDesc})
         vidQueryResult.info = JSON.parse(queryResult.custom_nested_json_data);
-        // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
+        console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
+        for(key in vidQueryResult.info) {
+            console.log({key})
+        }
         return vidQueryResult;
     } catch(e) {
         throw e;

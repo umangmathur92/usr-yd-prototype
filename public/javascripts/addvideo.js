@@ -28,6 +28,7 @@ function submitVideoData() {
             window.alert(JSON.stringify(response));
         },
         error: function (response, textStatus, errorThrown) {
+            console.log(errorThrown);
             window.alert(JSON.stringify(response));
         }
       });

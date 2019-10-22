@@ -7,8 +7,11 @@ const userStudy2 = require('../model/userStudy2');
 const questionAnswer = require('./question_answer');
 const db = require('../db/database');
 const quesAns = require('../model/questionAnswer');
+const sceneModification = require('./sceneModification');
 
 router.use('/us3/question', questionAnswer);
+router.use('/sceneModification', sceneModification);
+console.log({sceneModification: sceneModification.addModifiedScene})
 
 router.get('/', function(req, res, next) {
   //res.render('homeUserStudy', { title: 'Express' });
@@ -47,7 +50,7 @@ router.get('/playvideo/:youtubeId', function(req, res, next) {
 router.get('/fetchVideoData', function(req, res, next) {
   console.log('req.query', req.query)
   let {videoid, userId} = req.query;
-  let queryResult = video.fetchVideoDataFromDb(videoid);
+  let queryResult = video.fetchVideoDataFromDb(videoid, userId);
   queryResult.then(result => {
     quesAns.getQuestionAnswerByUserId(userId).then( qnaList =>{
       console.log({ resdata: qnaList});
@@ -147,6 +150,17 @@ router.get('/userStudy/helper/video', function (req, res) {
       });
   }
 });
+
+function addModifiedScene (data, callback) {
+  console.log('inside modified scene:', data);
+  const { scene_id, user, block_id, scene_num,start_time, end_time,  description, ocr, videoId } = data;
+  const sql = `
+  INSERT INTO us3_description_modified(video_id, user_id, scene_id, block_id, scene_num, start_time, end_time, description, ocr) 
+  VALUES('${videoId}', '${user}', '${scene_id}', '${block_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}')
+  ON CONFLICT(scene_id, user_id, video_id) DO UPDATE SET description ='${description}'; `;
+  console.log({sql});
+  return db.query(sql, callback);
+}
 
 //list of users
 //list of users study 1
@@ -275,6 +289,7 @@ router.post('/updatefeedback', function(req, res, next) {
 
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;
+  console.log("video id =====>", req.body.videoId)
   console.log('Save AI:', inputJson);
   console.log('Save AI user:', inputJson.user_id);
   console.log('qna data', inputJson.qnaData);
@@ -294,17 +309,39 @@ router.post('/saveAiDescription', function(req, res, next) {
         console.log("KEY:", key);
         for(let i= 0; i< qnaData[key].length; i++){
           console.log("value" ," -> " , qnaData[key][i].question);
+
           resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
         }
     }
 
   }
 
+  for(let key in inputJson.scene_arr) {
+    console.log({key})
+    let currScene = inputJson.scene_arr[key];
+    let {scene_id, modified_description, modified_ocr } = currScene;
+    console.log({currScene})
+    resArr = [...resArr, addModifiedScene({
+      scene_id,
+      user: user_id,
+      scene_num: key,
+      videoId: req.body.videoId,
+      description: modified_description,
+      ocr:  modified_ocr,
+      block_id: 'ff',
+      start_time:12,
+      end_time:18,
+    })];
+  }
+
   Promise.all(resArr).then(() => {
     let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+    console.log({inputJson})
+
     queryResult.then(result => {
       res.send({success: true});  
     }).catch((err) => {
+      console.log(err)
       res.send({success: false});
     });
     // res.send({success: true});

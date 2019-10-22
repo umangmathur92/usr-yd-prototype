@@ -338,6 +338,7 @@ function stopVideo() {
 }
 async function updateAll(shoudShowAlert) {
     let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
+    postJson.videoId = youtubeId;
     // await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
     await $.post('/saveAiDescription', postJson, function (response) {
         if(shoudShowAlert) {

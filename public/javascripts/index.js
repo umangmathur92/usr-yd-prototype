@@ -434,6 +434,7 @@ async function updateAll(shoudShowAlert) {
         // return;
     const qnaData = getNewQnAData();    
     postJson.qnaData = qnaData;
+    postJson.videoId = youtubeId;
     await $.post('/saveAiDescription', postJson, function (response) {
         if(shoudShowAlert) {
             if(response.success) {
