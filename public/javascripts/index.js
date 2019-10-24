@@ -70,7 +70,7 @@ const renderQnaList = (qnaList) => {
         let { answerId, sceneId, questionId, question, answer } = qa;
         let currentContainer = `qna_container:${sceneId}`
         let cont = document.getElementById(currentContainer);
-        const qaElement = getNewQnA(question, answer);
+        const qaElement = getNewQnA(question, answer, questionId, answerId);
         qaElement.dataset.jsonData = JSON.stringify(qa);
         cont.appendChild(qaElement);
     });
@@ -94,18 +94,21 @@ function fetchVideoInfo(youtubeId) {
     });
 }
 
-
-
 /*
 created by Vaishali 
 create Question answer on click of button "addQuestion"
 */
-function getNewQnA (ques, ans) {
+function getNewQnA (ques, ans, quesId, ansId) {
     let qa = document.createElement('div');
-    qa.innerHTML = `<label class="qnALabel">Question:</label> 
-                    <textarea style=""class='qnATextArea' onkeyup="auto_grow(this)" >${ques || ''}</textarea>
+
+    let del = `<button onclick="$(this).parent().remove()" id="delBtn:${quesId}:${ansId}"> Delete </button>`
+    qa.innerHTML = `<div>
+                    <label class="qnALabel">Question:</label> 
+                    <textarea class='qnATextArea' onkeyup="auto_grow(this)" >${ques || ''}</textarea>
                     <label class="qnALabel">Answer:</label> 
-                    <textarea class='qnATextArea' onkeyup="auto_grow(this)">${ans || ''}</textarea>`
+                    <textarea class='qnATextArea' onkeyup="auto_grow(this)">${ans || ''}</textarea>
+                    ${del}
+                   </div>`;
     return qa;
 };
 
@@ -115,11 +118,11 @@ adding eventListener on add question btn click, get question click
 */
 document.getElementById('ul-scene-list').addEventListener('click', (e) => {
 
-    console.log('click event TARGET: ', e.target.id);
-    console.log('click event TARGET: ', e.target.id);
+    console.log('click event TARGET: ', e.target);
+    // console.log('click event TARGET: ', e.target.id);
 
     if(e.target.id.includes('create_question:')) {
-        e.target.previousSibling.appendChild(getNewQnA()); 
+        e.target.previousSibling.previousSibling.appendChild(getNewQnA()); 
     }else if (e.target.id.includes('get_question:')) {
         let index = e.target.id.indexOf(':')+1;
         let textDescArea = e.target.id.substring(index);
@@ -147,13 +150,39 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
                         questionArr.push(rows[i]);
                         let response = rows[i].response;
                         let qnAelement = getNewQnA(response.question, response.answer);
-                        e.target.previousSibling.previousSibling.appendChild(qnAelement); 
+                        e.target.previousSibling.appendChild(qnAelement); 
                  
                     }
                 }
                 console.log('RESULT ', res.result);
                 console.log({questionArr});
         });
+
+        e.target.style.visibility = 'hidden';
+        e.target.style.height = '0px';
+    }else if(e.target.id.includes('delBtn')){
+        console.log('INSIDE DELETEEEE ', e.target);
+        let [txt, questionId, answerId] = e.target.id.split(':')
+        let jsonBody = {
+
+            
+            "questionId" : questionId,
+            "answerId" : answerId
+        };
+        console.log('DELETEJSON ', jsonBody);
+        $.ajax({
+            type: 'DELETE',
+            url : '/us3/question/deleteQuestion',
+            dataType: "json",
+            async:true,
+            data: jsonBody,
+            success: function (response) {
+                console.log('SUCCESS:', response);
+            },
+            error: function (response, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+          });
     }
 });
 
@@ -181,19 +210,20 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
             let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
             let newQuestion = `<div id="qna_container:${sceneId}">
-                               </div><input type="button" id="create_question:${sceneId}" value="Create Manual Question"/><input type="button" id="get_question:${sceneId}" value="Autogenerate Questions"/></div>`;
-            let getQuestion = `<div id="qna_container:${sceneId}"></div><input type="button" id="get_question:${sceneId}" value="Autogenerate Questions"/>`;
+                               </div><input style="display:block;" type="button" id="get_question:${sceneId}" value="Save Description"/><input type="button" id="create_question:${sceneId}" style="margin:10px 0px 0px 0px;" value="Create More Question"/></div>`;
+        
+          
             outputHtml = outputHtml
             + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
-            + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Description</button>'
+            + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="display: none;">Update Description</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
-            + '<tr><td>Text On-Screen</td><td><div class="scene-ocr-container">'
-            // + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
-            + newQuestion  ;
-           
+            // + '<tr><td>Text On-Screen</td><td>' 
+             + '<div class="scene-ocr-container" style="display:none">'
+            // // + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
+             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
+            + newQuestion ;
             // + '<tr><td>Question and Answer</td></td><div class="scene-ocr-container">'
             // + '<text area onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
             // if(j!=childSceneArr.length-1) {
@@ -412,8 +442,8 @@ const getNewQnAData = () =>{
             let sceneId = allQAContainer[i].id.substring(14)
             const currentElement = qaList[childIndex];
             // console.log('child', qaList[childIndex]);
-            var question = currentElement.children[1].value;
-            var answer = currentElement.children[3].value;
+            var question = currentElement.children[0].children[1].value;
+            var answer = currentElement.children[0].children[3].value;
             console.log({question, answer})
 
             qnaData[sceneId] = qnaData[sceneId] || [];
@@ -442,7 +472,7 @@ async function updateAll(shoudShowAlert) {
                 window.history.back();
             } else {
                 console.log(response);
-                alert('Update Failed: ' + response.success);
+                alert('Update Status: ' + response.success);
             }
         }
     });

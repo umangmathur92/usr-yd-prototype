@@ -46,6 +46,17 @@ router.post('/addQuestion', function(req, res, next) {
   });
 
 
+router.delete('/deleteQuestion', function(req, res, next) {
+    let queryResult = questionAnswer.deleteQuestionById(req.body);
+    queryResult.then(result => {
+      res.send('Question deleted successfully');  
+    }).catch((err) => {
+      res.send(err);
+      console.log(err)
+    });
+  });
+
+
 router.post('/generate', async function(req, res) {
   // debugger;
   // console.log('reached', req.body.sentence);

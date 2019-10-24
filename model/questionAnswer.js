@@ -53,6 +53,17 @@ let question = {
     updateQuestion: function (data, callback) {
         console.log({'IINSIE US': data});
         return db.query(`UPDATE question set question = $1 where id= $2`, [data.question, data.id], callback);
+    },
+
+    deleteQuestionById : function(data, callback){
+        console.log('inside delete');
+        const sql = `START TRANSACTION; 
+                     Delete from question where id = '${data.questionId}'; 
+                     Delete from answer where id = '${data.answerId}'; 
+                     Delete from scene_qna_mapping where question_id = '${data.questionId}' AND answer_id = '${data.answerId}' ;
+                     COMMIT;`;
+        console.log({sql});
+         return db.query(sql, callback);
     }
 
 };
