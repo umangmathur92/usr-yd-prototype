@@ -72,11 +72,11 @@ async function fetchVideoDataFromDb(videoId, userId) {
               video_id ORDER BY block_num ASC ) s`, [videoId]);
 
         let modifiedDesc = await db.query( `Select * from us3_description_modified where user_id=$1 and video_id=$2`, [userId, videoId]);
-        console.log({modifiedDesc})
+        // console.log({modifiedDesc})
         vidQueryResult.info = JSON.parse(queryResult.custom_nested_json_data);
-        console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
+        // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
         for(key in vidQueryResult.info) {
-            console.log({key})
+            // console.log({key})
         }
         return vidQueryResult;
     } catch(e) {

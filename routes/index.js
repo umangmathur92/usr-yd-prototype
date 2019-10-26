@@ -152,12 +152,16 @@ router.get('/userStudy/helper/video', function (req, res) {
 });
 
 function addModifiedScene (data, callback) {
-  console.log('inside modified scene:', data);
-  const { scene_id, user, block_id, scene_num,start_time, end_time,  description, ocr, videoId } = data;
+  // console.log('inside modified scene:', data);
+  const { has_ai, video_id, scene_id, user, block_id, scene_num, start_time, end_time,  description, ocr } = data;
+  let descriptionId = user + '_' + video_id + '_ai_' + scene_num;
+   console.log({INSIDEpSOT: data});
+   console.log({descriptionId});
   const sql = `
-  INSERT INTO us3_description_modified(video_id, user_id, scene_id, block_id, scene_num, start_time, end_time, description, ocr) 
-  VALUES('${videoId}', '${user}', '${scene_id}', '${block_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}')
-  ON CONFLICT(scene_id, user_id, video_id) DO UPDATE SET description ='${description}'; `;
+  INSERT INTO descriptions(desc_id, video_id, has_ai, volunteer_id, scene_id, scene_num, start_time, end_time, description, ocr) 
+  VALUES('${descriptionId}', '${video_id}', '${has_ai}','${user}', '${scene_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}')
+  ON CONFLICT(desc_id) DO UPDATE SET description ='${description}'; `;
+
   console.log({sql});
   return db.query(sql, callback);
 }
@@ -289,10 +293,11 @@ router.post('/updatefeedback', function(req, res, next) {
 
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;
-  console.log("video id =====>", req.body.videoId)
+  // console.log("video id =====>", req.body.videoId);
   console.log('Save AI:', inputJson);
-  console.log('Save AI user:', inputJson.user_id);
-  console.log('qna data', inputJson.qnaData);
+//  console.log('end time', inputJson.finish_time);
+//   console.log('Save AI user:', inputJson.user_id);
+//    console.log('qna data', inputJson.qnaData);
   let {qnaData, user_id} = inputJson;
 
   // let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
@@ -306,9 +311,9 @@ router.post('/saveAiDescription', function(req, res, next) {
   let resArr = [];
   for (let key in qnaData) {
     if (qnaData.hasOwnProperty(key)) {
-        console.log("KEY:", key);
+        // console.log("KEY:", key);
         for(let i= 0; i< qnaData[key].length; i++){
-          console.log("value" ," -> " , qnaData[key][i].question);
+          // console.log("value" ," -> " , qnaData[key][i].question);
 
           resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
         }
@@ -316,23 +321,27 @@ router.post('/saveAiDescription', function(req, res, next) {
 
   }
 
+ 
+  // console.log({TESTSCENE: inputJson.scene_arr})
   for(let key in inputJson.scene_arr) {
-    console.log({key})
+     console.log({key});
     let currScene = inputJson.scene_arr[key];
-    let {scene_id, modified_description, modified_ocr } = currScene;
-    console.log({currScene})
+    let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai  } = currScene;
+    
     resArr = [...resArr, addModifiedScene({
       scene_id,
       user: user_id,
       scene_num: key,
-      videoId: req.body.videoId,
+      video_id: req.body.videoId,
       description: modified_description,
       ocr:  modified_ocr,
-      block_id: 'ff',
-      start_time:12,
-      end_time:18,
+      start_time,
+      end_time,
+      has_ai
     })];
   }
+
+
 
   Promise.all(resArr).then(() => {
     let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);

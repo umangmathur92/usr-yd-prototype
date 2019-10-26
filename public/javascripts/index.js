@@ -470,6 +470,7 @@ async function updateAll(shoudShowAlert) {
     const qnaData = getNewQnAData();    
     postJson.qnaData = qnaData;
     postJson.videoId = youtubeId;
+    console.log({postJson});
     await $.post('/saveAiDescription', postJson, function (response) {
         if(shoudShowAlert) {
             if(response.success) {
@@ -497,11 +498,12 @@ async function updateMainTables() {
     });
 }
 
-
+//added start time, end time and has Ai for saving in descrption table
 function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     let parentJsonBody = {};
     let sceneArrJson = [];
     let blockArrJson = [];
+    console.log({'INSIDE fetchJsonBodyForAllTextFields ' : allSceneArr});
     for(let i=0; i<allSceneArr.length; i++) {
         let currScene = allSceneArr[i];
         let currSceneId = currScene.sc_id;
@@ -511,6 +513,9 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
         sceneJsonObj.scene_id = currSceneId;
         sceneJsonObj.modified_description = $(currSceneDescTextId).val().trim();
         sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+        sceneJsonObj.start_time = currScene.start_time;
+        sceneJsonObj.end_time = currScene.finish_time;
+        sceneJsonObj.has_ai = enableAi;
 
         sceneArrJson.push(sceneJsonObj);
     }
@@ -527,6 +532,8 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     parentJsonBody.scene_arr = sceneArrJson;
     parentJsonBody.block_arr = blockArrJson;
     parentJsonBody.time_taken = timeElapsedOnPage;
+
+    console.log({sceneArrJson});
     return parentJsonBody;
 }
 
