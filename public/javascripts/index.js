@@ -122,7 +122,9 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
     // console.log('click event TARGET: ', e.target.id);
 
     if(e.target.id.includes('create_question:')) {
-        e.target.previousSibling.previousSibling.appendChild(getNewQnA()); 
+        let index = e.target.id.indexOf(':')+1;
+        let textDescArea = e.target.id.substring(index);
+        document.getElementById(`qna_container:${textDescArea}`).appendChild(getNewQnA()); 
     }else if (e.target.id.includes('get_question:')) {
         let index = e.target.id.indexOf(':')+1;
         let textDescArea = e.target.id.substring(index);
@@ -150,16 +152,15 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
                         questionArr.push(rows[i]);
                         let response = rows[i].response;
                         let qnAelement = getNewQnA(response.question, response.answer);
-                        e.target.previousSibling.appendChild(qnAelement); 
+                        // e.target.nextSibling.nextSibling.appendChild(qnAelement); 
+
+                        document.getElementById(`qna_container:${textDescArea}`).appendChild(qnAelement)
                  
                     }
                 }
                 console.log('RESULT ', res.result);
                 console.log({questionArr});
         });
-
-        e.target.style.visibility = 'hidden';
-        e.target.style.height = '0px';
     }else if(e.target.id.includes('delBtn')){
         console.log('INSIDE DELETEEEE ', e.target);
         let [txt, questionId, answerId] = e.target.id.split(':')
@@ -183,6 +184,8 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
                 console.log(errorThrown);
             }
           });
+    } else if(e.target.id === 'doneSceneBtn') {
+        playVideo();
     }
 });
 
@@ -209,10 +212,11 @@ function initializeDescriptionsUI(blocksJsonArr) {
             let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
             let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
             let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
-            let newQuestion = `<div id="qna_container:${sceneId}">
-                               </div><input style="display:block;" type="button" id="get_question:${sceneId}" value="Save Description"/><input type="button" id="create_question:${sceneId}" style="margin:10px 0px 0px 0px;" value="Create More Question"/></div>`;
-        
-          
+            let doneSceneBtn = `<input type="button" id="doneSceneBtn" style="display:block; margin:10px 0px 0px 0px;" value="Done With Scene"/>`;
+            let getQuestionBtn = `<input style="display:block;" type="button" id="get_question:${sceneId}" value="Save Description"/>`;
+            let qaContainer = `<div id="qna_container:${sceneId}"></div>`;
+            let createMoreQues = `<input type="button" id="create_question:${sceneId}" style="margin:10px 0px 0px 0px;" value="Create More Question"/>`;
+            let newQuestion = `${getQuestionBtn}<hr />${qaContainer}<hr />${createMoreQues}<hr />${doneSceneBtn}</div>`;  
             outputHtml = outputHtml
             + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
@@ -223,7 +227,8 @@ function initializeDescriptionsUI(blocksJsonArr) {
              + '<div class="scene-ocr-container" style="display:none">'
             // // + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
              + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
-            + newQuestion ;
+             + `<hr/>` 
+             + newQuestion;
             // + '<tr><td>Question and Answer</td></td><div class="scene-ocr-container">'
             // + '<text area onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
             // if(j!=childSceneArr.length-1) {
