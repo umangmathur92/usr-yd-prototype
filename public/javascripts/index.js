@@ -85,10 +85,11 @@ function fetchVideoInfo(youtubeId) {
         let vidTitle = vidJson.title;
         let vidLength = vidJson.duration;
         let blocksJsonArr = vidJson.info;
+        let overrideData = vidJson.overrideData || [];
         $('#txtVidtitle').html(vidTitle);
         populateAllSceneArrAndAllBlockArr(blocksJsonArr);
         sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
-        initializeDescriptionsUI(blocksJsonArr);
+        initializeDescriptionsUI(blocksJsonArr, overrideData);
         renderQnaList(response.qnaList)
         //setInterval(updateAll, 1000*60*2);
     });
@@ -189,20 +190,8 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
     }
 });
 
-
-function initializeDescriptionsUI(blocksJsonArr) {
+function renderScenes(currScene) {
     let outputHtml = '';
-    for(let i=0; i<blocksJsonArr.length; i++) {
-        let currBlock = blocksJsonArr[i];
-        let blockId = currBlock.block_id;
-        let blockNum = currBlock.block_num;
-        let blStartTime = currBlock.start_time;
-        let blFinishTime = currBlock.finish_time;
-        let baselineDesc = enableAi ? $.trim(currBlock.baseline_des) : '';
-        let childSceneArr = currBlock.child_scenes;
-        outputHtml = outputHtml + '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
-        for(let j=0; j<childSceneArr.length; j++) {
-            let currScene = childSceneArr[j];
             console.log({currScene})
             let sceneId = currScene.sc_id;
             let sceneNum = currScene.sc_num;
@@ -237,15 +226,40 @@ function initializeDescriptionsUI(blocksJsonArr) {
             outputHtml = outputHtml
             + '</div>'
             + '</div></li>';
+            return outputHtml;
+}
+
+
+function initializeDescriptionsUI(blocksJsonArr, overrideData) {
+    let outputHtml = '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block 0 </b> </li>';
+    if (overrideData.length > 0 ) {
+        for(let i=0; i<overrideData.length; i++) {
+            outputHtml += renderScenes(overrideData[i]);
         }
-        outputHtml = outputHtml
-        + '<li class="li-block-footer" style="visibility: hidden; height: 0px;"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
-        + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
-        + '<button class="btn-update-block-description" data-blockid="'+ blockId +'">Update Description</button>'
-        + '<textarea onkeyup="auto_grow(this)" class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
-        + '</div></td></tr></table></div>'
-        + '</li>';
+
+    } else {
+        for(let i=0; i<blocksJsonArr.length; i++) {
+            let currBlock = blocksJsonArr[i];
+            let blockId = currBlock.block_id;
+            let blockNum = currBlock.block_num;
+            let blStartTime = currBlock.start_time;
+            let blFinishTime = currBlock.finish_time;
+            let baselineDesc = enableAi ? $.trim(currBlock.baseline_des) : '';
+            let childSceneArr = currBlock.child_scenes;
+            outputHtml = outputHtml + '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
+            for(let j=0; j<childSceneArr.length; j++) {
+                outputHtml +=  renderScenes(childSceneArr[j]);
+            }
+            // outputHtml = outputHtml
+            // + '<li class="li-block-footer" style="visibility: hidden; height: 0px;"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
+            // + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
+            // + '<button class="btn-update-block-description" data-blockid="'+ blockId +'">Update Description</button>'
+            // + '<textarea onkeyup="auto_grow(this)" class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
+            // + '</div></td></tr></table></div>'
+            // + '</li>';
+        }
     }
+    
     $('#ul-scene-list').html(outputHtml);
     $('.btn-update-scene-description').click(function() {
         let sceneId = this.dataset.sceneid;
@@ -519,15 +533,15 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
 
         sceneArrJson.push(sceneJsonObj);
     }
-    for(let i=0; i<allBlockArr.length; i++) {
-        let currBlock = allBlockArr[i];
-        let currBlockId = currBlock.block_id;
-        let currBlockDescTextId = '#b_d_' + currBlockId;
-        let blockJsonObj = {};
-        blockJsonObj.block_id = currBlockId;
-        blockJsonObj.modified_description = $(currBlockDescTextId).val().trim();
-        blockArrJson.push(blockJsonObj);
-    }
+    // for(let i=0; i<allBlockArr.length; i++) {
+    //     let currBlock = allBlockArr[i];
+    //     let currBlockId = currBlock.block_id;
+    //     let currBlockDescTextId = '#b_d_' + currBlockId;
+    //     let blockJsonObj = {};
+    //     blockJsonObj.block_id = currBlockId;
+    //     blockJsonObj.modified_description = $(currBlockDescTextId).val().trim();
+    //     blockArrJson.push(blockJsonObj);
+    // }
     parentJsonBody.user_id = userId;
     parentJsonBody.scene_arr = sceneArrJson;
     parentJsonBody.block_arr = blockArrJson;

@@ -70,10 +70,21 @@ async function fetchVideoDataFromDb(videoId, userId) {
              s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
              GROUP BY start_time, end_time, block_id, original_description, block_num,
               video_id ORDER BY block_num ASC ) s`, [videoId]);
+        let overrideData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
+        start_time, end_time as finish_time, ocr as original_ocr,
+        description as original_description
+        from descriptions where volunteer_id = $1 and
+                                has_ai=true and 
+                                video_id= $2 ORDER BY scene_num` 
+                                , [userId , videoId])
 
-        let modifiedDesc = await db.query( `Select * from us3_description_modified where user_id=$1 and video_id=$2`, [userId, videoId]);
+        
+        
+        console.log('over data', JSON.stringify(overrideData))
+
         // console.log({modifiedDesc})
         vidQueryResult.info = JSON.parse(queryResult.custom_nested_json_data);
+        vidQueryResult.overrideData = overrideData;
         // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
         for(key in vidQueryResult.info) {
             // console.log({key})
