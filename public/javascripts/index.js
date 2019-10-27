@@ -102,7 +102,7 @@ create Question answer on click of button "addQuestion"
 function getNewQnA (ques, ans, quesId, ansId) {
     let qa = document.createElement('div');
 
-    let del = `<button onclick="$(this).parent().remove()" id="delBtn:${quesId}:${ansId}"> Delete </button>`
+    let del = `<button onclick="$(this).parent().parent().remove()" id="delBtn:${quesId}:${ansId}"> Delete </button>`
     qa.innerHTML = `<div>
                     <label class="qnALabel">Question:</label> 
                     <textarea class='qnATextArea' onkeyup="auto_grow(this)" >${ques || ''}</textarea>
