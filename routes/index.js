@@ -1,17 +1,19 @@
 var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
-const userStudy = require('../model/userStudy');
 const textToSpeech = require('../backend/texttospeech.js');
 const userStudy2 = require('../model/userStudy2');
 const questionAnswer = require('./question_answer');
 const db = require('../db/database');
 const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
+const userStudy = require('./userStudy');
 
+router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
 console.log({sceneModification: sceneModification.addModifiedScene})
+
 
 router.get('/', function(req, res, next) {
   //res.render('homeUserStudy', { title: 'Express' });
@@ -114,42 +116,28 @@ router.post('/updateBlockAndScene', function(req, res, next) {
     res.send({success: result});  
   });
 })
-//vaishali
-router.get('/userStudy', function (req, res) {
-  res.render('homeUserStudy', { title: 'User Study' });
-});
 
 //poorva
 router.get('/userStudy2', function (req, res) {
   res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
-//list of video for a user
-router.get('/userStudy/video', function (req, res) {
-  res.render('videoUserStudy', { title: 'User Study Video' });
-});
+//list of users study 2
+router.get('/userStudy2/users/', function (req, res) {
+  // let userId = req.query.userId;
+  // if(userId){
+     //let queryResult = userStudy2.getVideoByUserId(userId);
+     let queryResult = db.query(`SELECT * from us_user_blind order by id`);
+     queryResult
+     .then(result => {
+       res.send(result);
+     })
+     .catch((err) => {
+       res.send(err);
+     });
+  // }
+ });
 
-//list of video for visually impaired users
-router.get('/userStudy/videoHelper', function (req, res) {
-  res.render('videoHelper', { title: 'User Study Video Helper' });
-});
-
-
-//list of visually impaired users
-router.get('/userStudy/helper/video', function (req, res) {
-  // console.log({ param: req.query.userId });
-  let userId = req.query.userId;
-  if (userId) {
-    let queryResult = userStudy.getHelperVideo(userId);
-    queryResult
-      .then(result => {
-        res.send(result);
-      })
-      .catch((err) => {
-        res.send(err);
-      });
-  }
-});
 
 function addModifiedScene (data, callback) {
   // console.log('inside modified scene:', data);
@@ -166,100 +154,7 @@ function addModifiedScene (data, callback) {
   return db.query(sql, callback);
 }
 
-//list of users
-//list of users study 1
-router.get('/userStudy/users/', function (req, res) {
-  console.log({param: req.query.userId});
-  let userId = req.query.userId;
-  if(userId){
-    //let queryResult = userStudy.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1 ORDER by u.id`,[userId]);
-    queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-  }else{
-    let queryResult = userStudy.getAllUsers();
-    console.log({ queryResult });
-    queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-  }
-});
 
-router.get('/userStudy/helperStatus', function (req, res) {
-  let userId= req.query.userId;
-  console.log({ userId});
-  
-  if (userId) {
-    let queryResult = db.query(`SELECT * from us_helper_video where vi_user_id = '${userId}' and rating IS NOT NULL`);
-    queryResult
-      .then(result => {
-        res.json(result);
-      })
-      .catch((err) => {
-        res.send({err});
-      });
-  }
-});
-
-router.get('/userStudy/getUserHelper', function (req, res) {
-  let userId = req.query.userId;
-  let queryResult = userStudy.getAllUser_VI(userId);
-  queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-});
-
-
-router.put('/userStudy/updateStatus', function (req, res, next) {
-  let task = userStudy.updateStatus_VIUser(req.body);
-  task.then(result => {
-    res.status(200).json({ 'message': 'Thank you for you participation' });
-  })
-    .catch((err) => {
-      console.log(err)
-      res.send({ success: false });
-    });;
-});
-
-router.put('/userStudy/updateUserInfo', function (req, res, next) {
-  let task = userStudy.updateVIUserInfo(req.body);
-  task.then(result => {
-    res.status(200).json({ 'success': 'true' });
-  })
-    .catch((err) => {
-      console.log(err)
-      res.send({ success: false });
-    });;
-});
-
-//list of users study 2
-router.get('/userStudy2/users/', function (req, res) {
- // let userId = req.query.userId;
- // if(userId){
-    //let queryResult = userStudy2.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT * from us_user_blind order by id`);
-    queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
- // }
-});
 
 router.post('/saveNonAiDescription', function(req, res, next) {
   let inputJson = req.body;
@@ -300,12 +195,12 @@ router.post('/saveAiDescription', function(req, res, next) {
 //    console.log('qna data', inputJson.qnaData);
   let {qnaData, user_id} = inputJson;
 
-  // let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
-  // queryResult.then(result => {
-  //   res.send({success: true});  
-  // }).catch((err) => {
-  //   res.send({success: false});
-  // });
+  let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+  queryResult.then(result => {
+    res.send({success: true});  
+  }).catch((err) => {
+    res.send({success: false});
+  });
 
   //saving Q&A for user study phase 3
   let resArr = [];
