@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head>
+    <title>User Study</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>       
+</head>
+<body>
+<nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <div class="container">
+      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">YouDescribe User Study</a>
+    </div>
+</nav>
+<div class="container">
+    <div>
+        <h1>List of Video</h1>
+        <p id="date"> </p>
+        <p>Please select the video</p>
+    </div>
+    <div class="container">
+        <div class="list-group"> 
+          
+    </div>
+    </b>
+     <!--iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfwGYCxzlpzy05nsvR74vqMRqUt6DPvIDI2Sy4hsQDktRSwug/viewform?embedded=true" width="640" height="1015" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe-->
+</div>
+
+<script>
+
+  //get parameters from query string
+let url = location.search.substring(1);
+console.log('URL:' +  url);
+let urlParams = new URLSearchParams(url);
+let userId = urlParams.get('userId');
+let targetUrl = '/userStudy/helper/video?userId=' + userId;
+console.log('target URL:' +  targetUrl);
+
+
+$(document).ready(function () {
+    getDateTime();
+    fetchVideo();
+});
+
+
+function getDateTime(){
+    let date = new Date(Date.now()).toLocaleString();
+     document.getElementById('date').innerHTML = date;
+    console.log(date);
+}
+
+
+function fetchVideo() {
+
+    $.get(targetUrl, function (rows) {
+        let videos = '';
+        for (let i = 0; i < rows.length; i++) {
+            let vid = rows[i];
+            let videoId = vid.video_id;
+            let videoTitle = vid.title;
+          
+            let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
+            let aiParam = vid.ai_support == 'true' ? 'yes' : 'no';
+            videos += `<b><a href="/playvideo/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
+                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg" alt=${videoTitle} style="width:100px;height:100px;">
+            
+                Video ${i+1}: ${videoTitle} (${aiSupportStr})</a></b>  
+                <form>
+                   <b><font color="1a4b6e"> Please Rate the above video from 0 to 5:</b></font> <input type="number" min="0" max="5" step="1"  style="width: 5%; border: 1px solid #ccc; padding: 10px 7px;border-radius: 4px; box-sizing: border-box;" name="rating" required><br>
+                   <br>
+                   <b><font color="1a4b6e"> Any other comments:</b></font> <input type="text" style= "width: 75%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                   <br>
+                   
+                </form><br>`;
+
+
+        }
+
+        $( ".list-group" ).append( videos);
+    });
+}
+
+</script>
+<input type="submit" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;" value="I completed"></input>
+
+
+</body>
+</html>
+
+          
+        
