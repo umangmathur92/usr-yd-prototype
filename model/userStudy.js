@@ -43,6 +43,13 @@ let userStudy = {
     getAllUser_VI: function (id, callback) {
         return db.query(`select * from us_user_blind where uuid = '${id}';`, callback);
     },
+
+    deleteSceneById : function(data, callback){
+        //  console.log('inside delete', data);
+         let sql = `Delete from descriptions where scene_id = '${data.sceneId}'`;
+        //  console.log({sql});
+        return db.query(sql, callback);
+    }
 };
 
 

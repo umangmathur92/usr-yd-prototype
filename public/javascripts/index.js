@@ -166,8 +166,6 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
         console.log('INSIDE DELETEEEE ', e.target);
         let [txt, questionId, answerId] = e.target.id.split(':')
         let jsonBody = {
-
-            
             "questionId" : questionId,
             "answerId" : answerId
         };
@@ -187,6 +185,45 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
           });
     } else if(e.target.id === 'doneSceneBtn') {
         playVideo();
+    } else if(e.target.id.includes('merge_scene')){
+        console.log('inside merge scene');
+        let index = e.target.id.indexOf(':')+1;
+        let curSceneId = e.target.id.substring(index);
+        console.log({curSceneId});
+        let curSceneDescElement = document.getElementById('s_d_'+ curSceneId);
+        console.log({curSceneDescElement});
+        
+        //next Sibling
+        let nextSibling = document.getElementById(e.target.id).parentElement.parentElement.nextSibling;
+        let nextSiblingSceneId = nextSibling.children[0].id;
+        nextSiblingSceneId = nextSiblingSceneId.substring(8);
+        console.log({nextSiblingSceneId});
+        let nextSceneDescElement = document.getElementById('s_d_'+ nextSiblingSceneId);
+        console.log({nextSceneDescElement});
+
+        curSceneDescElement.value += '\n' + nextSceneDescElement.value;
+
+        //delete next scene
+        let jsonBody = {
+            "sceneId" : nextSiblingSceneId
+        };
+        
+        $.ajax({
+            type: 'DELETE',
+            url : '/userStudy/deleteScene',
+            dataType: 'json',
+            async:true,
+            data: jsonBody,
+            success: function (response) {
+                window.alert('Scene merged successfully');
+                nextSibling.remove();
+            },
+            error: function (response, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+          });
+
+
     }
 });
 
@@ -205,19 +242,23 @@ function renderScenes(currScene) {
             let getQuestionBtn = `<input style="display:block;" type="button" id="get_question:${sceneId}" value="Save Description"/>`;
             let qaContainer = `<div id="qna_container:${sceneId}"></div>`;
             let createMoreQues = `<input type="button" id="create_question:${sceneId}" style="margin:10px 0px 0px 0px;" value="Create More Question"/>`;
-            let newQuestion = `${getQuestionBtn}<hr />${qaContainer}<hr />${createMoreQues}<hr />${doneSceneBtn}</div>`;  
+            let mergeScene = `<input type="button" id="merge_scene:${sceneId}" style="margin:10px 0px 0px 0px;" value="Merge with next scene"/>`;
+            let newQuestion = `${getQuestionBtn}<hr />${qaContainer}<hr />${createMoreQues}<hr />${doneSceneBtn} <hr />${mergeScene} </div>`;  
+            
+
             outputHtml = outputHtml
-            + '<li><div class="scene-container" id="'+ 'sc_cont_' + sceneId + '"><table style="width: 100%">'
+            + `<li><div class="scene-container" id="sc_cont_${currScene.sc_id}">`
+            + `<table style="width: 100%">`
             + '<tr><td><b>Scene ' + sceneNum + '</b></td><td>' + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
             + '<tr><td>Description</td><td><div class="scene-description-container">'
-            + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="display: none;">Update Description</button>'
+            // + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="display: none;">Update Description</button>'
             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
             // + '<tr><td>Text On-Screen</td><td>' 
              + '<div class="scene-ocr-container" style="display:none">'
             // // + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
              + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
              + `<hr/>` 
-             + newQuestion;
+             + newQuestion
             // + '<tr><td>Question and Answer</td></td><div class="scene-ocr-container">'
             // + '<text area onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
             // if(j!=childSceneArr.length-1) {
@@ -584,6 +625,9 @@ function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
 function populateSceneIdToListPositionMap(blocksJsonArr) {
     let listPositionIndex = 0;
     let sceneListPositionMap = new Map();
+    // for(let i=0; i< jsonArr.length; i++) {
+    //     sceneListPositionMap.set(jsonArr[i].sc_id, jsonArr[i].sc_num);
+    // }
     for(let i=0; i<blocksJsonArr.length; i++) {
         listPositionIndex++;
         let currBlock = blocksJsonArr[i];

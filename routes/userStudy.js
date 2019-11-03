@@ -122,4 +122,16 @@ router.get('/users/', function (req, res) {
     }
   });
   
+
+
+router.delete('/deleteScene', function(req, res, next) {
+  let queryResult = userStudy.deleteSceneById(req.body);
+  queryResult.then(result => {
+    // res.status(200).send('Scene deleted successfully', result);
+    res.status(200).send({msg:'Scene deleted successfully'});
+  }).catch((err) => {
+    res.status(500).send(err);
+    console.log(err)
+  });
+});
 module.exports = router;
