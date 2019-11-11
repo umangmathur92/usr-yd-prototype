@@ -195,12 +195,12 @@ router.post('/saveAiDescription', function(req, res, next) {
 //    console.log('qna data', inputJson.qnaData);
   let {qnaData, user_id} = inputJson;
 
-  let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
-  queryResult.then(result => {
-    res.send({success: true});  
-  }).catch((err) => {
-    res.send({success: false});
-  });
+  // let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+  // queryResult.then(result => {
+  //   res.send({success: true});  
+  // }).catch((err) => {
+  //   res.send({success: false});
+  // });
 
   //saving Q&A for user study phase 3
   let resArr = [];

@@ -49,7 +49,12 @@ let userStudy = {
          let sql = `Delete from descriptions where scene_id = '${data.sceneId}'`;
         //  console.log({sql});
         return db.query(sql, callback);
-    }
+    },
+    updateSceneEndTime: function (data, callback) {
+        return db.query(`UPDATE descriptions set end_time = $1
+                        where video_id = $2 and scene_id= $3 and volunteer_id = $4`, [data.endTime, data.video_id, data.scene_id, data.volunteer_id], callback);
+    },
+
 };
 
 

@@ -80,6 +80,17 @@ router.get('/helperStatus', function (req, res) {
         res.send({ success: false });
       });;
   });
+
+  router.put('/updateSceneEndTime', function (req, res, next) {
+    let task = userStudy.updateSceneEndTime(req.body);
+    task.then(result => {
+      res.status(200).json({succes : 'Scene end time updated successfully'});
+    })
+      .catch((err) => {
+        console.log(err)
+        res.send({ success: false });
+      });;
+  });
   
   router.put('/updateUserInfo', function (req, res, next) {
     let task = userStudy.updateVIUserInfo(req.body);
