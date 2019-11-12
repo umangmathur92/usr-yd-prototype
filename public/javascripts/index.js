@@ -404,12 +404,19 @@ function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
 
 
 function scrollToPosition(position) {
+    position--;
     $('#ul-scene-list').animate({
-        scrollTop: $('#ul-scene-list>.newscene-list:eq(' + position + ')').position().top - 
-        $('#ul-scene-list>.newscene-list:eq(1)').position().top 
+        scrollTop: $('#ul-scene-list>.newscene-list:eq(' + position + ')').position().top -
+        $('#ul-scene-list>.newscene-list:eq(0)').position().top 
     }, 'slow');
-    $(previouslyHighlightedContainerId).removeClass('highlight');
-    document.querySelectorAll('.newscene-list')[position].firstChild.classList.add('highlight')
+    let newSceneList = document.querySelectorAll('.newscene-list');
+    newSceneList[position].firstChild.classList.add('highlight');
+
+    if(position >0) {
+        newSceneList[position-1].firstChild.classList.remove('highlight');
+    }
+
+    // $(previouslyHighlightedContainerId).removeClass('highlight');
     console.log({position});
     console.log({previouslyHighlightedContainerId});
 
