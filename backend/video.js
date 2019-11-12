@@ -72,7 +72,7 @@ async function fetchVideoDataFromDb(videoId, userId) {
               video_id ORDER BY block_num ASC ) s`, [videoId]);
         let overrideData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
         start_time, end_time as finish_time, ocr as original_ocr,
-        description as original_description
+        description as original_description, merged_scene as "deletedScene"
         from descriptions where volunteer_id = $1 and
                                 has_ai=true and 
                                 video_id= $2 ORDER BY scene_num` 

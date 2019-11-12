@@ -85,7 +85,14 @@ function fetchVideoInfo(youtubeId) {
         let vidTitle = vidJson.title;
         let vidLength = vidJson.duration;
         let blocksJsonArr = vidJson.info;
-        let overrideData = vidJson.overrideData || [];
+        overrideData = vidJson.overrideData || [];
+        overrideData = overrideData.map( (over) => {
+            let { deletedScene='[]', ...rest } = over
+            return {
+                deletedScene: JSON.parse(deletedScene),
+                ...rest,
+            }
+        })
         $('#txtVidtitle').html(vidTitle);
         populateAllSceneArrAndAllBlockArr(blocksJsonArr);
         sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
@@ -204,11 +211,23 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             let nextSiblingSceneId = nextSibling.children[0].id;
             let indexNextSib = nextSiblingSceneId.indexOf(':')+1;
             nextSiblingSceneId = nextSiblingSceneId.substring(indexNextSib);
-
+            debugger;
             let nextSceneData = allSceneArr.filter( el => el.sc_id === nextSiblingSceneId )[0]
             let currSceneData = allSceneArr.filter( el => el.sc_id === curSceneId )[0]
-            allSceneArr = allSceneArr.filter(el => el.sc_id !=nextSiblingSceneId);
-            mergedSceneArr = mergedSceneArr.push({nextSiblingSceneId : currSceneData.sc_id})
+            if(overrideData.length > 0) {
+                nextSceneData = overrideData.filter( el => el.sc_id === nextSiblingSceneId )[0]
+                currSceneData = overrideData.filter( el => el.sc_id === curSceneId )[0]
+            } 
+            
+            // allSceneArr = allSceneArr.filter(el => el.sc_id !=nextSiblingSceneId);
+            if(!currSceneData.deletedScene){
+                let deletedSceneArr = [];
+                deletedSceneArr.push(nextSiblingSceneId);
+                currSceneData.deletedScene = deletedSceneArr;
+            }else{
+                currSceneData.deletedScene.push(nextSiblingSceneId);
+            }
+
             console.log({ nextSceneData,  currSceneData})
 
             let newStartTime = currSceneData.start_time;
@@ -216,11 +235,7 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             currSceneData.finish_time = newEndTime;
 
             document.getElementById(`time:${curSceneId}`).innerHTML = `${newStartTime} to ${newEndTime} seconds`
-
-
-            
             console.log({allSceneArr});
-
             console.log({nextSiblingSceneId});
             let nextSceneDescElement = document.getElementById('s_d_'+ nextSiblingSceneId);
             console.log({nextSceneDescElement});
@@ -233,45 +248,10 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             let jsonBody = {
                 "sceneId" : nextSiblingSceneId
             };
-            $.ajax({
-                type: 'DELETE',
-                url : '/userStudy/deleteScene',
-                dataType: 'json',
-                async:true,
-                data: jsonBody,
-                success: function (response) {
-                    // window.alert('Scene merged successfully');
-                    console.log('Scene merged successfully');
-                },
-                error: function (response, textStatus, errorThrown) {
-                    console.log(errorThrown);
-                }
-              });
-            // let mergeBody = {
-            //     "endTime" :,
-            //     "video_id" :,
-            //     "scene_id":,
-            //     "volunteer_id":
-            // }
-            // for(let i=0; i<allSceneArr.length; i++){
-            //     if(allSceneArr[i].)
-            // }
+           
             console.log(e.target.id);
-               console.log({"Inside merge:" : allSceneArr});
-            // $.ajax({
-            // type: 'UPDATE',
-            // url : '/userStudy/updateSceneEndTime',
-            // dataType: 'json',
-            // async:true,
-            // data: mergeBody,
-            // success: function (response) {
-            //     // window.alert('Scene merged successfully');
-            //     console.log('Scene merged successfully');
-            // },
-            // error: function (response, textStatus, errorThrown) {
-            //     console.log(errorThrown);
-            // }
-            // });
+            console.log({"Inside merge:" : allSceneArr});
+         
         }
 
     }
@@ -529,7 +509,7 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
-        case YT.PlayerState.CUED:
+        case YT.PlayerState.CUED:n
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log('i was called: cued state')
@@ -582,26 +562,34 @@ const getNewQnAData = () =>{
 }
 
 async function updateAll(shoudShowAlert) {
-    let postJson = fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId);
+
+    let postArr = allSceneArr;
+
+    let postJson = fetchJsonBodyForAllTextFields(postArr, allBlockArr, userId);
     // await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
         // return;
 
-        console.log('INSIDE UPDATE ALL');
+    console.log('INSIDE UPDATE ALL');
     const qnaData = getNewQnAData();    
     postJson.qnaData = qnaData;
     postJson.videoId = youtubeId;
     console.log({postJson});
-    await $.post('/saveAiDescription', postJson, function (response) {
-        if(shoudShowAlert) {
-            if(response.success) {
-                alert('Submitted Successfully\nYou will be redirected to the Video List Page');
-                window.history.back();
-            } else {
-                console.log(response);
-                alert('Update Status: ' + response.success);
+    try{
+        await $.post('/saveAiDescription', postJson, function (response) {
+            if(shoudShowAlert) {
+                if(response.success) {
+                    alert('Submitted Successfully\nYou will be redirected to the Video List Page');
+                    window.history.back();
+                } else {
+                    console.log(response);
+                    alert('Update Status: ' + response.success);
+                }
             }
-        }
-    });
+        });
+    }catch(e){
+        console.log(e);
+    }
+   
 }
 
 
@@ -624,33 +612,54 @@ function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
     let sceneArrJson = [];
     let blockArrJson = [];
     console.log({'INSIDE fetchJsonBodyForAllTextFields ' : allSceneArr});
-    for(let i=0; i<allSceneArr.length; i++) {
-        let currScene = allSceneArr[i];
-        let currSceneId = currScene.sc_id;
-        let currSceneDescTextId = '#s_d_' + currSceneId;
-        let currSceneOcrTextId = '#s_o_' + currSceneId;
-        let sceneJsonObj = {};
-        sceneJsonObj.scene_id = currSceneId;
-        // if($(currSceneDescTextId).val()){
-            sceneJsonObj.modified_description = $(currSceneDescTextId).val().trim();
-            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-            sceneJsonObj.start_time = currScene.start_time;
-            sceneJsonObj.end_time = currScene.finish_time;
-            sceneJsonObj.has_ai = enableAi;
+    let currScene ;
+    
 
-            sceneArrJson.push(sceneJsonObj);
-        // }
+    if(overrideData.length > 0) {
 
+        for(let i=0; i<overrideData.length; i++) {
+            currScene = overrideData[i];
+            let currSceneId = currScene.sc_id;
+            let currSceneDescTextId = '#s_d_' + currSceneId;
+            let currSceneOcrTextId = '#s_o_' + currSceneId;
+            let sceneJsonObj = {};
+            sceneJsonObj.scene_id = currSceneId;
+            let csTestbox = $(currSceneDescTextId)
+            if(csTestbox && csTestbox.val()){
+                sceneJsonObj.modified_description = csTestbox.val().trim();
+                sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+                sceneJsonObj.start_time = currScene.start_time;
+                sceneJsonObj.end_time = currScene.finish_time;
+                sceneJsonObj.has_ai = enableAi;
+                sceneJsonObj.deletedScene = currScene.deletedScene;
+                sceneArrJson.push(sceneJsonObj);
+            }
+    
+        }
+
+
+    } else {
+        for(let i=0; i<allSceneArr.length; i++) {
+            currScene = allSceneArr[i];
+            let currSceneId = currScene.sc_id;
+            let currSceneDescTextId = '#s_d_' + currSceneId;
+            let currSceneOcrTextId = '#s_o_' + currSceneId;
+            let sceneJsonObj = {};
+            sceneJsonObj.scene_id = currSceneId;
+            let csTestbox = $(currSceneDescTextId)
+            if(csTestbox && csTestbox.val()){
+                sceneJsonObj.modified_description = csTestbox.val().trim();
+                sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+                sceneJsonObj.start_time = currScene.start_time;
+                sceneJsonObj.end_time = currScene.finish_time;
+                sceneJsonObj.has_ai = enableAi;
+                sceneJsonObj.deletedScene = currScene.deletedScene;
+                sceneArrJson.push(sceneJsonObj);
+            }
+    
+        }
     }
-    // for(let i=0; i<allBlockArr.length; i++) {
-    //     let currBlock = allBlockArr[i];
-    //     let currBlockId = currBlock.block_id;
-    //     let currBlockDescTextId = '#b_d_' + currBlockId;
-    //     let blockJsonObj = {};
-    //     blockJsonObj.block_id = currBlockId;
-    //     blockJsonObj.modified_description = $(currBlockDescTextId).val().trim();
-    //     blockArrJson.push(blockJsonObj);
-    // }
+
     parentJsonBody.user_id = userId;
     parentJsonBody.scene_arr = sceneArrJson;
     parentJsonBody.block_arr = blockArrJson;
