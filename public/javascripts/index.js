@@ -225,6 +225,10 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
                 deletedSceneArr.push(nextSiblingSceneId);
                 currSceneData.deletedScene = deletedSceneArr;
             }else{
+                if(nextSceneData.deletedScene){
+                    currSceneData.deletedScene.push(...nextSceneData.deletedScene);
+                }
+               
                 currSceneData.deletedScene.push(nextSiblingSceneId);
             }
 

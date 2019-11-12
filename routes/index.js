@@ -160,10 +160,12 @@ function addModifiedScene (data, callback) {
 
 
 async function deleteMergedScenes(sceneArr) { 
-    let sql = `DELETE from descriptions where (scene_id) IN ($1);`
+   let sql = '';
+   for(let i=0; i< sceneArr.length; i++){
+     sql +=   `DELETE from descriptions where scene_id = '${sceneArr[i]}';`;
+   }
     console.log({'INSIDE DELETE': sql})
-   return  db.query(sql, sceneArr); 
- 
+    return  db.query(sql, sceneArr); 
 }
 
 
