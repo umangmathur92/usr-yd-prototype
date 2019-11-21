@@ -23,6 +23,7 @@ $(document).ready(function() {
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
     fetchVideoInfo(youtubeId);
+    
     $("#btnScroll").click(function() {
         resetVidModifiedTableData();
     });
@@ -94,13 +95,101 @@ function fetchVideoInfo(youtubeId) {
             }
         })
         $('#txtVidtitle').html(vidTitle);
-        populateAllSceneArrAndAllBlockArr(blocksJsonArr);
-        sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
-        console.log({sceneIdToListPositionMap});
-        initializeDescriptionsUI(blocksJsonArr, overrideData);
-        renderQnaList(response.qnaList)
+
+        populateAllSceneArrAndAllBlockArr(blocksJsonArr); //setting the data attribute for list-container
+        let listContainer = document.querySelector('.list-container');
+        listContainer.dataset.overrideData = JSON.stringify(overrideData);
+
+        // sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
+        // console.log({sceneIdToListPositionMap});
+        initializeDescriptionsUI();
+        if(response.qnaList){
+            renderQnaList(response.qnaList);
+        }
         //setInterval(updateAll, 1000*60*2);
     });
+}
+
+
+function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
+    let sceneArr = [];
+    for(let i=0; i<blocksJsonArr.length; i++) {
+        let currBlock = blocksJsonArr[i];
+        allBlockArr.push(currBlock);
+        let childSceneArr = currBlock.child_scenes;
+        allSceneArr.push.apply(allSceneArr, childSceneArr);
+        sceneArr.push.apply(sceneArr, childSceneArr);
+    }
+    let listContainer = document.querySelector('.list-container');
+    listContainer.dataset.sceneDetails = JSON.stringify(sceneArr);
+    // let sceneDetailsjson = JSON.parse(listContainer.dataset.sceneDetails);
+    // for(p in  sceneDetailsjson) {
+    //     if ( sceneDetailsjson.hasOwnProperty(p)) {
+    //         console.log ('LIST CONT', p,  sceneDetailsjson[p])
+    //     }
+    // }
+}
+
+
+function initializeDescriptionsUI() {
+    // let outputHtml = '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block 0 </b> </li>';
+    let outputHtml = '';
+    let listContainer = document.querySelector('.list-container');
+    overrideData = JSON.parse(listContainer.dataset.overrideData);
+    blocksJsonArr = JSON.parse(listContainer.dataset.sceneDetails);
+
+    if (overrideData.length > 0 ) {
+        for(let i=0; i<overrideData.length; i++) {
+            outputHtml += renderScenes(overrideData[i]);
+        }
+    } else {
+        for(let i=0; i<blocksJsonArr.length; i++) {
+            let currBlock = blocksJsonArr[i];
+            outputHtml +=  renderScenes(currBlock);
+        }
+    }
+    $('#ul-scene-list').html(outputHtml);
+    $("textarea").each(function(){
+        auto_grow(this);
+    });
+}
+
+
+function renderScenes(currScene) {
+    console.log({currScene})
+    let sceneId = currScene.sc_id;
+    let sceneNum = currScene.sc_num;
+    let scStartTime = currScene.start_time;
+    let scFinishTime = currScene.finish_time;
+    let sceneOcr = enableAi ? $.trim(currScene.original_ocr) : '';
+    let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
+    let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
+    let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
+    let mergeMessage = 'Please merge the scene before generating questions for the next scene';
+    let doneSceneBtn = `<input type="button" id="doneSceneBtn" style="display:block; margin:10px 0px 0px 0px;" value="Done with scene"/>`;
+    let getQuestionBtn = `<input style="display:block;" type="button" id="get_question:${sceneId}" value="Autogenerate Questions"/><label for="get_question:${sceneId}"> Generates question on the above description</label>`;
+    let qaContainer = `<div id="qna_container:${sceneId}"></div>`;
+    let createMoreQues = `<input type="button" id="create_question:${sceneId}" style="margin:10px 0px 0px 0px;" value="Create More Question"/>`;
+    let mergeScene = `<input type="button" id="merge_scene:${sceneId}" style="margin:10px 0px 0px 0px;" value="Merge with next scene"/>`;
+    let newQuestion = `${getQuestionBtn}<hr />${qaContainer}<hr />${createMoreQues}<hr />${doneSceneBtn} <hr />  ${mergeScene} ${mergeMessage}</div>`;  
+            
+
+    let  outputHtml = `<li class="newscene-list"><div class="scene-container" id="sc_cont:${currScene.sc_id}">`
+                    + `<table style="width: 100%">`
+                    + '<tr><td><b>Scene ' + sceneNum + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
+                    + '<tr><td>Description</td><td><div class="scene-description-container">'
+                    + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
+                    // + '<tr><td>Text On-Screen</td><td>' 
+                    + '<div class="scene-ocr-container" style="display:none">'
+                    + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
+                    + `<hr/>` 
+                    + newQuestion;
+    
+    // outputHtml = outputHtml
+    //             + '</div>'
+    //             + '</div></li>';
+            
+    return outputHtml;
 }
 
 /*
@@ -261,105 +350,6 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
     }
 });
 
-function renderScenes(currScene) {
-    let outputHtml = '';
-            console.log({currScene})
-            let sceneId = currScene.sc_id;
-            let sceneNum = currScene.sc_num;
-            let scStartTime = currScene.start_time;
-            let scFinishTime = currScene.finish_time;
-            let sceneOcr = enableAi ? $.trim(currScene.original_ocr) : '';
-            let sceneDesc = enableAi ? $.trim(currScene.original_description) : '';
-            let scStartTimePretty = millisToMinutesAndSeconds(scStartTime);
-            let scFinishTimePretty = millisToMinutesAndSeconds(scFinishTime);
-            let mergeMessage = 'Please merge the scene before generating questions for the next scene';
-            let doneSceneBtn = `<input type="button" id="doneSceneBtn" style="display:block; margin:10px 0px 0px 0px;" value="Done with scene"/>`;
-            let getQuestionBtn = `<input style="display:block;" type="button" id="get_question:${sceneId}" value="Autogenerate Questions"/><label for="get_question:${sceneId}"> Generates question on the above description</label>`;
-            let qaContainer = `<div id="qna_container:${sceneId}"></div>`;
-            let createMoreQues = `<input type="button" id="create_question:${sceneId}" style="margin:10px 0px 0px 0px;" value="Create More Question"/>`;
-            let mergeScene = `<input type="button" id="merge_scene:${sceneId}" style="margin:10px 0px 0px 0px;" value="Merge with next scene"/>`;
-            let newQuestion = `${getQuestionBtn}<hr />${qaContainer}<hr />${createMoreQues}<hr />${doneSceneBtn} <hr />  ${mergeScene} ${mergeMessage}</div>`;  
-            
-
-            outputHtml = outputHtml
-            + `<li class="newscene-list"><div class="scene-container" id="sc_cont:${currScene.sc_id}">`
-            + `<table style="width: 100%">`
-            + '<tr><td><b>Scene ' + sceneNum + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
-            + '<tr><td>Description</td><td><div class="scene-description-container">'
-            // + '<button class="btn-update-scene-description" data-sceneid="'+ sceneId +'" style="display: none;">Update Description</button>'
-            + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
-            // + '<tr><td>Text On-Screen</td><td>' 
-             + '<div class="scene-ocr-container" style="display:none">'
-            // // + '<button class="btn-update-scene-ocr" data-sceneid="'+ sceneId +'" style="visibility: hidden;">Update Text</button>'
-             + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
-             + `<hr/>` 
-             + newQuestion
-            // + '<tr><td>Question and Answer</td></td><div class="scene-ocr-container">'
-            // + '<text area onkeyup="auto_grow(this)" class="txt-scene-ocr"> </textarea></div></td></tr></table>';
-            // if(j!=childSceneArr.length-1) {
-            //     outputHtml = outputHtml + '<button class="btn-merge">Merge With Next</button>'
-            // }
-            outputHtml = outputHtml
-            + '</div>'
-            + '</div></li>';
-            return outputHtml;
-}
-
-
-function initializeDescriptionsUI(blocksJsonArr, overrideData) {
-    // let outputHtml = '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block 0 </b> </li>';
-    let outputHtml = '';
-    if (overrideData.length > 0 ) {
-        for(let i=0; i<overrideData.length; i++) {
-            outputHtml += renderScenes(overrideData[i]);
-        }
-    } else {
-        for(let i=0; i<blocksJsonArr.length; i++) {
-            let currBlock = blocksJsonArr[i];
-            let blockId = currBlock.block_id;
-            let blockNum = currBlock.block_num;
-            let blStartTime = currBlock.start_time;
-            let blFinishTime = currBlock.finish_time;
-            let baselineDesc = enableAi ? $.trim(currBlock.baseline_des) : '';
-            let childSceneArr = currBlock.child_scenes;
-            // outputHtml = outputHtml + '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block ' + blockNum + ' </b>(' + blStartTime + ' to ' +  blFinishTime + ' secs) </li>';
-            for(let j=0; j<childSceneArr.length; j++) {
-                outputHtml +=  renderScenes(childSceneArr[j]);
-            }
-            // outputHtml = outputHtml
-            // + '<li class="li-block-footer" style="visibility: hidden; height: 0px;"><div class="block-footer-container" id="'+ 'bl_cont_' + blockId +'"><table style="width: 100%">'
-            // + '<tr>Block ' + blockNum + ' Baseline Description</tr><tr><td><div class="block-description-container">'
-            // + '<button class="btn-update-block-description" data-blockid="'+ blockId +'">Update Description</button>'
-            // + '<textarea onkeyup="auto_grow(this)" class="txt-block-description" id="b_d_'+ blockId + '">' + baselineDesc + '</textarea>'
-            // + '</div></td></tr></table></div>'
-            // + '</li>';
-        }
-    }
-    
-    $('#ul-scene-list').html(outputHtml);
-    $('.btn-update-scene-description').click(function() {
-        let sceneId = this.dataset.sceneid;
-        let sceneDescTxtId = '#s_d_' + sceneId;
-        let modifiedDescription = $(sceneDescTxtId).val();
-        sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription);
-    });
-    $('.btn-update-scene-ocr').click(function() {
-        let sceneId = this.dataset.sceneid;
-        let sceneOcrTxtId = '#s_o_' + sceneId;
-        let modifiedOcr = $(sceneOcrTxtId).val();
-        sendUpdateOcrPostReq(sceneId, modifiedOcr);
-    });
-    $('.btn-update-block-description').click(function() {
-        let blockId = this.dataset.blockid;
-        let blockDescTxtId ='#b_d_' + blockId;
-        let modifiedDescription = $(blockDescTxtId).val();
-        console.log(blockDescTxtId + ', ' +blockId, ', ' + modifiedDescription);
-        sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription);
-    });
-    $("textarea").each(function(){
-        auto_grow(this);
-    });
-}
 
 function millisToMinutesAndSeconds(secs) {
     var minutes = Math.floor(secs / 60);
@@ -367,40 +357,40 @@ function millisToMinutesAndSeconds(secs) {
     return minutes + ":" + seconds;
 }  
 
-function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
-    const body = {
-        userId: userId,
-        sceneId: sceneId,
-        modifiedDescription: modifiedDescription,
-    };
-    $.post( '/updateSceneDescription', body, function(response) {
-        window.alert(JSON.stringify(response));
-    });
-}
+// function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
+//     const body = {
+//         userId: userId,
+//         sceneId: sceneId,
+//         modifiedDescription: modifiedDescription,
+//     };
+//     $.post( '/updateSceneDescription', body, function(response) {
+//         window.alert(JSON.stringify(response));
+//     });
+// }
 
 
 
-function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
-    const body = {
-        userId: userId,
-        sceneId: sceneId,
-        modifiedOcr: modifiedOcr,
-    };
-    $.post( '/updateSceneOCR', body, function(response) {
-        window.alert(JSON.stringify(response));
-    });
-}
+// function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
+//     const body = {
+//         userId: userId,
+//         sceneId: sceneId,
+//         modifiedOcr: modifiedOcr,
+//     };
+//     $.post( '/updateSceneOCR', body, function(response) {
+//         window.alert(JSON.stringify(response));
+//     });
+// }
 
-function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
-    const body = {
-        userId: userId,
-        blockId: blockId,
-        modifiedDescription: modifiedDescription,
-    };
-    $.post( '/updateBlockDescription', body, function(response) {
-        window.alert(JSON.stringify(response));
-    });
-}
+// function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
+//     const body = {
+//         userId: userId,
+//         blockId: blockId,
+//         modifiedDescription: modifiedDescription,
+//     };
+//     $.post( '/updateBlockDescription', body, function(response) {
+//         window.alert(JSON.stringify(response));
+//     });
+// }
 
 
 function scrollToPosition(position) {
@@ -465,14 +455,13 @@ function onPlayerReady(event) {
 }
 
 function updateTime() {
-    // console.log('I was called');
     var oldTime = videotime;
     if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
     }
-    if(videotime !== oldTime) {
-        onProgress(videotime);
-    }
+    // if(videotime !== oldTime) {
+    //     onProgress(videotime);
+    // }
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
 }
 
@@ -555,7 +544,6 @@ const getNewQnAData = () =>{
             console.log('id of parent', allQAContainer[i].id.substring(14));
             let sceneId = allQAContainer[i].id.substring(14)
             const currentElement = qaList[childIndex];
-            // console.log('child', qaList[childIndex]);
             var question = currentElement.children[0].children[1].value;
             var answer = currentElement.children[0].children[3].value;
             console.log({question, answer})
@@ -565,7 +553,7 @@ const getNewQnAData = () =>{
                 const tempData = JSON.parse(currentElement.dataset.jsonData); //saving coming json data  for the exisiting qnA
                 qnaData[sceneId].push({question, answer, answerId: tempData.answerId, questionId: tempData.questionId });
             } else {
-                qnaData[sceneId].push({question, answer })//pushing only questio and answer value to the exisiting qnA.
+                qnaData[sceneId].push({videoId:youtubeId, question, answer })//pushing only questio and answer value to the exisiting qnA.
             }
         }
     }
@@ -598,7 +586,9 @@ async function updateAll(shoudShowAlert) {
             }
         });
     }catch(e){
+
         console.log(e);
+        response.send(e);
     }
    
 }
@@ -710,39 +700,32 @@ function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
 }
 
 
-function populateSceneIdToListPositionMap(blocksJsonArr) {
-    console.log({blocksJsonArr});
-    let listPositionIndex = 0;
-    let sceneListPositionMap = new Map();
-    // for(let i=0; i< jsonArr.length; i++) {
-    //     sceneListPositionMap.set(jsonArr[i].sc_id, jsonArr[i].sc_num);
-    // }
-    for(let i=0; i<blocksJsonArr.length; i++) {
-        // listPositionIndex++;
-        let currBlock = blocksJsonArr[i];
-        let currBlockId = currBlock.block_id;
-        let childSceneArr = currBlock.child_scenes;
-        for(let j=0; j<childSceneArr.length; j++) {
-            // listPositionIndex++;
-            let currSceneId = childSceneArr[j].sc_id;
-            sceneListPositionMap.set(currSceneId, ++listPositionIndex);//sceneToBlockMap
-            if(j == childSceneArr.length-1) {
-                sceneToBlockMap.set(currSceneId, currBlockId);
-            }
-        }
-        // listPositionIndex++;
-    }
-    return sceneListPositionMap;
-}
+// function populateSceneIdToListPositionMap(blocksJsonArr) {
+//     console.log({blocksJsonArr});
+//     let listPositionIndex = 0;
+//     let sceneListPositionMap = new Map();
+//     // for(let i=0; i< jsonArr.length; i++) {
+//     //     sceneListPositionMap.set(jsonArr[i].sc_id, jsonArr[i].sc_num);
+//     // }
+//     for(let i=0; i<blocksJsonArr.length; i++) {
+//         // listPositionIndex++;
+//         let currBlock = blocksJsonArr[i];
+//         let currBlockId = currBlock.block_id;
+//         let childSceneArr = currBlock.child_scenes;
+//         for(let j=0; j<childSceneArr.length; j++) {
+//             // listPositionIndex++;
+//             let currSceneId = childSceneArr[j].sc_id;
+//             sceneListPositionMap.set(currSceneId, ++listPositionIndex);//sceneToBlockMap
+//             if(j == childSceneArr.length-1) {
+//                 sceneToBlockMap.set(currSceneId, currBlockId);
+//             }
+//         }
+//         // listPositionIndex++;
+//     }
+//     return sceneListPositionMap;
+// }
 
-function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
-    for(let i=0; i<blocksJsonArr.length; i++) {
-        let currBlock = blocksJsonArr[i];
-        allBlockArr.push(currBlock);
-        let childSceneArr = currBlock.child_scenes;
-        allSceneArr.push.apply(allSceneArr, childSceneArr);
-    }
-}
+
 
 function getSceneFromTime(currentTime, sceneArr) {
     let startTimesArr = [];

@@ -53,8 +53,12 @@ router.get('/fetchVideoData', function(req, res, next) {
   console.log('req.query', req.query)
   let {videoid, userId} = req.query;
   let queryResult = video.fetchVideoDataFromDb(videoid, userId);
+  let data= {'videoId': videoid, 
+              'userId':  userId
+            };
+
   queryResult.then(result => {
-    quesAns.getQuestionAnswerByUserId(userId).then( qnaList =>{
+    quesAns.getQuestionAnswerByUserId(data).then( qnaList =>{
       console.log({ resdata: qnaList});
       result.qnaList = qnaList;
       res.send(result);
