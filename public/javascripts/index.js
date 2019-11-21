@@ -2,8 +2,6 @@ let player;
 let youtubeId = '';
 let videotime = 0;
 let timeupdater = null;
-let allSceneArr = [];
-let allBlockArr = [];
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
 let userId;
@@ -62,20 +60,6 @@ function incrementSeconds() {
     }
 }
 
-/*
-created by Vaishali 
-renders Question answer on withAi page
-*/
-const renderQnaList = (qnaList) => {  
-    qnaList.forEach(qa => {
-        let { answerId, sceneId, questionId, question, answer } = qa;
-        let currentContainer = `qna_container:${sceneId}`
-        let cont = document.getElementById(currentContainer);
-        const qaElement = getNewQnA(question, answer, questionId, answerId);
-        qaElement.dataset.jsonData = JSON.stringify(qa);
-        cont.appendChild(qaElement);
-    });
-}
 
 function fetchVideoInfo(youtubeId) {
     console.log(userId);
@@ -95,59 +79,38 @@ function fetchVideoInfo(youtubeId) {
             }
         })
         $('#txtVidtitle').html(vidTitle);
-
-        populateAllSceneArrAndAllBlockArr(blocksJsonArr); //setting the data attribute for list-container
+     
+        //setting the data attribute for list-container\
         let listContainer = document.querySelector('.list-container');
-        listContainer.dataset.overrideData = JSON.stringify(overrideData);
-
-        // sceneIdToListPositionMap = populateSceneIdToListPositionMap(blocksJsonArr);
-        // console.log({sceneIdToListPositionMap});
+        if(overrideData.length > 0){
+            listContainer.dataset.sceneDetails = JSON.stringify(overrideData);
+        }else{
+            let sceneArr = [];
+            for(let i=0; i<blocksJsonArr.length; i++) {
+                let currBlock = blocksJsonArr[i];
+                let childSceneArr = currBlock.child_scenes;
+                sceneArr.push.apply(sceneArr, childSceneArr);
+            }
+            listContainer.dataset.sceneDetails = JSON.stringify(sceneArr);
+        }
+        let sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
+        sceneIdToListPositionMap = populateSceneIdToListPositionMap(sceneDetails);
         initializeDescriptionsUI();
         if(response.qnaList){
             renderQnaList(response.qnaList);
         }
-        //setInterval(updateAll, 1000*60*2);
     });
 }
 
-
-function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
-    let sceneArr = [];
-    for(let i=0; i<blocksJsonArr.length; i++) {
-        let currBlock = blocksJsonArr[i];
-        allBlockArr.push(currBlock);
-        let childSceneArr = currBlock.child_scenes;
-        allSceneArr.push.apply(allSceneArr, childSceneArr);
-        sceneArr.push.apply(sceneArr, childSceneArr);
-    }
-    let listContainer = document.querySelector('.list-container');
-    listContainer.dataset.sceneDetails = JSON.stringify(sceneArr);
-    // let sceneDetailsjson = JSON.parse(listContainer.dataset.sceneDetails);
-    // for(p in  sceneDetailsjson) {
-    //     if ( sceneDetailsjson.hasOwnProperty(p)) {
-    //         console.log ('LIST CONT', p,  sceneDetailsjson[p])
-    //     }
-    // }
-}
-
-
 function initializeDescriptionsUI() {
-    // let outputHtml = '<li class="li-block-header" style="visibility: hidden; height: 0px;"><b>Block 0 </b> </li>';
     let outputHtml = '';
     let listContainer = document.querySelector('.list-container');
-    overrideData = JSON.parse(listContainer.dataset.overrideData);
-    blocksJsonArr = JSON.parse(listContainer.dataset.sceneDetails);
+    sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
 
-    if (overrideData.length > 0 ) {
-        for(let i=0; i<overrideData.length; i++) {
-            outputHtml += renderScenes(overrideData[i]);
-        }
-    } else {
-        for(let i=0; i<blocksJsonArr.length; i++) {
-            let currBlock = blocksJsonArr[i];
-            outputHtml +=  renderScenes(currBlock);
-        }
+    for(let i=0; i<sceneDetails.length; i++) {
+        outputHtml += renderScenes(sceneDetails[i]);
     }
+   
     $('#ul-scene-list').html(outputHtml);
     $("textarea").each(function(){
         auto_grow(this);
@@ -176,7 +139,7 @@ function renderScenes(currScene) {
 
     let  outputHtml = `<li class="newscene-list"><div class="scene-container" id="sc_cont:${currScene.sc_id}">`
                     + `<table style="width: 100%">`
-                    + '<tr><td><b>Scene ' + sceneNum + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes<button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
+                    + '<tr><td><b>Scene ' + sceneNum + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes <button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
                     + '<tr><td>Description</td><td><div class="scene-description-container">'
                     + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
                     // + '<tr><td>Text On-Screen</td><td>' 
@@ -184,13 +147,23 @@ function renderScenes(currScene) {
                     + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
                     + `<hr/>` 
                     + newQuestion;
-    
-    // outputHtml = outputHtml
-    //             + '</div>'
-    //             + '</div></li>';
             
     return outputHtml;
 }
+
+
+
+const renderQnaList = (qnaList) => {  
+    qnaList.forEach(qa => {
+        let { answerId, sceneId, questionId, question, answer } = qa;
+        let currentContainer = `qna_container:${sceneId}`
+        let cont = document.getElementById(currentContainer);
+        const qaElement = getNewQnA(question, answer, questionId, answerId);
+        qaElement.dataset.jsonData = JSON.stringify(qa);
+        cont.appendChild(qaElement);
+    });
+}
+
 
 /*
 created by Vaishali 
@@ -215,9 +188,7 @@ created by Vaishali
 adding eventListener on add question btn click, get question click
 */
 document.getElementById('ul-scene-list').addEventListener('click', (e) => {
-
     console.log('click event TARGET: ', e.target);
-    // console.log('click event TARGET: ', e.target.id);
 
     if(e.target.id.includes('create_question:')) {
         let index = e.target.id.indexOf(':')+1;
@@ -230,13 +201,10 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
         let desc = document.getElementById(descId).value;
         
         console.log('descId: ', descId, 'val: ', desc);
-
         let rows = desc.split("\n");
-
         for (var i = 0; i < rows.length; i++) {
             console.log('ROWS:', rows[i]);
         }
-
         let postJson = {
             "sentence" : rows
         };
@@ -285,6 +253,9 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
         playVideo();
 
     } else if(e.target.id.includes('merge_scene')){
+        let listContainer = document.querySelector('.list-container');
+        sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
+
         let result = confirm("Do you want to merge current scene with the next?");
         if (result) {
             //Logic to delete the item
@@ -300,15 +271,9 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             let nextSiblingSceneId = nextSibling.children[0].id;
             let indexNextSib = nextSiblingSceneId.indexOf(':')+1;
             nextSiblingSceneId = nextSiblingSceneId.substring(indexNextSib);
-            debugger;
-            let nextSceneData = allSceneArr.filter( el => el.sc_id === nextSiblingSceneId )[0]
-            let currSceneData = allSceneArr.filter( el => el.sc_id === curSceneId )[0]
-            if(overrideData.length > 0) {
-                nextSceneData = overrideData.filter( el => el.sc_id === nextSiblingSceneId )[0]
-                currSceneData = overrideData.filter( el => el.sc_id === curSceneId )[0]
-            } 
-            
-            // allSceneArr = allSceneArr.filter(el => el.sc_id !=nextSiblingSceneId);
+            let nextSceneData = sceneDetails.filter( el => el.sc_id === nextSiblingSceneId )[0]
+            let currSceneData = sceneDetails.filter( el => el.sc_id === curSceneId )[0]
+         
             if(!currSceneData.deletedScene){
                 let deletedSceneArr = [];
                 deletedSceneArr.push(nextSiblingSceneId);
@@ -327,12 +292,11 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             let newEndTime = nextSceneData.finish_time;
             currSceneData.finish_time = newEndTime;
 
-            document.getElementById(`time:${curSceneId}`).innerHTML = `${newStartTime} to ${newEndTime} seconds`
-            console.log({allSceneArr});
+            document.getElementById(`time:${curSceneId}`).innerHTML = `${millisToMinutesAndSeconds(newStartTime)} to ${millisToMinutesAndSeconds(newEndTime)} minutes`
+            // console.log({allSceneArr});
             console.log({nextSiblingSceneId});
             let nextSceneDescElement = document.getElementById('s_d_'+ nextSiblingSceneId);
             console.log({nextSceneDescElement});
-            
     
             curSceneDescElement.value += '\n' + nextSceneDescElement.value;
             // document.getElementById(curSceneDescElement+'.'+'txt-scene-description').autogrow();
@@ -343,7 +307,8 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             };
            
             console.log(e.target.id);
-            console.log({"Inside merge:" : allSceneArr});
+            console.log({"Inside merge:" : sceneDetails});
+            listContainer.dataset.sceneDetails = JSON.stringify(sceneDetails);
          
         }
 
@@ -357,44 +322,8 @@ function millisToMinutesAndSeconds(secs) {
     return minutes + ":" + seconds;
 }  
 
-// function sendUpdateSceneDescriptionPostReq(sceneId, modifiedDescription) {
-//     const body = {
-//         userId: userId,
-//         sceneId: sceneId,
-//         modifiedDescription: modifiedDescription,
-//     };
-//     $.post( '/updateSceneDescription', body, function(response) {
-//         window.alert(JSON.stringify(response));
-//     });
-// }
-
-
-
-// function sendUpdateOcrPostReq(sceneId, modifiedOcr) {
-//     const body = {
-//         userId: userId,
-//         sceneId: sceneId,
-//         modifiedOcr: modifiedOcr,
-//     };
-//     $.post( '/updateSceneOCR', body, function(response) {
-//         window.alert(JSON.stringify(response));
-//     });
-// }
-
-// function sendUpdateBlockDescriptionPostReq(blockId, modifiedDescription) {
-//     const body = {
-//         userId: userId,
-//         blockId: blockId,
-//         modifiedDescription: modifiedDescription,
-//     };
-//     $.post( '/updateBlockDescription', body, function(response) {
-//         window.alert(JSON.stringify(response));
-//     });
-// }
-
-
 function scrollToPosition(position) {
-    position--;
+     position--;
     $('#ul-scene-list').animate({
         scrollTop: $('#ul-scene-list>.newscene-list:eq(' + position + ')').position().top -
         $('#ul-scene-list>.newscene-list:eq(0)').position().top 
@@ -405,24 +334,9 @@ function scrollToPosition(position) {
     if(position >0) {
         newSceneList[position-1].firstChild.classList.remove('highlight');
     }
-
-    // $(previouslyHighlightedContainerId).removeClass('highlight');
     console.log({position});
     console.log({previouslyHighlightedContainerId});
-
-
-    // $('#ul-scene-list>.newscene-list').removeClass('highlight')
-    // console.log('position', `#ul-scene-list>.newscene-list:eq(${position})>div`)
-    // $(`#ul-scene-list>.newscene-list:eq(0)>div`).addClass('highlight')
-    // $(`#ul-scene-list>.newscene-list:eq(${position})>div`).addClass('highlight');
     previouslyHighlightedContainerId = '#ul-scene-list>.newscene-list:eq(' + position + ')' + ' .scene-container';
-}
-
-function resetVidModifiedTableData() {
-    let url = '/reset/' + youtubeId + '/' + userId;
-    $.get(url, function(response) {
-        window.alert(JSON.stringify(response));
-    });
 }
 
 function onYouTubeIframeAPIReady() {
@@ -459,20 +373,23 @@ function updateTime() {
     if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
     }
-    // if(videotime !== oldTime) {
-    //     onProgress(videotime);
-    // }
+    if(videotime !== oldTime) {
+        onProgress(videotime);
+    }
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
 }
 
 // when the time changes, this will be called.
 function onProgress(currentTime) {
     currentTime = currentTime.toFixed(3);
-    let currScene = getSceneFromTime(currentTime, allSceneArr);
+    let currScene = getSceneFromTime(currentTime);
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
     let sceneEndTime = currScene.finish_time;
     if(prevSceneNum != sceneNum) {
+        let listContainer = document.querySelector('.list-container');
+        let sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
+        let = sceneIdToListPositionMap = populateSceneIdToListPositionMap(sceneDetails);
         let listPosition = sceneIdToListPositionMap.get(sceneId);
         console.log({sceneIdToListPositionMap, listPosition});
         scrollToPosition(listPosition);
@@ -484,9 +401,6 @@ function onProgress(currentTime) {
     if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
         pauseVideo();
         timeAtWhichLastPaused = currentTime;
-        //if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
-        // let blockId = sceneToBlockMap.get(sceneId);
-        // let blockElementId = '#bl_cont_' + blockId;
     }
     let sceneElementId = '#sc_cont_' + sceneId;
     // $(previouslyHighlightedContainerId).removeClass('highlight');
@@ -561,18 +475,11 @@ const getNewQnAData = () =>{
 }
 
 async function updateAll(shoudShowAlert) {
-
-    let postArr = allSceneArr;
-
-    let postJson = fetchJsonBodyForAllTextFields(postArr, allBlockArr, userId);
-    // await $.post('/updateMultipleScenesAndBlocksForUser', postJson, function (response) {
-        // return;
-
-    console.log('INSIDE UPDATE ALL');
+    let postJson = fetchJsonBodyForAllTextFields(userId);
     const qnaData = getNewQnAData();    
     postJson.qnaData = qnaData;
     postJson.videoId = youtubeId;
-    console.log({postJson});
+    console.log({'HERE': postJson});
     try{
         await $.post('/saveAiDescription', postJson, function (response) {
             if(shoudShowAlert) {
@@ -593,6 +500,42 @@ async function updateAll(shoudShowAlert) {
    
 }
 
+//added start time, end time and has Ai for saving in descrption table
+function fetchJsonBodyForAllTextFields(userId) {
+    let listContainer = document.querySelector('.list-container');
+    sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
+
+    let parentJsonBody = {};
+    let sceneArrJson = [];
+
+    console.log({'INSIDE fetchJsonBodyForAllTextFields ' : sceneDetails});
+    let currScene ;
+    for(let i=0; i < sceneDetails.length; i++) {
+        currScene = sceneDetails[i];
+        let currSceneId = currScene.sc_id;
+        let currSceneDescTextId = '#s_d_' + currSceneId;
+        let currSceneOcrTextId = '#s_o_' + currSceneId;
+        let sceneJsonObj = {};
+        sceneJsonObj.scene_id = currSceneId;
+        let csTestbox = $(currSceneDescTextId)
+        if(csTestbox && csTestbox.val()){
+            sceneJsonObj.modified_description = csTestbox.val().trim();
+            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+            sceneJsonObj.start_time = currScene.start_time;
+            sceneJsonObj.end_time = currScene.finish_time;
+            sceneJsonObj.has_ai = enableAi;
+            sceneJsonObj.deletedScene = currScene.deletedScene;
+            sceneArrJson.push(sceneJsonObj);
+        }
+    }
+
+    parentJsonBody.user_id = userId;
+    parentJsonBody.scene_arr = sceneArrJson;
+    parentJsonBody.time_taken = timeElapsedOnPage;
+
+    console.log({parentJsonBody});
+    return parentJsonBody;
+}
 
 async function updateMainTables() {
     let postJson = fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr);
@@ -605,69 +548,6 @@ async function updateMainTables() {
             window.alert('Update Failed');
         }
     });
-}
-
-//added start time, end time and has Ai for saving in descrption table
-function fetchJsonBodyForAllTextFields(allSceneArr, allBlockArr, userId) {
-    let parentJsonBody = {};
-    let sceneArrJson = [];
-    let blockArrJson = [];
-    console.log({'INSIDE fetchJsonBodyForAllTextFields ' : allSceneArr});
-    let currScene ;
-    
-
-    if(overrideData.length > 0) {
-
-        for(let i=0; i<overrideData.length; i++) {
-            currScene = overrideData[i];
-            let currSceneId = currScene.sc_id;
-            let currSceneDescTextId = '#s_d_' + currSceneId;
-            let currSceneOcrTextId = '#s_o_' + currSceneId;
-            let sceneJsonObj = {};
-            sceneJsonObj.scene_id = currSceneId;
-            let csTestbox = $(currSceneDescTextId)
-            if(csTestbox && csTestbox.val()){
-                sceneJsonObj.modified_description = csTestbox.val().trim();
-                sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-                sceneJsonObj.start_time = currScene.start_time;
-                sceneJsonObj.end_time = currScene.finish_time;
-                sceneJsonObj.has_ai = enableAi;
-                sceneJsonObj.deletedScene = currScene.deletedScene;
-                sceneArrJson.push(sceneJsonObj);
-            }
-    
-        }
-
-
-    } else {
-        for(let i=0; i<allSceneArr.length; i++) {
-            currScene = allSceneArr[i];
-            let currSceneId = currScene.sc_id;
-            let currSceneDescTextId = '#s_d_' + currSceneId;
-            let currSceneOcrTextId = '#s_o_' + currSceneId;
-            let sceneJsonObj = {};
-            sceneJsonObj.scene_id = currSceneId;
-            let csTestbox = $(currSceneDescTextId)
-            if(csTestbox && csTestbox.val()){
-                sceneJsonObj.modified_description = csTestbox.val().trim();
-                sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-                sceneJsonObj.start_time = currScene.start_time;
-                sceneJsonObj.end_time = currScene.finish_time;
-                sceneJsonObj.has_ai = enableAi;
-                sceneJsonObj.deletedScene = currScene.deletedScene;
-                sceneArrJson.push(sceneJsonObj);
-            }
-    
-        }
-    }
-
-    parentJsonBody.user_id = userId;
-    parentJsonBody.scene_arr = sceneArrJson;
-    parentJsonBody.block_arr = blockArrJson;
-    parentJsonBody.time_taken = timeElapsedOnPage;
-
-    console.log({sceneArrJson});
-    return parentJsonBody;
 }
 
 function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
@@ -700,43 +580,30 @@ function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
 }
 
 
-// function populateSceneIdToListPositionMap(blocksJsonArr) {
-//     console.log({blocksJsonArr});
-//     let listPositionIndex = 0;
-//     let sceneListPositionMap = new Map();
-//     // for(let i=0; i< jsonArr.length; i++) {
-//     //     sceneListPositionMap.set(jsonArr[i].sc_id, jsonArr[i].sc_num);
-//     // }
-//     for(let i=0; i<blocksJsonArr.length; i++) {
-//         // listPositionIndex++;
-//         let currBlock = blocksJsonArr[i];
-//         let currBlockId = currBlock.block_id;
-//         let childSceneArr = currBlock.child_scenes;
-//         for(let j=0; j<childSceneArr.length; j++) {
-//             // listPositionIndex++;
-//             let currSceneId = childSceneArr[j].sc_id;
-//             sceneListPositionMap.set(currSceneId, ++listPositionIndex);//sceneToBlockMap
-//             if(j == childSceneArr.length-1) {
-//                 sceneToBlockMap.set(currSceneId, currBlockId);
-//             }
-//         }
-//         // listPositionIndex++;
-//     }
-//     return sceneListPositionMap;
-// }
+function populateSceneIdToListPositionMap(sceneDetailsArr) {
+    let listPositionIndex = 0;
+    let sceneListPositionMap = new Map();
+
+    for(let i=0; i<sceneDetailsArr.length; i++) {
+        let currSceneId = sceneDetailsArr[i].sc_id;
+        sceneListPositionMap.set(currSceneId, ++listPositionIndex);//sceneToBlockMap
+    }
+    return sceneListPositionMap;
+}
 
 
 
-function getSceneFromTime(currentTime, sceneArr) {
+function getSceneFromTime(currentTime) {
+    let listContainer = document.querySelector('.list-container');
+    sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
+
     let startTimesArr = [];
-    for(let i=0; i<sceneArr.length; i++) {
-        let startTime = parseFloat(sceneArr[i].start_time);
+    for(let i=0; i< sceneDetails.length; i++) {
+        let startTime = parseFloat(sceneDetails[i].start_time);
         startTimesArr.push(startTime);
     }
-  
     let sceneIndex = getIndexOfInputArrForTargetVal(currentTime, startTimesArr);
-    // console.log({sceneIndex: sceneArr[sceneIndex]})
-    return sceneArr[sceneIndex];
+    return sceneDetails[sceneIndex];
 }
 
 //Returns index of array item whose value is equal-to or lesser-than(also nearest-in-value) the target (binary search algorithm)
@@ -779,7 +646,6 @@ function resetVideoTo(time) {
 }
 
 function formatTime(time) {
-    // console.log(time);
     var minutes = Math.floor(time / 60);
     var seconds = time - minutes * 60;
     seconds = seconds < 10 ? '0' + seconds : seconds;
