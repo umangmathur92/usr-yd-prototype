@@ -57,11 +57,38 @@ async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
 }
 
-async function fetchVideoDataFromDb(videoId) {
+async function fetchVideoDataFromDb(videoId, userId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
-        let queryResult = await db.one("SELECT jsonb_pretty(jsonb_agg(js_object)) custom_nested_json_data FROM (select jsonb_build_object( 'block_id', block_id, 'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 'baseline_des', original_description, 'child_scenes', jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num', s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description, 'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s GROUP BY start_time, end_time, block_id, original_description, block_num, video_id ORDER BY block_num ASC ) s", [videoId]);
+        let queryResult = await db.one(`SELECT jsonb_pretty(jsonb_agg(js_object))
+         custom_nested_json_data FROM (select jsonb_build_object( 'block_id', block_id,
+          'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 
+         'baseline_des', original_description, 'child_scenes',
+          jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num',
+           s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description,
+            'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON
+             s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
+             GROUP BY start_time, end_time, block_id, original_description, block_num,
+              video_id ORDER BY block_num ASC ) s`, [videoId]);
+        let overrideData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
+        start_time, end_time as finish_time, ocr as original_ocr,
+        description as original_description, merged_scene as "deletedScene"
+        from descriptions where volunteer_id = $1 and
+                                has_ai=true and 
+                                video_id= $2 ORDER BY scene_num` 
+                                , [userId , videoId])
+
+        
+        
+        console.log('over data', JSON.stringify(overrideData))
+
+        // console.log({modifiedDesc})
         vidQueryResult.info = JSON.parse(queryResult.custom_nested_json_data);
+        vidQueryResult.overrideData = overrideData;
+        // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
+        for(key in vidQueryResult.info) {
+            // console.log({key})
+        }
         return vidQueryResult;
     } catch(e) {
         throw e;
@@ -142,20 +169,26 @@ async function addVideoDataToDb(inputJson) {
     try {
         // //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
+        console.log({VIDEO: video});
         await Video.insertIntoVideoTable(video);
         //Parse and insert Blocks
-        // let blockJsonArr = video.insights_json.blocks;
-        let blockJsonArr = [];
-        if(video.youtube_id == '_1DDhUnyvwY') {
-            blockJsonArr = PredefVid1.predefBlockArrJson;
-        } else if (video.youtube_id == 'EQoJS8Pkmj0') {
-            blockJsonArr = PredefVid2.predefBlockArrJson;
-        } else if(video.youtube_id == 'cNj3aOTYdQQ') {
-            blockJsonArr = PredefVid3.predefBlockArrJson;
-        } else if(video.youtube_id == 'nqXz8hhAYGo') {
-            blockJsonArr = PredefVid4.predefBlockArrJson;
-        }
-        let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        let blockJsonArr = video.insights_json.blocks;
+        // let blockJsonArr = [];
+        //commented by vaishali to have the default behavior for the blocks
+
+        //the blockJsonArr is hardcoded for user study 2
+        // if(video.youtube_id == '_1DDhUnyvwY') {
+        //     blockJsonArr = PredefVid1.predefBlockArrJson;
+        // } else if (video.youtube_id == 'EQoJS8Pkmj0') {
+        //     blockJsonArr = PredefVid2.predefBlockArrJson;
+        // } else if(video.youtube_id == 'cNj3aOTYdQQ') {
+        //     blockJsonArr = PredefVid3.predefBlockArrJson;
+        // } else if(video.youtube_id == 'nqXz8hhAYGo') {
+        //     blockJsonArr = PredefVid4.predefBlockArrJson;
+        // }
+
+       let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
+        console.log({blockArr});
         await Block.insertIntoBlockTable(blockArr);
         // let blockArr = Block.parseBlockArr(blockJsonArr, video.youtube_id);
         // blockArr = modifyLastElementsOfBlockArray(blockArr);
@@ -347,7 +380,10 @@ async function fetchImageAnalysisForAllKeyFrames(allKeyframesArr) {
     let keyframeTagArr = [];
     for(const keyFrameImg of allKeyframesArr) {
         let imgUrl = keyFrameImg.thumbnail_url;
+        console.log({imgUrl});
         let imgAnalysisJson = await ApiRepository.getImageAnalysis(imgUrl);
+        console.log({imgAnalysisJson});
+
         let captionText = '';
         let confidenceScore = 0;
         if(imgAnalysisJson.description.captions.length>0) {

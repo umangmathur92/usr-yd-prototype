@@ -5,16 +5,13 @@ body {
 a {
   color: #00B7FF;
 }
-
 .scene-list {
   list-style-type: none;
   padding: 0;
-  margin: 0;
   overflow:auto;
   height: 100%;
   background-color: #e0e0e0;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin: 1px;
 }
 
 .scene-container {
@@ -40,7 +37,7 @@ a {
   width: 25%;
 }
 
-.txt-scene-description, .txt-scene-ocr, .txt-block-description {
+.txt-scene-description, .txt-scene-ocr, .txt-block-description, .qnATextArea {
   position:relative;
   border:none;
   width:75%;
@@ -50,12 +47,27 @@ a {
   overflow: hidden;
 }
 
+.qnATextArea {
+  margin: 3px 0px 0px 42px;
+  width: 77%;
+  border: 1px solid rgb(221, 221, 221);
+  /* min-height: 15px; */
+  height: 20px;
+
+}
+
+.qnALabel {
+  width: 12%;
+  margin: 0px;
+}
+
 tr td:first-child{
   width:1%;
   white-space:nowrap;
 }
 
 .list-container {
+  margin-top: 10px;
   height: 700px;
   max-height: 700px;
   background-color: darkgray;

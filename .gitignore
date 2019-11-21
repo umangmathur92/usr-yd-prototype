@@ -82,3 +82,5 @@ typings/
 videodata/
 
 *.DS_Store
+
+*.mp3

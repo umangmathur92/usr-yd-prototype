@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouDescribe</title>
+    <script src="https://use.fontawesome.com/8a92be1af5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">  
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body background="/images/bg.jpg" style="background-repeat: no-repeat; background-size: cover;">
+    <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+        <div class="container">
+            <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a>
+        </div>
+    </nav>
+    <br>
+    <div class="container-fluid" style="position: absolute;top: 60px;">
+        <div class="row" style="text-align: center; height:100%;">
+            <div class="col-5">
+                <div style="background-color: #1a4b6e; color:#fff; font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
+                <div id="player"></div>
+                <br>
+                <!-- <div style="width: 100%;">
+                    <div style="width: 480px; height: 30px; padding:2px; margin: auto; border:0px solid black; background-color: darkgrey;">
+                        <div style="float: left;">
+                            <span id="btn-play-pause" style="visibility: visible;"></span>
+                            <b><span id="elapsed_time">0:00</span>/<span id="total_time">0:00</span></b>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+            <div class="col-7">
+
+            </div>
+        </div>
+    </div>
+    <script src="/javascripts/playvideodescription.js"></script>
+    <script src="http://www.youtube.com/iframe_api" async></script>
+</body>
+</html>

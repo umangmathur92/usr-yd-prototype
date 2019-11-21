@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<head>
+    <title>User Study</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   <script src="https://code.jquery.com/jquery-3.4.1.js"   integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="   crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>      
+</head>
+<body>
+<nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <div class="container" style="
+text-align: center;display: inline-block;" >
+      <h1><a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a><h1>
+    </div>
+</nav>
+<div class="container">
+
+    <div class="container">
+    <div>
+        <!--p id="date"> </p-->
+        <p style= "margin: 20px 20px 0px 0px; text-align:justify;" id="intro">   </p> 
+        <p style= "margin: 20px 20px 20px 0px">Please play each video once all the way through to the end (there are no pause or rewind functions). You are welcome to take a break in between videos. If the Youtube video fails to load, please click the refresh button on your browser. Thank you again for participating.</p>
+        <br>
+        <form name= "userInfo" id="userInfo">
+        Please enter your email address: <input type="email" name="email" id="email"><br>
+        <br>
+        <label id="label_access" for="rating_access"> How do you typically prefer to access images?</label> 
+        <fieldset class='rating_access' tab-index="0" id="rating_access" aria-describedby="How do you typically prefer to access images?" name="rating">
+                <input type="radio" name="rating_access"  aria-labelledby="gdesc1" value="With magnification" > <label id="gdesc1"> With magnification</label><br> </input>
+                <input type="radio" name="rating_access"  aria-labelledby="idRely" value="Rely on description">  <label id= "idRely">Rely on description</label><br> </input>
+                <input type="radio" name="rating_access" aria-labelledby="idtac" value="Tactile graphic">  <label id="idtac">Tactile graphic</label><br> </input>
+                <input type="radio" name="rating_access" value="Other" />  Other : <input name="other" style= "width: 50%" placeholder= "Please enter text for other" id="other" /> <br>
+        </fieldset>
+        <br>
+        <label id="label_freq" for="frequency"> How regularly do you use video descriptions?</label> 
+        <fieldset class='freq' id="frequency" name="video_understanding">
+                <input type="radio" name="freq" aria-labelledby="1" value="never"> <label id="1">Never</label><br>
+                <input type="radio" name="freq" aria-labelledby="2" value="infrequently"> <label id="2">Very infrequently (a few times a year)</label><br>
+                <input type="radio" name="freq" aria-labelledby="3" value="sometimes"> <label id="3">Sometimes (a few times a month)</label><br>
+                <input type="radio" name="freq" aria-labelledby="4" value="frequently"> <label id="4">Very Frequently (several times a week)</label><br>
+                <input type="radio" name="freq" aria-labelledby="5" value="daily"> <label id="5"> Almost daily or daily</label><br>
+        </fieldset>
+    </form>
+        <br>
+    </div>
+    <br>
+    <div class="container">
+        <div class="list-group"> 
+    </div>
+    </b>
+</div>
+
+
+<script>
+let url = location.search.substring(1);
+let pid = new URLSearchParams(url).get('pid');
+let num_videos = (pid % 2 == 0) ? 20 : 22;
+let num_describers = (pid % 2 == 0) ? 10 : 11;
+
+let intro = `Thank you for participating in this user study. Please answer the questions below, and then watch the videos, and answer the questions about each video. 
+            There are ${num_videos} videos, and each video is about 2 minutes long. The ${num_videos} videos are in fact only 2 different videos described by ${num_describers} different describers. 
+            Even though they are repetitive, please listen to each description, rate the description quality, and leave comments for each video. 
+            At the end, there is a button confirming that you completed all the videos. For each video, there is a link to the video on YouTube. 
+            Open the link and click the play button. The YouTube video will be played along with the audio description.`
+$("#intro").append(intro);
+</script>
+
+
+<script>
+
+  //get parameters from query string
+//let url = location.search.substring(1);
+let urlParams = new URLSearchParams(url);
+let userId = urlParams.get('userId');
+let targetUrl = '/userStudy/helper/video?userId=' + userId;
+// console.log('target URL:' +  targetUrl);
+
+
+$(document).ready(function () {
+    // getDateTime();
+    fetchVideo();
+    getAllVIUsers(userId);
+});
+
+
+function getDateTime(){
+    let date = new Date(Date.now()).toLocaleString();
+     document.getElementById('date').innerHTML = `Current time: ${date}`;
+}
+
+function getAllVIUsers(userId){
+    let url = '/userStudy/getUserHelper?userId='+ userId;
+    $.get(url , function (body) {
+        console.log({body});
+        if(body.length === 1) {
+        let val = body[0];
+        let email = $('#email').val(val.email);
+        let frequency = $(`[name="freq"][value="${val.vid_desc_frequency||" "}"]`).prop("checked", true);
+        
+        let validAccess = ['With magnification', 'Rely on description', 'Tactile graphic'];
+        if(validAccess.includes(val.access_preference)) {
+            $(`[name="rating_access"][value="${val.access_preference||" "}"]`).prop("checked", true);
+        } else if(val.access_preference === 'Other') {
+            $(`[name="rating_access"][value="${val.access_preference||" "}"]`).prop("checked", true);
+            $('#other').val(val.access_pref_other)
+        }
+
+        let access = $(`[name="rating_access"]`)
+        access.each(function(sel, el) {
+            console.log({sel, el});
+        });
+        
+            
+        }
+        //  $('[name="freq"]').val(rows[0].vid_desc_frequency);
+    });
+}
+
+function submitVideoData(userId, status, email, frequency,access_preference) {
+    let jsonBody = {
+        "id": userId,
+        "status": status,
+    };
+    $.ajax({
+        type: 'PUT',
+        url : "/userStudy/updateStatus",
+        dataType: "json",
+        async:true,
+        crossDomain:true,
+        data: jsonBody,
+        success: function (response) {
+            window.alert(JSON.stringify("Thank you for taking part in our study"));
+        },
+        error: function (response, textStatus, errorThrown) {
+            window.alert(JSON.stringify(response));
+        }
+      });
+}
+
+
+function submitUserInfo(userId, email, frequency,access_preference, access_pref_other) {
+    let jsonBody = {
+        "id": userId,
+        "vid_desc_frequency" : frequency,
+        "email": email,
+        "access_preference" : access_preference,
+        "access_pref_other" : access_pref_other,
+    };
+    $.ajax({
+        type: 'PUT',
+        url : '/userStudy/updateUserInfo',
+        dataType: "json",
+        async:true,
+        crossDomain:true,
+        data: jsonBody,
+        success: function (response) {
+            console.log('success');
+        },
+        error: function (response, textStatus, errorThrown) {
+            console.log(JSON.stringify(response));
+        }
+      });
+}
+
+function getVideoData1(userId, num_videos){
+    if($("#email").val()){
+        let url = "/userStudy/helperStatus?userId="+ userId;
+        $.get(url, function (rows) {
+            console.log({LENGTH: rows.length});
+            if(rows.length === num_videos){
+                submitVideoData(userId,true);
+            }else{
+                window.alert(`Please rate all the ${num_videos} videos`);
+            }
+        });
+    }else{
+        window.alert(`Please provide the email address`);
+    }
+}
+
+
+
+
+function fetchVideo() {
+    $.get(targetUrl, function (rows) {
+        let videos = '';
+        for (let i = 0; i < rows.length; i++) {
+            let vid = rows[i];
+            let videoId = vid.video_id;
+            let videoTitle = vid.title;
+            let volunteerId = vid.volunteer_id;
+            let vi_userId= vid.vi_user_id;
+            let vi_comment= vid.comment;
+            let vi_rating=vid.rating;
+            let vi_understanding = vid.video_understanding;
+            let vi_ai_support = vid.ai_support.toString();
+            // console.log({vi_ai_support});
+
+            let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
+            let aiParam = vid.ai_support ? 'yes' : 'no';
+            let formid = ""+videoId + volunteerId + aiParam
+            const stepperMsg = 'Please rate the description of this video on a scale of 1 to 5, with 1 being the poorest and 5 being the best';
+            const understanding = 'I feel I have a good understanding of the topic covered in this video due to the video.';
+
+            videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ml=${aiParam}" class="list-group-item" >
+
+                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg" alt=${videoTitle} style="width:100px;height:100px;">
+                Video ${i+1}: ${videoTitle}</a></b>
+                  
+                <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-vi_ai_support="${vi_ai_support}"  class="video-form" method="POST">
+
+                <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> 
+                <fieldset class='rating' id="group1_${i+1}" name="rating">
+                    <input type="radio" name="rating" aria-labelledby="r1" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"> <label id="r1"> 5 - Excellent</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r2" ${vi_rating==4?"checked":""} value="4" name="group1_${i+1}"> <label id="r2"> 4 - Good</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r3" ${vi_rating==3?"checked":""} value="3" name="group1_${i+1}"> <label id="r3"> 3 - Average</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r4" ${vi_rating==2?"checked":""} value="2" name="group1_${i+1}"> <label id="r4"> 2 - Fair</label><br>
+                    <input type="radio" name="rating" aria-labelledby="r5" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> <label id="r5"> 1 - Poor</label><br>
+                </fieldset>
+                <br>
+
+                <label id="label_video_understanding_${i+1}" for="video_understanding${i+1}"> ${understanding}:</label> 
+                <fieldset class='video_understanding' id="group2_${i+1}" name="video_understanding">
+                    <input type="radio" name="video_understanding" aria-labelledby="v1" ${vi_understanding==5?"checked":""} value="5" name="group2_${i+1}"> <label id="v1">Strongly Agree</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v2" ${vi_understanding==4?"checked":""} value="4" name="group2_${i+1}"> <label id="v2">Agree</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v3" ${vi_understanding==3?"checked":""} value="3" name="group2_${i+1}"> <label id="v3">Neutral</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v4" ${vi_understanding==2?"checked":""} value="2" name="group2_${i+1}"> <label id="v4">Disagree</label><br>
+                    <input type="radio" name="video_understanding" aria-labelledby="v5" ${vi_understanding==1?"checked":""} value="1" name="group2_${i+1}"> <label id="v5">Strongly Disagree</label><br>
+                </fieldset>
+                <br>
+                
+                <label id="label_comment_${i+1}" for="comment_${i+1}">Comment:</label> 
+                <input name="comment" aria-describedby="label_comment_${i+1}" type="text" id="comment_${i+1}" placeholder= "Please add comment" value= "${vi_comment ? vi_comment : "" }" style= "width: 90%; padding: 10px 7px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" name="comment"><br>
+                <br>
+                </form>`;   
+                           
+        }
+        $(".list-group ").append( videos);
+        $(".list-group ").append(`<button type="button" style= "width:100%;  background-color: #4CAF50; color: white; padding: 10px 10px; margin: 8px 0; border: none; border-radius: 4px;" onclick= "getVideoData1('${userId}', ${num_videos})"> Done and send me Amazon Gift Card!</button>`);
+    
+        $(document).on("click", "list-group", function () {
+            var a = $('input[name=active_status]:checked').val();  
+            (OR)   
+            var a = $('.active_status:checked').val();
+            alert(a);
+        });
+
+
+        $(".video-form").bind('focusout',function() {
+            //$( "#rating", "#comment" ).blur();
+           // $( "#input" ).blur();
+           $(this).toggleClass("#rating").toggleClass("#comment");
+            // console.log( 'DATA', this.data);
+            let videoId = $(this).data("videoid")
+            let volunteerId = $(this).data("volunteer_id")
+            let vi_ai_support = $(this).data("vi_ai_support")
+            let vi_userId = $(this).data("viuserid")
+
+            var values ={}
+            $.each($(this).serializeArray(), function(i, field) {
+                values[field.name] = field.value;
+            })
+
+            if (values["rating"] == '') {
+                values["rating"] = 0;
+            }
+
+            $.ajax({
+                type: "POST",
+                url:"/updatefeedback",
+                data: {
+                    vi_user_id: vi_userId,
+                    video_id: videoId,
+                    volunteer_id: volunteerId,
+                    ai_support: vi_ai_support,
+                    rating: values["rating"], 
+                    comment: values["comment"],
+                    video_understanding : values["video_understanding"]
+                },
+                beforeSend: function() {
+                    console.log("Before send.")
+                    
+                },
+                success: function(){
+                    console.log("success connected");
+                },
+                fail: function() {
+                    console.log("Failed.")
+                },
+                dataType: "json"
+            })
+
+            return false;
+        })
+    });
+
+    $('#userInfo').change(function(e){
+        let email = $('#email');
+        let frequency = $('[name="freq"]:checked');
+        let ratingAccess = $('[name="rating_access"]:checked');
+        let otherText= '';
+
+        let emailVal = '';
+        let frequencyVal = '';
+        let ratingAccessVal = '';
+        if(frequency.length === 1) {
+            frequencyVal = frequency[0].value;
+        }
+
+        if(email.length === 1) {
+            emailVal = email[0].value;
+        }
+
+        if(ratingAccess.length === 1) {
+            ratingAccessVal = ratingAccess[0].value;
+            if(ratingAccessVal === 'Other') {
+                otherText = $('#other')[0].value || '';
+            }
+        }
+
+        console.log({ email, frequency: frequency, ratingAccess })
+        console.log({  emailVal,  frequencyVal, ratingAccessVal})
+        submitUserInfo(userId, emailVal, frequencyVal,ratingAccessVal, otherText);
+    });
+
+    
+}
+</script>
+
+</body>
+</html>
+
+          
+        
