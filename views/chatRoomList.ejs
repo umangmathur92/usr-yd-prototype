@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<head>
+  <title>Chat App</title>
+  <script type="text/javascript"  src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="stylesheets/chat.css">
+</head>
+<body>
+  <div id="room-container"></div> 
+  <script>
+    $(document).ready(function() {
+        fetchRooms();
+    });    
+
+    function fetchRooms(){
+      let roomList = ['test1', 'test2'];
+      let rows = '';
+      roomList.forEach(room=>{
+        rows += `<div> 
+                <a href = "room?name=${room}"> ${room} </a>
+                </div>`
+      })
+      document.getElementById('room-container').innerHTML = rows;
+    }
+
+</script>
+</body>
+
+</html>

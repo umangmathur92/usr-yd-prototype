@@ -18,9 +18,51 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
+const io = require('socket.io')(server);
 
+let rooms = { };
+
+rooms['test1'] = { users: {} };
+rooms['test2'] = { users: {} };
+console.log({rooms});
+
+//chat message is an event name
+io.on('connection', socket =>{
+  console.log('new user');
+
+  socket.on('new-user', (room, name) => {
+    socket.join(room);
+    // users[socket.id] = name;
+    console.log('HERE:', rooms);
+    rooms[room].users[socket.id] = name;
+    socket.to(room).broadcast.emit('user-connected', name);
+    console.log('new user', name);
+    console.log('new user', rooms);
+  })
+
+  socket.on('send-chat-message', (room, message) => {
+    console.log('INside send:', room);
+    socket.to(room).broadcast.emit('chat-message', {name: rooms[room].users[socket.id], message: message});
+    console.log({'room' : rooms, 'message:': message });
+  })
+
+  socket.on('disconnect', ()=>{
+    getUserRooms(socket).forEach(room => {
+      // console.log(`${rooms[room].users[socket.id]} disconnected`);
+      socket.broadcast.emit('user-disconnected', rooms[room].users[socket.id]);
+      delete rooms[room].users[socket.id];
+    });
+  })
+})
+
+
+function getUserRooms(socket) {
+  return Object.entries(rooms).reduce((names, [name, room]) => {
+    if (room.users[socket.id] != null) names.push(name)
+    return names
+  }, [])
+}
 /**
  * Listen on provided port, on all network interfaces.
  */

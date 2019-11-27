@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<head>
+  <title>ROOM</title>
+  <script type="text/javascript"  src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="stylesheets/chat.css">
+</head>
+<body>
+  <div id="message-container"></div>
+  <form id="send-container">
+    <input type="text" id="message-input">
+    <button type="submit" id="send-button">Send</button>
+  </form>
+  <script>
+        const socket = io('http://localhost:5001');
+        
+        let url = location.search.substring(1);
+        let roomName = new URLSearchParams(url).get('name');
+        console.log({url});
+        console.log({roomName});
+        let messageForm = document.getElementById('send-container');
+        let messageInput = document.getElementById('message-input');
+        let messageContainer = document.getElementById('message-container');
+        
+        const name = prompt('What is your name?');
+        if(name){
+            appendMessage('You joined');
+            socket.emit('new-user', roomName, name);
+        }
+        
+        socket.on('chat-message', data=>{
+           console.log(data);
+           appendMessage(`${data.name} : ${data.message}`);
+        })
+
+        socket.on('user-connected', name=>{
+            appendMessage(`${name} joined`);
+        })     
+        
+        socket.on('user-disconnected', name=>{
+            appendMessage(`${name} disconnected`);
+        })        
+
+        messageForm.addEventListener('submit', (e) =>{
+            e.preventDefault();
+            let message = messageInput.value;
+            appendMessage(`You: ${message}`);
+            socket.emit('send-chat-message', roomName, message);
+            messageInput.value = '';
+        })
+        
+        function appendMessage(message){
+            let messageElement = document.createElement('div');
+            messageElement.innerText = message;
+            messageContainer.append(messageElement);
+
+        }
+
+    </script>
+</body>
+
+</html>

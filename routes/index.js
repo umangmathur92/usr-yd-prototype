@@ -8,10 +8,13 @@ const db = require('../db/database');
 const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
 const userStudy = require('./userStudy');
+const chatRoom = require('./chatRoom');
+
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
+router.use('/room', chatRoom);
 console.log({sceneModification: sceneModification.addModifiedScene})
 
 
