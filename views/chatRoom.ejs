@@ -6,23 +6,53 @@
   <link rel="stylesheet" href="stylesheets/chat.css">
 </head>
 <body>
+<div id="player"></div>
+<!-- <iframe width="420" height="345" src="https://www.youtube.com/embed/tgbNymZ7vqY"> -->
+</iframe>
   <div id="message-container"></div>
   <form id="send-container">
     <input type="text" id="message-input">
     <button type="submit" id="send-button">Send</button>
   </form>
   <script>
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+            height: '390',
+            width: '640',
+            videoId: 'M7lc1UVf-VE',
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+
+
         const socket = io('http://localhost:5001');
         
         let url = location.search.substring(1);
-        let roomName = new URLSearchParams(url).get('name');
+        const roomName = new URLSearchParams(url).get('name');
+        const name = new URLSearchParams(url).get('user');
         console.log({url});
         console.log({roomName});
+        console.log({userName: name});
+
         let messageForm = document.getElementById('send-container');
         let messageInput = document.getElementById('message-input');
         let messageContainer = document.getElementById('message-container');
-        
-        const name = prompt('What is your name?');
+
+       
         if(name){
             appendMessage('You joined');
             socket.emit('new-user', roomName, name);
@@ -56,6 +86,25 @@
 
         }
 
+      
+        var done = false;
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING && !done) {
+            // setTimeout(stopVideo, 6000);
+            done = true;
+            }else if(event.data == YT.PlayerState.PAUSED){
+                console.log({'data': event.target.getCurrentTime()});
+                let currentTime = event.target.getCurrentTime();
+                let message = `Paused the video at ${currentTime} seconds`;
+                appendMessage(`You: video paused at ${currentTime} seconds`);
+                socket.emit('send-chat-message', roomName, message);
+            }
+        }
+
+        function stopVideo() {
+            player.stopVideo();
+        }
+    
     </script>
 </body>
 
