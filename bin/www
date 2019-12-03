@@ -41,10 +41,16 @@ io.on('connection', socket =>{
     console.log('new user', rooms);
   })
 
-  socket.on('send-chat-message', (room, message) => {
+  socket.on('send-chat-message', (room, message, questionId, userId, type) => {
     console.log('INside send:', room);
-    socket.to(room).broadcast.emit('chat-message', {name: rooms[room].users[socket.id], message: message});
-    console.log({'room' : rooms, 'message:': message });
+    let data = {name: rooms[room].users[socket.id], 
+                message,
+                questionId,
+                type, 
+                userId
+              };
+    socket.to(room).broadcast.emit('chat-message', data);
+    console.log(data);
   })
 
   socket.on('disconnect', ()=>{
