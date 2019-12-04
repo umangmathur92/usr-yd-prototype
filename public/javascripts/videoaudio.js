@@ -16,6 +16,8 @@ let timeElapsedOnPage = 0;
 let isTimerPaused = false;
 let audioArr = [];
 let currAudio;
+let currAudioTime;
+let wasCurrAudioPaused = false;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", false);
@@ -64,6 +66,7 @@ function incrementSeconds() {
 }
 
 function fetchVideoInfo(youtubeId) {
+    WebSocketTest();
     let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     $.get(targetUrl, function (response) {
         let vidJson = response;
@@ -252,7 +255,20 @@ function updateTime() {
     }
     if(videotime !== oldTime) {
         onProgress(videotime);
+        if(wasCurrAudioPaused)
+            {
+                currAudio.play();
+                // currAudio.fastSeek(currAudioTime);
+            wasCurrAudioPaused = false;
+                console.log("The curr audio time is:" + currAudioTime);
+        }
+        // currAudio.play();
     }
+    else
+        {currAudio.pause();
+            currAudioTime = currAudio.currentTime;
+            wasCurrAudioPaused = true;
+        }
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
 }
 
@@ -261,8 +277,10 @@ function onProgress(currentTime) {
     currentTime = currentTime.toFixed(3);
     let currScene = getSceneFromTime(currentTime, allSceneArr);
     let sceneId = currScene.sc_id;
+    // console.log("The scene id : " + sceneId);
     let sceneNum = currScene.sc_num;
     let sceneEndTime = currScene.finish_time;
+    // currAudioTime = currAudio.currentTime;
     if(prevSceneNum != sceneNum) {
         if((currAudio !== null) && (sceneNum !==0) && (isPlaying(currAudio))) {
             pauseVideo();
@@ -273,6 +291,7 @@ function onProgress(currentTime) {
 
             currAudio = audioArr[sceneNum];
             currAudio.play();
+            // currAudioTime = currAudio.currentTime;
             currAudio.onended = function() {
                 console.log('player state is: ' + player.getPlayerState());
                 if(player.getPlayerState() == YT.PlayerState.PAUSED) {
@@ -327,10 +346,12 @@ function onPlayerStateChange(event) {
 
 function playVideo() {
     player.playVideo();
+    // currAudio.play();
 }
 
 function pauseVideo() {
     player.pauseVideo();
+    // currAudio.pause();
 }
 
 function stopVideo() {

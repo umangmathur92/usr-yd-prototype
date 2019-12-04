@@ -38,6 +38,18 @@ router.get('/getAllVideos', function(req, res, next) {
   });
 });
 
+router.get('/getKeyFrames', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+
+  let {sceneId, videoTime} = req.query;
+  console.log("The vals are: "+sceneId+"  "+videoTime);
+  let queryResult = video.fetchKeyFrames(sceneId, videoTime);
+  queryResult.then(result => {
+    console.log("The vals are: "+sceneId+"  "+videoTime);
+       res.send(result);
+    });
+});
+
 router.get('/playvideo/:youtubeId', function(req, res, next) {
   let isAiEnabled = req.query.ai === 'yes';
   if(isAiEnabled) {
@@ -50,6 +62,7 @@ router.get('/playvideo/:youtubeId', function(req, res, next) {
 router.get('/fetchVideoData', function(req, res, next) {
   console.log('req.query', req.query)
   let {videoid, userId} = req.query;
+  console.log('Video id and user id are: ' + videoid + "  "+userId);
   let queryResult = video.fetchVideoDataFromDb(videoid, userId);
   queryResult.then(result => {
     quesAns.getQuestionAnswerByUserId(userId).then( qnaList =>{
