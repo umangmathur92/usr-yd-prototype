@@ -2,15 +2,20 @@
 <head>
   <title>ROOM</title>
   <script type="text/javascript"  src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="stylesheets/chat.css">
 </head>
 <body>
-<div id="player"></div>
+  <div class="videoContainer">
+      <div id="player"></div>
+      <div id= "record"><button id="record-button" class="btn btn-primary" >Ask Question</button></div>
+  </div>
+
 <div id="message-container"></div>
-    
-    <div id="page-wrapper">
-            <button id="record-button">Record</button>
+  
+    <!-- <div id="page-wrapper"> -->
+            
         <!-- <h1>Web Speech Synthesis Demo</h1> -->
         <!-- <p id="msg"></p>
         <input type="text" name="speech-msg" id="speech-msg" x-webkit-speech> -->
@@ -30,12 +35,12 @@
               <label for="pitch">Pitch</label>
               <input type="range" min="0" max="2" step="0.1" name="pitch" id="pitch" value="1">
           </div> -->
-    </div>
+    <!-- </div> -->
       
     <!-- <button id="speak">Speak</button> -->
       
-</div>
-
+<!-- </div> -->
+<!-- <button id="record-button">Record</button> -->
   <script src="javascripts/chatRoom.js"></script>
 </body>
 

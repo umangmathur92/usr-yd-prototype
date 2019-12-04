@@ -17,12 +17,19 @@ let messageForm = document.getElementById('send-container');
 let messageInput = document.getElementById('message-input');
 let messageContainer = document.getElementById('message-container');
 let recordButton = document.getElementById('record-button');
+let heading = document.getElementById('heading');
+
+if(userType === 'admin'){
+    recordButton.style.display = "none";
+}
 
 //Video
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+firstScriptTag.append(`<p> hello </p>`);
 
 var player;
 function onYouTubeIframeAPIReady() {
@@ -86,12 +93,12 @@ function appendQnA(data){
     let messageElement = document.createElement('div');
     // messageElement.innerText = message;
     // <label class="qnALabel" ${ratingVisibility}>Rating(between 1 and 5):</label> 
-    messageElement.innerHTML = `<div id= qna:${data.questionId}>
+    messageElement.innerHTML = `<div class="qNaContainer" id= qna:${data.questionId} style="border:0px">
                                     <label class="qnALabel">Question:</label> 
                                     <textarea class='qnATextArea' id=question:${data.questionId}>${data.message || ''}</textarea>
                                     <label class="qnALabel">Answer:</label> 
                                     <textarea class='qnATextArea' id=answer:${data.questionId}></textarea>
-                                    ${userType == 'admin' ? `<button id="sendButton:${data.questionId}">Send</button>` : '' }
+                                    ${userType == 'admin' ? `<button id="sendButton:${data.questionId}" class="btn btn-success" >Send</button>` : '' }
                                     ${userType == 'participant' ? `Rating: <input type="number" name="rating" 
                                         id=rating:${data.questionId} min="1" max="5"></input>` : ''}
                                 </div>`;
@@ -130,6 +137,7 @@ recordButton.addEventListener('click', (e) => {
     e.preventDefault();
    // player.pauseVideo();
    console.log('Record button clicked..Recording....');
+   player.pauseVideo();
    recognition.start();
    e.stopPropagation();
 });
