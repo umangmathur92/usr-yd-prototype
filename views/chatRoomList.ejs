@@ -8,16 +8,16 @@
 <body>
   <div id="room-container">
     <div> 
-        <a href = "room?name=test1&user=participant1&type=participant"> ROOM: Test 1, Participant 1 </a>
+        <a href = "room?name=PrepSession1&user=Participant1&type=participant&videoId=q_3Kv9JmsC8">PrepSession1, Participant 1 </a>
     </div>
     <div> 
-        <a href = "room?name=test1&user=admin1&type=admin"> Room: TEST 1, ADMIN </a>
+        <a href = "room?name=PrepSession1&user=Admin1&type=admin&videoId=q_3Kv9JmsC8"> PrepSession1, ADMIN </a>
     </div>
     <div> 
-        <a href = "room?name=test2&user=participant2&type=participant"> Room: TEST 2, Participant 2 </a>
+        <a href = "room?name=PrepSession2&user=Participant2&type=participant&videoId=OYjaBQ8dDHc"> PrepSession2, Participant 2 </a>
     </div>
     <div> 
-        <a href = "room?name=test2&user=admin2&type=admin"> Room: TEST 2, ADMIN 2 </a>
+        <a href = "room?name=PrepSession2&user=Admin2&type=admin&videoId=OYjaBQ8dDHc"> PrepSession2, ADMIN 2 </a>
     </div>
   
   </div> 
@@ -27,7 +27,7 @@
     });    
 
     function fetchRooms(){
-      let roomList = ['test1', 'test2'];
+      let roomList = ['room1', 'room2'];
       let userList = ['user1', '']
       let rows = '';
       roomList.forEach(room=>{

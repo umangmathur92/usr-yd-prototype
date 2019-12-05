@@ -4,12 +4,14 @@ let url = location.search.substring(1);
 const roomName = new URLSearchParams(url).get('name');
 const name = new URLSearchParams(url).get('user');
 const userType = new URLSearchParams(url).get('type');
+const videoId =  new URLSearchParams(url).get('videoId');
 console.log({url});
 console.log({roomName});
 console.log({userName: name});
 const ANSWER = 'answer';
 const QUESTION = 'question';
 const INFO = 'info';
+
 
 let questions = {};
 
@@ -18,9 +20,13 @@ let messageInput = document.getElementById('message-input');
 let messageContainer = document.getElementById('message-container');
 let recordButton = document.getElementById('record-button');
 let heading = document.getElementById('heading');
+let submitButton = document.getElementById('submit-button');
+let totalQuestions = 0;
+
 
 if(userType === 'admin'){
     recordButton.style.display = "none";
+    submitButton.style.display = "none";
 }
 
 //Video
@@ -36,7 +42,7 @@ function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
     height: '390',
     width: '640',
-    videoId: 'M7lc1UVf-VE',
+    videoId: videoId,
     events: {
         'onReady': onPlayerReady,
         'onStateChange': onPlayerStateChange
@@ -61,9 +67,10 @@ socket.on('chat-message', data=>{
    }else if(userType === 'admin' && data.type == INFO){
         appendMessage(data.userId + ':'+ data.message);
    }else if(data.type == ANSWER){
-       let message =  data.name + 'said ' + data.message;
+       let message =  data.name + ' said ' + data.message;
        speak(message);
        updateAnswer(data);
+       speak('  Please rate the response');
    }
 })
 
@@ -74,6 +81,16 @@ socket.on('user-connected', name=>{
 socket.on('user-disconnected', name=>{
     appendMessage(`${name} disconnected`);
 })        
+submitButton.addEventListener('click', (e)=>{
+    console.log({event: e.target.id});
+    if(totalQuestions < 5){
+        console.log('inside submit-button');
+        speak('Please submit atleast 5 questions');
+    }else{
+        speak('Thank you for completing the session');
+    }
+    e.stopPropagation();
+})
 
 messageContainer.addEventListener('click', (e)=>{
     console.log({event: e.target.id});
@@ -90,6 +107,7 @@ messageContainer.addEventListener('click', (e)=>{
 })
 
 function appendQnA(data){
+    totalQuestions++;
     let messageElement = document.createElement('div');
     // messageElement.innerText = message;
     // <label class="qnALabel" ${ratingVisibility}>Rating(between 1 and 5):</label> 
@@ -171,14 +189,6 @@ if ('speechSynthesis' in window) {
 }
 
 let button = document.getElementById('speak');
-// Get the text input element.
-// let speechMsgInput = document.getElementById('speech-msg');
-// Get the voice select element.
-// let voiceSelect = document.getElementById('voice');
-// // Get the attribute controls.
-// let volumeInput = document.getElementById('volume');
-// let rateInput = document.getElementById('rate');
-// let pitchInput = document.getElementById('pitch');
 
 // Chrome loads voices asynchronously.
 window.speechSynthesis.onvoiceschanged = function(e) {
@@ -189,11 +199,10 @@ function speak(text) {
     // Create a new instance of SpeechSynthesisUtterance.
     var msg = new SpeechSynthesisUtterance();
     msg.text = text;
-    msg.volume = parseFloat(1);
-    msg.rate = parseFloat(1);
-    msg.pitch = parseFloat(1);
+    msg.volume = 1;
+    msg.rate = 1;
+    msg.pitch = 1;
     msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == 'Alex' })[0];
-    // Queue this utterance.
     window.speechSynthesis.speak(msg);
     console.log('speech synthesis called:', text );
   }
@@ -207,13 +216,20 @@ function onPlayerStateChange(event) {
     done = true;
     }else if(event.data == YT.PlayerState.PAUSED){
         console.log({'data': event.target.getCurrentTime()});
-        let currentTime = event.target.getCurrentTime();
-        let message = `Paused the video at ${currentTime} seconds`;
+        let currentTime = formatTime(event.target.getCurrentTime());
+        let message = `Paused the video at ${currentTime} minutes`;
         socket.emit('send-chat-message', roomName, message, '', name ,INFO);
     }
 }
 
-
+function formatTime(time) {
+    // console.log(time);
+    var minutes = Math.floor(time / 60);
+    var seconds = time - minutes * 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    var s = parseFloat(seconds).toFixed(0);
+    return minutes + ":" + s;
+}
 
 function stopVideo() {
     player.stopVideo();

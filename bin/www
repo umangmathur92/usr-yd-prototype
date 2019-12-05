@@ -23,8 +23,8 @@ const io = require('socket.io')(server);
 
 let rooms = { };
 
-rooms['test1'] = { users: {} };
-rooms['test2'] = { users: {} };
+rooms['PrepSession1'] = { users: {} };
+rooms['PrepSession2'] = { users: {} };
 console.log({rooms});
 
 //chat message is an event name
