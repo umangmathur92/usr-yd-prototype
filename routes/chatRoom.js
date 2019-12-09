@@ -4,6 +4,18 @@ var express = require('express');
 var router = express.Router();
 const rooms = { };
 
+
+router.get('/prepsession', function(req, res, next) {
+  console.log(req.query);
+  res.render('prepsession', { roomName: req.params.name}); 
+});
+
+router.get('/session3', function(req, res, next) {
+  console.log(req.query);
+  res.render('us3_session3', { roomName: req.params.name}); 
+});
+
+
 router.get('/', function(req, res, next) {
   console.log(req.query);
   if(req.query.name){
@@ -12,11 +24,6 @@ router.get('/', function(req, res, next) {
     res.render('chatRoomList', { rooms: rooms });
   }  
 });
-
-// router.post('/room', (req,res) => {
-//   rooms[req.body.name] = {users: {}};
-//   res.redirect(`/room=${req.query.room}`);
-// })
 
 
 module.exports = router;

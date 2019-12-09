@@ -5,6 +5,7 @@ const roomName = new URLSearchParams(url).get('name');
 const name = new URLSearchParams(url).get('user');
 const userType = new URLSearchParams(url).get('type');
 const videoId =  new URLSearchParams(url).get('videoId');
+console.log('START PAGE');
 console.log({url});
 console.log({roomName});
 console.log({userName: name});
@@ -178,22 +179,17 @@ recognition.onresult = (event) => {
         console.log({speechToText});
     }
 }
-
-//SPeech Synthesis
-if ('speechSynthesis' in window) {
-	supportMsg.innerHTML = 'Your browser <strong>supports</strong> speech synthesis.';
-} else {
-    supportMsg.innerHTML = `Sorry your browser <strong>does not support</strong> speech synthesis.<br>
-                            Try this in <a href="https://www.google.co.uk/intl/en/chrome/browser/canary.html">Chrome Canary</a>.`;
-	supportMsg.classList.add('not-supported');
-}
+// let supportMsg = document.getElementById('supportMsg');
+// //SPeech Synthesis
+// if ('speechSynthesis' in window) {
+// 	supportMsg.innerHTML = 'Your browser <strong>supports</strong> speech synthesis.';
+// } else {
+//     supportMsg.innerHTML = `Sorry your browser <strong>does not support</strong> speech synthesis.<br>
+//                             Try this in <a href="https://www.google.co.uk/intl/en/chrome/browser/canary.html">Chrome Canary</a>.`;
+// 	supportMsg.classList.add('not-supported');
+// }
 
 let button = document.getElementById('speak');
-
-// Chrome loads voices asynchronously.
-window.speechSynthesis.onvoiceschanged = function(e) {
-    loadVoices();
-};
 
 function speak(text) {
     // Create a new instance of SpeechSynthesisUtterance.
@@ -205,9 +201,7 @@ function speak(text) {
     msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == 'Alex' })[0];
     window.speechSynthesis.speak(msg);
     console.log('speech synthesis called:', text );
-  }
-
-
+}
 
 var done = false;
 function onPlayerStateChange(event) {
