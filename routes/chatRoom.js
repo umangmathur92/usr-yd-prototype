@@ -3,11 +3,13 @@
 var express = require('express');
 var router = express.Router();
 const rooms = { };
+const sessionUserStudy = require('../model/sessionUserStudy3');
+
 
 
 router.get('/prepsession', function(req, res, next) {
   console.log(req.query);
-  res.render('prepsession', { roomName: req.params.name}); 
+  res.render('us3_prepsession', { roomName: req.params.name}); 
 });
 
 router.get('/session3', function(req, res, next) {
@@ -24,6 +26,10 @@ router.get('/', function(req, res, next) {
     res.render('chatRoomList', { rooms: rooms });
   }  
 });
+
+
+
+
 
 
 module.exports = router;

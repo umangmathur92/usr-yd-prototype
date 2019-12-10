@@ -63,18 +63,20 @@ if(name){
 socket.on('chat-message', data=>{
     
    console.log(data);
+
+   if(userType === 'admin'){
+       beep();
+   }
+
    if(data.type == QUESTION){
         appendQnA(data);
    }else if(userType === 'admin' && data.type === INFO){
-        beep();
         appendMessage(data.userId + ' : '+ data.message);
    }else if(data.type == ANSWER){
        let message =  data.name + ' said ' + data.message;
        speak(message);
        updateAnswer(data);
-    //    speak('  Please rate the response');
    }else if(userType === 'admin' && data.type === PAUSEINFO){
-       beep();
        console.log({data});
        appendMessage(data.userId + ' :'+ data.message.text);
        player.seekTo(data.message.duration);
@@ -167,7 +169,7 @@ function appendQnA(data){
                                 <input type="checkbox" id="visualBased:${data.questionId}" name="visualBased"> 
                                 <label for="visualBased">Visual Based</label>`;
     }else{
-        questionTypeElement = `<button id="submitQuestionButton:${data.questionId}" class="btn btn-success"> Submit Question </button>`;
+        questionTypeElement = `<button id="submitQuestionButton:${data.questionId}" class="btn btn-success" style="float:right"> Submit Question </button>`;
     }
     messageElement.innerHTML = `<div class="qNaContainer" id= qna:${data.questionId} style="border:0px">
                                     <label class="qnALabel">Question ${totalQuestions} :</label> 
