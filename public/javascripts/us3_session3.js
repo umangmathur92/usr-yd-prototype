@@ -28,6 +28,11 @@ let totalQuestions = 0;
 if(userType === 'admin'){
     recordButton.style.display = "none";
     submitButton.style.display = "none";
+
+    let url = '/room/fetchQuestions' + '?userId=' + 'Participant1' + '&videoId=' + videoId; 
+    $.get(url, function (res) {
+        console.log('RESULT ', res);
+    });
 }
 
 //Video

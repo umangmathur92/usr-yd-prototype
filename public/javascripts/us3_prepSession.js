@@ -123,7 +123,21 @@ messageContainer.addEventListener('click', (e)=>{
         console.log('questionElement: ', questionElement.value);
         document.getElementById(e.target.id).disabled = true;
         socket.emit('send-chat-message', roomName, questionElement.value, textDescArea, name, QUESTION);
-       
+        
+        let postJson = {
+            'user' : name ,
+            videoId,
+            'questionId' : textDescArea,
+            'answerId' : textDescArea,
+            'question' : questionElement.value,
+            'answer' : '',
+            'sessionType' : 'PREPSESSION'
+        }
+
+        $.post('/room/addQuesAns', postJson, function (res) {
+            console.log('RESULT ', res);
+        });
+
     }else if(e.target.id.includes('contentBased:')){
         console.log('inside contentBased checkbox');
         let contentButtonValue = document.getElementById(e.target.id).checked;
