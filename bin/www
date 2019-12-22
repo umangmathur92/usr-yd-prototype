@@ -27,6 +27,8 @@ rooms['prepSession1'] = { users: {} };
 rooms['prepSession2'] = { users: {} };
 rooms['session3'] = { users: {} };
 rooms['session3'] = { users: {} };
+rooms['1'] = { users: {} };
+rooms['2'] = { users: {} };
 console.log({rooms});
 
 //chat message is an event name

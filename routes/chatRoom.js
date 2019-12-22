@@ -38,11 +38,11 @@ router.post('/addQuesAns', function(req, res, next) {
 
 router.get('/fetchQuestions', function(req, res, next) {
   console.log('req.query', req.query)
-    let data = {
-      'userId' : req.query.userId,
-      'videoId': req.query.videoId
-    }
-    sessionUserStudy.getQuestionAnswerByUserId(data).then( qnaList =>{
+    // let data = {
+    //   'userId' : req.query.userId,
+    //   'videoId': req.query.videoId
+    // }
+    sessionUserStudy.getQuestionAnswerByUserId(req.query).then( qnaList =>{
       res.send(qnaList);
       console.log(qnaList);
     }).catch((err) => {

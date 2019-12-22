@@ -12,6 +12,10 @@ const ANSWER = 'answer';
 const QUESTION = 'question';
 const INFO = 'info';
 const PAUSEINFO = 'pause';
+const CONTENT = 'content';
+const VISUAL = 'visual';
+let questionTimestamp;
+let prepSessionQuestionCount = 1;
 
 
 let questions = {};
@@ -25,9 +29,32 @@ let submitButton = document.getElementById('submit-button');
 let totalQuestions = 0;
 
 
+function fetchQuestions() {
+    let url = `/room/fetchQuestions?userId=Participant1&videoId=${videoId}`;
+    $.get(url , function (rows) {
+        let generatedHtml = '';
+        for (let i = 0; i < rows.length; i++) {
+            console.log(rows[i]);
+            appendQuestionsAnswers(rows[i]);
+        }
+    });
+}
+
+function appendQuestionsAnswers(data){
+    let messageElement = document.createElement('div');
+    messageElement.innerHTML = `<div class="qNaContainer" id= qna:${data.questionId} style="border:0px">
+                                    <label class="qnALabel">PrepSession Ques ${prepSessionQuestionCount} :</label> 
+                                    <textarea class='qnATextArea' id=question:${data.questionId}>${data.question || ''}</textarea>
+                                    <textarea class='qnATextArea' id=answer:${data.answerId}>${data.answer || ''}</textarea>
+                                </div>`;
+   messageContainer.append(messageElement);
+   prepSessionQuestionCount++;
+}
+
 if(userType === 'admin'){
     recordButton.style.display = "none";
     submitButton.style.display = "none";
+    fetchQuestions(name);
 }
 
 //Video
@@ -123,6 +150,9 @@ messageContainer.addEventListener('click', (e)=>{
         console.log('questionElement: ', questionElement.value);
         document.getElementById(e.target.id).disabled = true;
         socket.emit('send-chat-message', roomName, questionElement.value, textDescArea, name, QUESTION);
+        let content = document.getElementById('cont')
+        // let contentBasedElementStatus  = document.getElementById(`contentBased:${e.target.id}`).checked;
+        // let questionType = contentBasedElementStatus ? CONTENT : VISUAL;
         
         let postJson = {
             'user' : name ,
@@ -131,9 +161,12 @@ messageContainer.addEventListener('click', (e)=>{
             'answerId' : textDescArea,
             'question' : questionElement.value,
             'answer' : '',
-            'sessionType' : 'PREPSESSION'
+            'sessionType' : 'PREPSESSION',
+            'timeStamp' : questionTimestamp,
+            'questionType' : '',
         }
 
+        console.log({postJson});
         $.post('/room/addQuesAns', postJson, function (res) {
             console.log('RESULT ', res);
         });
@@ -264,6 +297,7 @@ function onPlayerStateChange(event) {
     // setTimeout(stopVideo, 6000);
     done = true;
     }else if(event.data == YT.PlayerState.PAUSED){
+        questionTimestamp = event.target.getCurrentTime();
         console.log({'data': event.target.getCurrentTime()});
         let currentTime = formatTime(event.target.getCurrentTime());
         let duration = player.getDuration() * (event.target.getCurrentTime()/ 100);

@@ -5,6 +5,7 @@ const roomName = new URLSearchParams(url).get('name');
 const name = new URLSearchParams(url).get('user');
 const userType = new URLSearchParams(url).get('type');
 const videoId =  new URLSearchParams(url).get('videoId');
+const participantId = new  URLSearchParams(url).get('participantId');
 console.log({url});
 console.log({roomName});
 console.log({userName: name});
@@ -12,8 +13,7 @@ const ANSWER = 'answer';
 const QUESTION = 'question';
 const INFO = 'info';
 const PAUSEINFO = 'pause';
-
-
+let videoTime = 0; //synch time according to youtube player
 let questions = {};
 
 let messageForm = document.getElementById('send-container');
@@ -23,16 +23,104 @@ let recordButton = document.getElementById('record-button');
 let heading = document.getElementById('heading');
 let submitButton = document.getElementById('submit-button');
 let totalQuestions = 0;
+let prepSessionQuestionsList = [];
+let prepSessionTimeList= [];
+let timeListCount = 0;
 
 
 if(userType === 'admin'){
     recordButton.style.display = "none";
     submitButton.style.display = "none";
 
-    let url = '/room/fetchQuestions' + '?userId=' + 'Participant1' + '&videoId=' + videoId; 
-    $.get(url, function (res) {
-        console.log('RESULT ', res);
+    let url = '/room/fetchQuestions' + '?userId=' + participantId + '&videoId=' + videoId + '&sessionType=' + 'PREPSESSION'; 
+    let qNaList = [];
+    $.get(url, function (rows) {
+        console.log('RESULT ', rows);
+        for(let i=0; i<rows.length; i++){
+            console.log(rows[i]);
+            prepSessionTimeList.push(rows[i].time);
+            prepSessionQuestionsList.push(rows[i]);
+        }
     });
+    prepSessionTimeList.sort();
+    console.log({prepSessionQuestionsList});
+    console.log({prepSessionTimeList});
+}
+
+// let prepSessionQuestionsURL = '';
+// if(userType === 'admin'){
+//     recordButton.style.display = "none";
+//     submitButton.style.display = "none";
+//     prepSessionQuestionsURL = '/room/fetchQuestions' + '?userId=' + participantId + '&videoId=' + videoId + '&sessionType=' + 'PREPSESSION'; 
+// }else{
+//     prepSessionQuestionsURL = '/room/fetchQuestions' + '?userId=' + name + '&videoId=' + videoId + '&sessionType=' + 'PREPSESSION'; 
+// }
+
+// let qNaList = [];
+// $.get(prepSessionQuestionsURL, function (rows) {
+//     console.log('RESULT ', rows);
+//     for(let i=0; i<rows.length; i++){
+//         console.log(rows[i]);
+//         prepSessionTimeList.push(rows[i].time);
+//         prepSessionQuestionsList.push(rows[i]);
+//     }
+// });
+// prepSessionTimeList.sort();
+// console.log({prepSessionQuestionsList});
+// console.log({prepSessionTimeList});
+
+
+function updateTime() {
+    if(player && player.getCurrentTime) {
+        videoTime = player.getCurrentTime();
+    }
+    console.log('update time:', videoTime);
+    if(timeListCount < prepSessionQuestionsList.length && videoTime >= prepSessionTimeList[timeListCount]) {
+        player.pauseVideo();
+        let time = prepSessionTimeList[timeListCount];
+        console.log({prepSessionTime : time});
+        let qnA = prepSessionQuestionsList.filter(i => i.time == prepSessionTimeList[timeListCount]);
+        console.log({qnA} );
+        appendPrepSessionQuestions(qnA[0]);
+        timeListCount++;
+    }
+}
+
+function appendPrepSessionQuestions(data){
+  /*  totalQuestions++;
+    let messageElement = document.createElement('div');
+    let answerElement = '';
+   
+    answerElement = ` <label class="qnALabel">Answer:</label> 
+                    <textarea class='qnATextArea' id=answer:${data.questionId}>${data.answer}</textarea>`;
+    
+    messageElement.innerHTML = `<div class="qNaContainer" id= qna:${data.questionId} style="border:0px">
+                                    <label class="qnALabel">Question ${totalQuestions} : </label> 
+                                    <textarea class='qnATextArea' id=question:${data.questionId}>${data.question}</textarea>
+                                    ${answerElement}
+                                    <button id="sendButton:${data.questionId}" class="btn btn-success" >Send</button>
+                                </div>`;
+   messageContainer.append(messageElement);*/
+
+   totalQuestions++;
+    let messageElement = document.createElement('div');
+    let answerElement = '';
+    if(userType === 'admin'){
+         answerElement = ` <label class="qnALabel">Answer:</label> 
+                           <textarea class='qnATextArea' id=answer:${data.questionId}>${data.answer}</textarea>`;
+    }else{
+        answerElement = `<label class="qnALabel">Answer:</label> 
+                        <textarea readonly class='qnATextArea' id=answer:${data.questionId}>${data.answer}</textarea>
+                        <button id="submitQuestionButton:${data.questionId}" class="btn btn-success"> Submit Question </button>`;
+    }
+    messageElement.innerHTML = `<div class="qNaContainer" id= qna:${data.questionId} style="border:0px">
+                                    <label class="qnALabel">Question ${totalQuestions} : </label> 
+                                    <textarea class='qnATextArea' id=question:${data.questionId}>${data.question}</textarea>
+                                    ${answerElement}
+                                    ${userType == 'participant' ? `Rating: <input type="number" name="rating" id=rating:${data.questionId} min="1" max="5"></input>` : ''}
+                                    ${userType == 'admin' ? `<button id="sendButton:${data.questionId}" class="btn btn-success" >Send</button>` : '' }
+                                </div>`;
+   messageContainer.append(messageElement);
 }
 
 //Video
@@ -57,8 +145,13 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    event.target.playVideo();
+    event.target.playVideo(); 
+    console.log('here');
+    setInterval(updateTime, 100);  
 }
+
+
+
 
 if(name){
     appendMessage('You joined');
@@ -105,7 +198,6 @@ submitButton.addEventListener('click', (e)=>{
     speak('Thank you for completing the session');
     e.stopPropagation();
 })
-
 
 messageContainer.addEventListener('click', (e)=>{
     console.log({event: e.target.id});
@@ -159,7 +251,6 @@ function appendMessage(message){
     messageContainer.append(messageElement);
 }
 
-
 function updateAnswer(data){
     console.log('inside updateAnswer:', data);
     let answerId = 'answer:' + data.questionId;
@@ -167,8 +258,6 @@ function updateAnswer(data){
 }
 
 // let supportMsg = document.getElementById('msg');
-
-
 //Speech Recognition
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
@@ -221,6 +310,7 @@ function speak(text) {
 var done = false;
 function onPlayerStateChange(event) {
     if (event.data == YT.PlayerState.PLAYING && !done) {
+        
     // setTimeout(stopVideo, 6000);
     done = true;
     }else if(event.data == YT.PlayerState.PAUSED){
@@ -235,6 +325,8 @@ function onPlayerStateChange(event) {
         socket.emit('send-chat-message', roomName, message, '', name ,PAUSEINFO);
     }
 }
+
+
 
 function formatTime(time) {
     // console.log(time);
