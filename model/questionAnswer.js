@@ -55,6 +55,11 @@ let question = {
         return db.query(`UPDATE question set question = $1 where id= $2`, [data.question, data.id], callback);
     },
 
+    updateAnswer: function (data, callback) {
+        // console.log({'IINSIE US': data});
+        return db.query(`UPDATE answer set answer = $1 where id= $2`, [data.answer, data.id], callback);
+    },
+
     deleteQuestionById : function(data, callback){
         // console.log('inside delete');
         const sql = `START TRANSACTION; 

@@ -4,6 +4,7 @@ var express = require('express');
 var router = express.Router();
 const rooms = { };
 const sessionUserStudy = require('../model/sessionUserStudy3');
+const questionAnwer = require('../model/questionAnswer');
 
 
 router.get('/prepsession', function(req, res, next) {
@@ -30,6 +31,28 @@ router.post('/addQuesAns', function(req, res, next) {
   let queryResult = sessionUserStudy.addQuestionAnswer(req.body);
   queryResult.then(result => {
     res.send('session Q&A inserted successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
+router.put('/updateAnswer', function(req, res, next) {
+  console.log({insideput :  req.body});
+  let queryResult = questionAnwer.updateAnswer(req.body);
+  queryResult.then(result => {
+    res.send('answer updated successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
+router.put('/updateRating', function(req, res, next) {
+  console.log({insideput :  req.body});
+  let queryResult = sessionUserStudy.updateRating(req.body);
+  queryResult.then(result => {
+    res.send('rating updated successfully');  
   }).catch((err) => {
     res.send(err);
     console.log(err)

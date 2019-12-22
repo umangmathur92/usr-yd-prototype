@@ -52,6 +52,11 @@ let sessionQnA = {
         // console.log({sql});
          return db.query(sql, callback);
     },
+    
+    updateRating: function (data, callback) {
+        // console.log({'IINSIE US': data});
+        return db.query(`UPDATE us3_session_qna set rating = $1 where question_id= $2`, [data.rating, data.id], callback);
+    },
 
 };
 

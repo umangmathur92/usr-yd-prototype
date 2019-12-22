@@ -141,6 +141,19 @@ messageContainer.addEventListener('click', (e)=>{
         let answerElement = document.getElementById(`answer:${textDescArea}`);
         console.log('ansElement: ', answerElement.value);
         socket.emit('send-chat-message', roomName, answerElement.value, textDescArea, name, ANSWER);
+        let data = {
+            'id' :  textDescArea,
+            'answer' : answerElement.value,
+        };
+        $.ajax({
+            url: '/room/updateAnswer',
+            type: 'PUT',
+            data,
+            success: function(result) {
+                console.log('PUT RESULT ', res);
+            }
+        });
+    
     }else if(e.target.id.includes('submitQuestionButton:')){
         console.log('inside submitQuestionButton button');
         let index = e.target.id.indexOf(':')+1;
