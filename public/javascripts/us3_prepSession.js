@@ -34,6 +34,7 @@ function fetchQuestions() {
     $.get(url , function (rows) {
         let generatedHtml = '';
         for (let i = 0; i < rows.length; i++) {
+            console.log('FETCH QUESTIONS:');
             console.log(rows[i]);
             appendQuestionsAnswers(rows[i]);
         }
@@ -193,10 +194,25 @@ messageContainer.addEventListener('click', (e)=>{
             // console.log({textDescArea});
             let questionElement = document.getElementById(`question:${textDescArea}`);
             console.log('questionElement: ', questionElement.value);
-            let message = `Please ask content based question for question ${questionElement.value}`;
+            // let message = `Please ask visual based question for question ${questionElement.value}`;
+            let message = 'Question not submitted. Please ask visual based question.'
             socket.emit('send-chat-message', roomName, message, textDescArea, name, ANSWER);
 
             document.getElementById(`visualBased:${textDescArea}`).checked = false;
+            
+            let data = {
+                'id' :  textDescArea,
+                'questionType' : CONTENT,
+            };
+
+            $.ajax({
+                url: '/room/updateQuestionType',
+                type: 'PUT',
+                data,
+                success: function(result) {
+                    console.log('question type updated: ', res);
+                }
+            });
         }
     }else if(e.target.id.includes('visualBased:')){
         console.log('inside visualBased checkbox');
@@ -204,9 +220,23 @@ messageContainer.addEventListener('click', (e)=>{
         if(visualButtonValue){
             let index = e.target.id.indexOf(':')+1;
             let id = e.target.id.substring(index);
-            let message = `Thank you for submitting the question. Please create more questions`;
+            let message = `Question submitted. Please create more questions`;
             socket.emit('send-chat-message', roomName, message, '', name, ANSWER);
             document.getElementById(`contentBased:${id}`).checked = false;
+
+            let data = {
+                'id' :  id,
+                'questionType' : VISUAL,
+            };
+
+            $.ajax({
+                url: '/room/updateQuestionType',
+                type: 'PUT',
+                data,
+                success: function(result) {
+                    console.log('question type updated: ', res);
+                }
+            });
         }
     }
     e.stopPropagation();

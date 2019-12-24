@@ -22,10 +22,10 @@ let sessionQnA = {
     getQuestionAnswerByUserId: function (data, callback) {
         console.log('INSIDE GET QUESTIONS:', data);
         let query = `select q.id as "questionId", a.id as "answerId",
-                    q.question as question, a.answer as answer, s.time as time, s.question_type as questionType
+                    q.question as question, a.answer as answer, s.time as time, s.question_type as questionType, s.rating, s.session_type
                     from us3_session_qna s, question q, answer a
                     where s.question_id=q.id and s.answer_id=a.id and s.user_id='${data.userId}' 
-                    and s.video_id= '${data.videoId}' and s.session_type= '${data.sessionType}' ;`
+                    and s.video_id= '${data.videoId}' and s.session_type= '${data.sessionType}' and s.question_type='visual';`
 
         console.log({query});
         return db.query(query, callback);
@@ -56,6 +56,11 @@ let sessionQnA = {
     updateRating: function (data, callback) {
         // console.log({'IINSIE US': data});
         return db.query(`UPDATE us3_session_qna set rating = $1 where question_id= $2`, [data.rating, data.id], callback);
+    },
+
+    updateQuestionType: function (data, callback) {
+        // console.log({'IINSIE US': data});
+        return db.query(`UPDATE us3_session_qna set question_type = $1 where question_id= $2`, [data.questionType, data.id], callback);
     },
 
 };

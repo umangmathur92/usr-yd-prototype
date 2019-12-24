@@ -59,6 +59,18 @@ router.put('/updateRating', function(req, res, next) {
   });
 });
 
+
+router.put('/updateQuestionType', function(req, res, next) {
+  console.log({insideput :  req.body});
+  let queryResult = sessionUserStudy.updateQuestionType(req.body);
+  queryResult.then(result => {
+    res.send('question type updated successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
 router.get('/fetchQuestions', function(req, res, next) {
   console.log('req.query', req.query)
     // let data = {
