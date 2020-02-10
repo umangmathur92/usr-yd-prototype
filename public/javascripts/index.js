@@ -142,8 +142,8 @@ function renderScenes(currScene) {
                     + '<tr><td><b>Scene ' + sceneNum + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes <button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
                     + '<tr><td>Description</td><td><div class="scene-description-container">'
                     + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
-                    // + '<tr><td>Text On-Screen</td><td>' 
-                    + '<div class="scene-ocr-container" style="display:none">'
+                    + '<tr><td>Text On-Screen</td><td>' 
+                    + '<div class="scene-ocr-container">'
                     + '<textarea onkeyup="auto_grow(this)" class="txt-scene-ocr" id="s_o_'+ sceneId + '">' + sceneOcr + '</textarea></div></td></tr></table>'
                     + `<hr/>` 
                     + newQuestion;
