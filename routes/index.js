@@ -43,6 +43,18 @@ router.get('/getAllVideos', function(req, res, next) {
   });
 });
 
+router.get('/getDialogTimeStamps', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+  console.log('Dialog TS:',req);
+  let {videoId} = req.query;
+  console.log("The vals are: "+videoId);
+  let queryResult = video.fetchDialogTimeStamps(videoId);
+  queryResult.then(result => {
+    console.log("The vals are: "+videoId);
+       res.send(result);
+    });
+});
+
 router.get('/playvideo/:youtubeId', function(req, res, next) {
   let isAiEnabled = req.query.ai === 'yes';
   if(isAiEnabled) {
