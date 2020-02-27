@@ -107,7 +107,7 @@ function fetchVideoInfo(youtubeId) {
                 let randomNum = Math.random();
                 let descType = enableAi ? 'ai' : 'non_ai';
                 let src = `../audio/${youtubeId}/${descType}/${userId}/${sceneNum}.mp3` + '?random='+randomNum;
-                console.log(src);
+                // console.log(src);
                 let audioFile = new Audio(src);
                 audioArr.push(audioFile);
             }
@@ -166,7 +166,7 @@ function initializeDescriptionsUI() {
 
 
 function renderScenes(currScene) {
-    console.log({currScene})
+    // console.log({currScene})
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
     let scStartTime = currScene.start_time;
@@ -430,7 +430,7 @@ async function updateTime() {
         // console.log("No state change");
     }
 
-    if(videotime - oldTime > 0.3) {
+    if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
         console.log("Forward");
         STATE = 0;
         updateProgress(videotime); // S1 Different func
@@ -495,10 +495,11 @@ function updateProgress(currentTime){
     currentTime = currentTime.toFixed(3);
     let currScene = getSceneFromTime(currentTime, allSceneArr);
     let sceneId = currScene.sc_id;
-    // console.log("The scene id : " + sceneId);
+    console.log("The scene id : " + sceneId);
     let sceneNum = currScene.sc_num;
     let sceneStartTime = currScene.start_time;
     let sceneEndTime = currScene.finish_time;
+    YT_FLAG_Dial = false;
     prevSceneNum = sceneNum;
     let currAudTime = currentTime - sceneStartTime;
     if(currAudio !== null && isPlaying(currAudio))
@@ -514,6 +515,10 @@ function updateProgress(currentTime){
             currAudio.play(); // May have to check YT_STATE
             currAudio.onended = function() {
                 console.log("This curr Audio ended");
+                if(player.getPlayerState() == YT.PlayerState.PAUSED) {                
+                    STATE = 0;
+                    playVideo();
+                }
                 currAudio = null;
             }
     }
@@ -531,6 +536,7 @@ function onProgress(currentTime) {
     let sceneEndTime = currScene.finish_time;
     // currAudioTime = currAudio.currentTime;
     let isDialog = getDialogFromTime(currentTime);
+    console.log("Curr Audio is:",prevSceneNum);
     if(currAudio && isPlaying(currAudio) && isDialog && !YT_FLAG_Dial)
         {currAudio.pause(); 
             YT_FLAG_Dial = true;
@@ -1006,6 +1012,7 @@ function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
     }
 }
 
-function isPlaying(audioElement) { 
-    return !audioElement.paused; 
+function isPlaying(audioElement) {
+    if(audioElement!=null)  
+        return !audioElement.paused; 
 }

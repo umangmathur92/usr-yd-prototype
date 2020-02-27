@@ -59,7 +59,7 @@ async function fetchAllVideos() {
 
 async function fetchDialogTimeStamps(videoId) {
     console.log("Ent: testking");
-    return await db.any(`SELECT start_time, end_time FROM video_dialogs WHERE video_id = '${videoId}' ORDER BY start_time`);
+    return await db.any(`SELECT start_time, end_time FROM video_dialogs_timestamps WHERE video_id = '${videoId}' ORDER BY start_time`);
     // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
 }
 
