@@ -204,28 +204,28 @@ router.get('/uploadVideo', function (req, res) {
 
 
 
-function uploadVideo1(accessToken, file){
-  console.log('inside upload video');
-  let name = 'youdescribe-5a8c6d';
-  let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
-  file = `/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/videos/7QZNpS0uos4.mp4`;
-  var formdata = new FormData();
-  formdata.append(file);
+// function uploadVideo1(accessToken, file){
+//   console.log('inside upload video');
+//   let name = 'youdescribe-5a8c6d';
+//   let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
+//   file = `/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/videos/7QZNpS0uos4.mp4`;
+//   var formdata = new FormData();
+//   formdata.append(file);
 
-  $.ajax({
-      type: 'POST',
-      url,
-      data: formdata,
-      contentType: 'application/x-www-form-urlencoded',
-      success: function (response) {
-          window.alert(JSON.stringify(response));
-      },
-      error: function (response, textStatus, errorThrown) {
-          console.log(errorThrown);
-          window.alert(JSON.stringify(response));
-      }
-    });
-}
+//   $.ajax({
+//       type: 'POST',
+//       url,
+//       data: formdata,
+//       contentType: 'application/x-www-form-urlencoded',
+//       success: function (response) {
+//           window.alert(JSON.stringify(response));
+//       },
+//       error: function (response, textStatus, errorThrown) {
+//           console.log(errorThrown);
+//           window.alert(JSON.stringify(response));
+//       }
+//     });
+// }
 
 async function accountAccessToken() {
   console.log('inside Access token');
@@ -247,7 +247,6 @@ async function accountAccessToken() {
     formdata.append('myFile', fs.createReadStream(file));
 
 
-url=`https://api.videoindexer.ai/trial/Accounts/5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b/Videos?indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&name=youdescribe-5a8c6d&privacy=Public&accessToken=eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJBY2NvdW50SWQiOiI1YThjNmRkZi05MDBmLTQ4YjQtOGEzYS0wY2Q1Y2Y0OGNiNGIiLCJBbGxvd0VkaXQiOiJUcnVlIiwiRXh0ZXJuYWxVc2VySWQiOiI4MTMzMWQxNTAwZjY3MGViIiwiVXNlclR5cGUiOiJNaWNyb3NvZnQiLCJuYmYiOjE1ODI1MzA4OTQsImV4cCI6MTU4MjUzNDc5NCwiaXNzIjoiaHR0cHM6Ly93d3cudmlkZW9pbmRleGVyLmFpLyIsImF1ZCI6Imh0dHBzOi8vd3d3LnZpZGVvaW5kZXhlci5haS8ifQ.HwdQjWLbZjtGrLW_oDLaERsyibzWPOJDk_QdgGGEkTU`;
 
     request.post({
       url,

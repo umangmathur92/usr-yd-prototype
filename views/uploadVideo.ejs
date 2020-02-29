@@ -12,19 +12,25 @@
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Upload Video</a>
+    <a class="navbar-brand" href="#">You Describe</a>
 </nav>
 <div id="container1">
     <form id="uploadVideoForm">
         <div class="form-group">
-            <label for="videoId">Video Id</label>
-            <input type="text" class="form-control" id="videoId" placeholder="Please enter the video id">
-            <small class="form-text text-muted">Please provide the youtube id of the video.</small>
+            <label for="youtubeId">Youtube Id</label>
+            <input type="text" class="form-control" id="youtubeId" placeholder="Please enter the youtube id">
+            <small class="form-text text-muted">Please provide the youtube id of the video. This id will be used to play the video from the youtube</small>
         </div>
         <div class="form-group">
             <label for="VideoName">Name of the Video</label>
-            <input type="text" class="form-control" id="videoName" placeholder="Name of the video">
+            <input type="text" class="form-control" id="videoName" placeholder="Please enter name of the video">
         </div>
+        <div class="form-group">
+            <label for="videoId">Video Id</label>
+            <input type="text" class="form-control" id="videoId" placeholder="" disabled="disabled">
+            <small class="form-text text-muted">Please provide the youtube id of the video.</small>
+        </div>
+      
         <div class="form-group">
             <label for="upload">Upload file</label>
             <input type="file" class="form-control-file" id="file" name="file">
