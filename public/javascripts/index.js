@@ -333,11 +333,16 @@ function scrollToPosition(position) {
         $('#ul-scene-list>.newscene-list:eq(0)').position().top 
     }, 'slow');
     let newSceneList = document.querySelectorAll('.newscene-list');
+
+    newSceneList.forEach(sceneItem => {
+        sceneItem.firstChild.classList.remove('highlight');
+    })
+
     newSceneList[position].firstChild.classList.add('highlight');
 
-    if(position >0) {
-        newSceneList[position-1].firstChild.classList.remove('highlight');
-    }
+    // if(position > 0) {
+    //     newSceneList[position-1].firstChild.classList.remove('highlight');
+    // }
     console.log({position});
     console.log({previouslyHighlightedContainerId});
     previouslyHighlightedContainerId = '#ul-scene-list>.newscene-list:eq(' + position + ')' + ' .scene-container';
@@ -393,7 +398,7 @@ function onProgress(currentTime) {
     if(prevSceneNum != sceneNum) {
         let listContainer = document.querySelector('.list-container');
         let sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
-        let = sceneIdToListPositionMap = populateSceneIdToListPositionMap(sceneDetails);
+        let sceneIdToListPositionMap = populateSceneIdToListPositionMap(sceneDetails);
         let listPosition = sceneIdToListPositionMap.get(sceneId);
         console.log({sceneIdToListPositionMap, listPosition});
         scrollToPosition(listPosition);
