@@ -108,7 +108,7 @@ function initializeDescriptionsUI() {
     sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
 
     for(let i=0; i<sceneDetails.length; i++) {
-        outputHtml += renderScenes(sceneDetails[i]);
+        outputHtml += renderScenes(sceneDetails[i], i+1);
     }
    
     $('#ul-scene-list').html(outputHtml);
@@ -118,7 +118,7 @@ function initializeDescriptionsUI() {
 }
 
 
-function renderScenes(currScene) {
+function renderScenes(currScene, scene_num) {
     console.log({currScene})
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
@@ -139,7 +139,7 @@ function renderScenes(currScene) {
 
     let  outputHtml = `<li class="newscene-list"><div class="scene-container" id="sc_cont:${currScene.sc_id}">`
                     + `<table style="width: 100%">`
-                    + '<tr><td><b>Scene ' + sceneNum + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes <button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
+                    + '<tr><td><b>Scene ' + scene_num + `</b></td><td id=${'time:'+currScene.sc_id}>` + scStartTimePretty + ' to ' + scFinishTimePretty + ' minutes <button type = "submit" name = "learn" value = "myimage" onclick="resetVideoTo('+scStartTime+')" style="float: right;"> <img src="/images/replay.png" style="height: 15px;" /> <span style="height: 100%; width: 100%;">Replay Scene</span></button></td></tr>'
                     + '<tr><td>Description</td><td><div class="scene-description-container">'
                     + '<textarea onkeyup="auto_grow(this)" class="txt-scene-description" id="s_d_'+ sceneId + '">' + sceneDesc + '</textarea></div></td></tr>'
                     + '<tr><td>Text On-Screen</td><td>' 
@@ -309,6 +309,10 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             console.log(e.target.id);
             console.log({"Inside merge:" : sceneDetails});
             listContainer.dataset.sceneDetails = JSON.stringify(sceneDetails);
+            updateAll();
+            fetchVideoInfo(youtubeId);
+            // let currentTime = player.getCurrentTime();
+            // player.seekTo(currentTime);
          
         }
 
