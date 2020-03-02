@@ -277,7 +277,10 @@ async function addVideoDataToDb(inputJson) {
             let currBlock = blockArr[i];
             let currBlockId = currBlock.block_id;
             let envDataForBlock = await db.any('SELECT distinct ke.environment_id, (COUNT(ke.environment_id)*AVG(ke.probability)) as score, env.category_name FROM environment env, keyframe_environment ke, keyframe k, shot sh, scene sc, block b, video v WHERE ke.environment_id = env.environment_id AND ke.keyframe_id = k.keyframe_id AND k.shot_id=sh.shot_id AND sh.scene_id = sc.scene_id AND sc.block_id = b.block_id AND b.block_id = $1 GROUP BY ke.environment_id, env.category_name ORDER BY score DESC', [currBlockId]);
-            currBlock.setOriginalDescription('The environment is either ' + envDataForBlock[0].category_name + ' or ' + envDataForBlock[1].category_name);
+            console.log({envDataForBlock});
+            if(envDataForBlock.length > 0){
+                currBlock.setOriginalDescription('The environment is either ' + envDataForBlock[0].category_name + ' or ' + envDataForBlock[1].category_name);
+            }
             console.log(currBlock);
         }
         Block.updateBlockTableDescription(blockArr);
