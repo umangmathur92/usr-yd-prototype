@@ -288,9 +288,11 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
 
             console.log({ nextSceneData,  currSceneData})
 
-            let newStartTime = currSceneData.start_time;
-            let newEndTime = nextSceneData.finish_time;
+            let newStartTime = Math.min(currSceneData.start_time, nextSceneData.start_time);
+            let newEndTime = Math.max(currSceneData.finish_time, nextSceneData.finish_time);
             currSceneData.finish_time = newEndTime;
+            currSceneData.start_time = newStartTime;
+            console.log('New time', newStartTime, '->', newEndTime);
 
             document.getElementById(`time:${curSceneId}`).innerHTML = `${millisToMinutesAndSeconds(newStartTime)} to ${millisToMinutesAndSeconds(newEndTime)} minutes`
             // console.log({allSceneArr});
