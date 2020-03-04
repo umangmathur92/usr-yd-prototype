@@ -44,10 +44,10 @@ let userStudy = {
         return db.query(`select * from us_user_blind where uuid = '${id}';`, callback);
     },
 
-    deleteSceneById : function(data, callback){
-        //  console.log('inside delete', data);
-         let sql = `Delete from descriptions where scene_id = '${data.sceneId}'`;
-        //  console.log({sql});
+    deleteSceneById : function(data, videoId, user_id, callback){
+        console.log('inside delete', data);
+         let sql = `Delete from descriptions where video_id='${videoId}' and scene_id = '${data.sceneId} and volunteer_id='${user_id}''`;
+         console.log({sql});
         return db.query(sql, callback);
     },
     updateSceneEndTime: function (data, callback) {
