@@ -812,7 +812,11 @@ function fetchJsonBodyForAllTextFields(userId) {
             }else{
                 sceneJsonObj.modified_description = csTestbox.val().trim();
             }
-            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+            if($(currSceneOcrTextId).val()){
+                sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+            }else{
+                sceneJsonObj.modified_ocr = "";
+            }
             sceneJsonObj.start_time = currScene.start_time;
             sceneJsonObj.end_time = currScene.finish_time;
             sceneJsonObj.has_ai = enableAi;
