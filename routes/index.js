@@ -181,7 +181,7 @@ function addModifiedScene (data, callback) {
 async function deleteMergedScenes(sceneArr, videoId, user_id) { 
    let sql = '';
    for(let i=0; i< sceneArr.length; i++){
-    sql +=   `DELETE from descriptions where scene_id = '${sceneArr[i]}' and video_id='${videoId}' and volunteer_id='${user_id}';`;
+     sql +=   `DELETE from descriptions where scene_id = '${sceneArr[i]}' and video_id='${videoId}' and volunteer_id='${user_id}';`;
    }
     console.log({'INSIDE DELETE': sql})
     return  db.query(sql, sceneArr); 
@@ -290,7 +290,7 @@ router.post('/saveAiDescription', function(req, res, next) {
     })];
     if(deletedScene.length > 0) {
       console.log('INSIDE DELETE CALLL');
-      resArr = [...resArr, deleteMergedScenes(deletedScene, videoId, user_id)]
+       resArr = [...resArr, deleteMergedScenes(deletedScene, videoId, user_id)]
     }
   }
 

@@ -166,7 +166,7 @@ function initializeDescriptionsUI() {
 
 
 function renderScenes(currScene, scene_num) {
-    // console.log({currScene})
+    console.log({currScene})
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
     let scStartTime = currScene.start_time;
@@ -335,9 +335,11 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
 
             console.log({ nextSceneData,  currSceneData})
 
-            let newStartTime = currSceneData.start_time;
-            let newEndTime = nextSceneData.finish_time;
+            let newStartTime = Math.min(currSceneData.start_time, nextSceneData.start_time);
+            let newEndTime = Math.max(currSceneData.finish_time, nextSceneData.finish_time);
             currSceneData.finish_time = newEndTime;
+            currSceneData.start_time = newStartTime;
+            console.log('New time', newStartTime, '->', newEndTime);
 
             document.getElementById(`time:${curSceneId}`).innerHTML = `${millisToMinutesAndSeconds(newStartTime)} to ${millisToMinutesAndSeconds(newEndTime)} minutes`
             // console.log({allSceneArr});
@@ -360,6 +362,7 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             fetchVideoInfo(youtubeId);
             // let currentTime = player.getCurrentTime();
             // player.seekTo(currentTime);
+         
         }
 
     }
@@ -379,7 +382,6 @@ function scrollToPosition(position) {
         $('#ul-scene-list>.newscene-list:eq(0)').position().top 
     }, 'slow');
     let newSceneList = document.querySelectorAll('.newscene-list');
-    
     newSceneList.forEach(sceneItem => {
         sceneItem.firstChild.classList.remove('highlight');
     })
@@ -804,7 +806,7 @@ function fetchJsonBodyForAllTextFields(userId) {
         let sceneJsonObj = {};
         sceneJsonObj.scene_id = currSceneId;
         let csTestbox = $(currSceneDescTextId)
-        if(csTestbox && csTestbox.val()){
+        if(csTestbox){
             sceneJsonObj.modified_description = csTestbox.val().trim();
             sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
             sceneJsonObj.start_time = currScene.start_time;
