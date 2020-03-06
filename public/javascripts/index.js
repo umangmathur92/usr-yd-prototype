@@ -529,9 +529,17 @@ function fetchJsonBodyForAllTextFields(userId) {
         let sceneJsonObj = {};
         sceneJsonObj.scene_id = currSceneId;
         let csTestbox = $(currSceneDescTextId)
-        if(csTestbox && csTestbox.val()){
-            sceneJsonObj.modified_description = csTestbox.val().trim();
-            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+        if(csTestbox){
+            if(!csTestbox.val()){
+                sceneJsonObj.modified_description = "";
+            }else{
+                sceneJsonObj.modified_description = csTestbox.val().trim();
+            }
+            if($(currSceneOcrTextId).val()){
+                sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+            }else{
+                sceneJsonObj.modified_ocr = "";
+            }
             sceneJsonObj.start_time = currScene.start_time;
             sceneJsonObj.end_time = currScene.finish_time;
             sceneJsonObj.has_ai = enableAi;
