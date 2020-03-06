@@ -807,7 +807,11 @@ function fetchJsonBodyForAllTextFields(userId) {
         sceneJsonObj.scene_id = currSceneId;
         let csTestbox = $(currSceneDescTextId)
         if(csTestbox){
-            sceneJsonObj.modified_description = csTestbox.val().trim();
+            if(!csTestbox.val()){
+                sceneJsonObj.modified_description = "";
+            }else{
+                sceneJsonObj.modified_description = csTestbox.val().trim();
+            }
             sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
             sceneJsonObj.start_time = currScene.start_time;
             sceneJsonObj.end_time = currScene.finish_time;
