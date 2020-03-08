@@ -63,6 +63,13 @@ async function fetchDialogTimeStamps(videoId) {
     // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
 }
 
+async function fetchSentences(videoId) {
+    console.log("Now: testking");
+    return await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${videoId}' ORDER BY sentence_id`);
+    // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
+}
+
+
 async function fetchVideoDataFromDb(videoId, userId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
@@ -561,6 +568,7 @@ module.exports = {
     addVideoDataToDb: addVideoDataToDb,
     clearDb: clearDb,
     fetchDialogTimeStamps: fetchDialogTimeStamps,
+    fetchSentences: fetchSentences,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,
     updateBlockDescription: updateBlockDescription,

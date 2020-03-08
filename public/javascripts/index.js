@@ -17,6 +17,9 @@ let allBlockArr = [];
 let audioArr = [];
 let allDialogArraySTartTimes = [];
 let allDialogArrayEndTimes = [];
+let allSentenceStartTimes = [];
+let allSentenceEndTimes = [];
+let isSceneExtended = []; // Required to check if a scene has to be auto-paused to play the extended audio
 let currAudio;
 let currAudioTime;
 let wasCurrAudioPaused = false;
@@ -147,6 +150,39 @@ function fetchVideoInfo(youtubeId) {
             // debugger;    
         }});
         console.log('Times',allDialogArraySTartTimes);
+
+        let target_url_sentence = '/getSentences' + '?videoId=' + youtubeId;
+        $.get(target_url_sentence, function (response) {
+            // KeyFramesArr = response;
+            // debugger;
+            console.log('sentence start times'+response[0]);
+            allSentenceArr = response;
+            for(val of response)
+            {
+                allSentenceStartTimes.push(val['audio_start_time']);
+                allSentenceEndTimes.push(val['audio_end_time']);
+                
+            // debugger;    
+        }
+            let j = 0, num=0;
+            let presentScene = allSentenceArr[0]['scene_num'];
+            let flag = true;
+            for(val of allSentenceArr){
+
+                if (val['scene_num'] != presentScene){
+                    if(flag)
+                    isSceneExtended.push(false);
+                    flag = true;    
+                }
+
+                if(flag && val['audio_type'] == 'extended')
+                {   isSceneExtended.push(true);    
+                    flag = false    
+                }
+                }
+    });
+        console.log('Times',allDialogArraySTartTimes);
+
 }
 
 function initializeDescriptionsUI() {

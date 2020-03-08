@@ -9,6 +9,7 @@ const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
 const userStudy = require('./userStudy');
 const chatRoom = require('./chatRoom');
+const sentences = require('../backend/sentences.js')
 
 
 router.use('/userStudy',userStudy);
@@ -54,6 +55,19 @@ router.get('/getDialogTimeStamps', function(req, res, next) {
        res.send(result);
     });
 });
+
+router.get('/getSentences', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+  console.log('Sentences ',req);
+  let {videoId} = req.query;
+  console.log("The vals are: "+videoId);
+  let queryResult = video.fetchSentences(videoId);
+  queryResult.then(result => {
+    console.log("The vals are: "+videoId);
+       res.send(result);
+    });
+});
+
 
 router.get('/playvideo/:youtubeId', function(req, res, next) {
   let isAiEnabled = req.query.ai === 'yes';
@@ -329,6 +343,28 @@ router.get('/generateMp3FromDescriptions', function(req, res, next) {
     res.send({success: result});
   });
 });
+                  /*  For sentence generation starts*/
+router.get('/generateSentencesFromDescriptions', function(req, res, next) {
+  let task = sentences.generateSentencesForAllDescriptionsInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateMp3ForAllSentences', function(req, res, next) {
+  let task = sentences.generateMp3ForAllSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateTimestampsforSentences', function(req, res, next) {
+  let task = sentences.generateTimestampsforSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+              /*  For sentence generation ends  */
 
 router.get('/playVideoAudio/:youtubeId', function(req, res, next) {
   res.render('videoaudio');
