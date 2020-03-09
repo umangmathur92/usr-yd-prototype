@@ -579,9 +579,9 @@ function onProgress(currentTime) {
             scrollToPosition(listPosition);
 
             currAudio = audioArr[sceneNum];
-            console.log("Curr Audio length is:",currAudio.length);
+            console.log("Curr Audio length is:",currAudio.duration);
             currAudio.play();
-            if(currAudio.length > 0)
+            if(!isDialog)
             player.setVolume(5);
             // currAudioTime = currAudio.currentTime;
             currAudio.onended = function() {
