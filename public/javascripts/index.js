@@ -424,6 +424,7 @@ function onYouTubeIframeAPIReady() {
 // }
 
 function onPlayerReady(event) {
+    player.setVolume(50);
     $('#total_time').text(formatTime(player.getDuration()));
     // timeupdater = setInterval(updateTime, 100);
     updateTime();
@@ -433,6 +434,8 @@ function onPlayerReady(event) {
 async function updateTime() {
     while(true){
     var oldTime = videotime;
+    if(player.getPlayerState() == YT.PlayerState.ENDED && currAudio != null)
+    {currAudio.play(); break;}
      if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
         // console.log("No state change");
@@ -468,7 +471,7 @@ async function updateTime() {
                 YT_FLAG = true;
                 console.log("Extended fault");
                 if(currAudio && currAudio!==null)
-                    currAudio.pause();
+                    {currAudio.pause(); player.setVolume(50);}
                     console.log("Current Audio is paused: 0"+STATE_TIME);
                 STATE = 2;
             }
@@ -480,6 +483,7 @@ async function updateTime() {
             videotime = player.getCurrentTime();
             if(currAudio && currAudio!==null)
                 currAudio.play();
+                player.setVolume(5);
                 STATE = 1;
         }
     }
@@ -487,7 +491,7 @@ async function updateTime() {
         // console.log("Paused");  // modify currAudio.onended func
 
     if(STATE == 0 && currAudio && currAudio!==null && isPlaying(currAudio))
-        currAudio.pause();
+        {currAudio.pause(); player.setVolume(50);}
 }
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
     console.log("Time event");
@@ -511,17 +515,19 @@ function updateProgress(currentTime){
     prevSceneNum = sceneNum;
     let currAudTime = currentTime - sceneStartTime;
     if(currAudio !== null && isPlaying(currAudio))
-        {currAudio.pause(); currAudio.currentTime = 0;}
+        {currAudio.pause(); currAudio.currentTime = 0; player.setVolume(50);}
     currAudio = audioArr[sceneNum];
 
     if(currAudio.duration > currAudTime){
     currAudio.currentTime = currAudTime;
 
     if(player.getPlayerState() == YT.PlayerState.PAUSED)
-            currAudio.pause();
+            {currAudio.pause(); player.setVolume(50);}
     else
-            currAudio.play(); // May have to check YT_STATE
+            {currAudio.play(); // May have to check YT_STATE
+                player.setVolume(5);}
             currAudio.onended = function() {
+                player.setVolume(50);
                 console.log("This curr Audio ended");
                 if(player.getPlayerState() == YT.PlayerState.PAUSED) {                
                     STATE = 0;
@@ -531,7 +537,7 @@ function updateProgress(currentTime){
             }
     }
     else
-        currAudio = null;
+        {currAudio = null; player.setVolume(50);}
 }
 
 function onProgress(currentTime) {
@@ -547,6 +553,7 @@ function onProgress(currentTime) {
     console.log("Curr Audio is:",prevSceneNum);
     if(currAudio && isPlaying(currAudio) && isDialog && !YT_FLAG_Dial)
         {currAudio.pause(); 
+            player.setVolume(50);
             YT_FLAG_Dial = true;
         console.log('*********************************************************');}
 
@@ -554,6 +561,7 @@ function onProgress(currentTime) {
         if((currAudio && (currAudio !== null) && (isPlaying(currAudio))) || (currAudio && YT_FLAG_Dial)) {
             YT_FLAG_Dial = false;
             currAudio.play();
+            player.setVolume(5);
             YT_FLAG_EXT = true;
             STATE = 1;
             STATE_CHANGE = 1;
@@ -571,10 +579,13 @@ function onProgress(currentTime) {
             scrollToPosition(listPosition);
 
             currAudio = audioArr[sceneNum];
-            // console.log("Curr Audio is:",currAudio);
+            console.log("Curr Audio length is:",currAudio.length);
             currAudio.play();
+            if(currAudio.length > 0)
+            player.setVolume(5);
             // currAudioTime = currAudio.currentTime;
             currAudio.onended = function() {
+                player.setVolume(50);
                 console.log('player state is: ' + player.getPlayerState());
                 if(player.getPlayerState() == YT.PlayerState.PAUSED) {
                     console.log('I was called');
@@ -595,12 +606,12 @@ function onProgress(currentTime) {
         }
     }
     else if(currAudio && !isDialog && YT_FLAG_Dial)
-    {YT_FLAG_Dial = false; currAudio.play();}
+    {YT_FLAG_Dial = false; currAudio.play(); player.setVolume(5);}
 
     else{
         // YT_FLAG_Dial = false;
         if(currAudio!==null && !isPlaying(currAudio) && !YT_FLAG_Dial)
-        currAudio.play();
+        {currAudio.play(); player.setVolume(5);}
     }
 }
 /********************************************* */
@@ -708,6 +719,9 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
+            console.log("CurrAudio appeared here");
+            if(currAudio != null)
+                currAudio.play();
         case YT.PlayerState.CUED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
