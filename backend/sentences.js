@@ -175,7 +175,7 @@ async function generateTimestampsforSentencesInDb(){
         scene_start_time.push(currSentence.start_time);
         sentence_video_id.push(currSentence.video_id);
         sentence_video_end_times.push(currSentence.end_time);
-        sentence_scene.push(currSentence.sceneNum);
+        sentence_scene.push(currSentence.scene_num);
         size++;
     }
 // Select unique video ids from video_dialogs_timestamps and create an object (set) from it
@@ -222,15 +222,8 @@ async function generateTimestampsforSentencesInDb(){
         let time_end = video_end_time;
 
         while(index > 0){
-        // let time_gap = 0; // check scene_num, video_num, video start and end
-
-        // if(index == 0 || dialog_video_id[index] != dialog_video_id[index-1])
-        //     {time_gap = dialog_start_time[index] - 1; }  // till the beginning of the scene (but 1 sec threshold for preprocessing)
-        // else
-        //     {time_gap = dialog_start_time[index] - dialog_end_time[index-1];}
-        
-        // let time_start = dialog_start_time[index] - sentence_duration[i]; // (to check sentence is within the same scene)
-        // time_start = dialog_start_time[index] - sentence_duration[i];
+        if(currVideo != sentence_video_id[i])
+            break;
         let end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
         let start_time_sceneNum = await fetchSceneNum(time_start, currVideo, sentence_id[i]);
             // if time gap is between two different scenes, break the time gap into two parts for each scene
@@ -238,7 +231,7 @@ async function generateTimestampsforSentencesInDb(){
             {
                 let presentSceneNum = sentence_scene[i];
                 
-                while(presentSceneNum == sentence_scene[i]){
+                while(presentSceneNum == sentence_scene[i] && currVideo == sentence_video_id[i]){
                     let sceneStartTime = scene_start_time[i];
                     await updateSentenceStartTime(sentence_id[i], sceneStartTime, 'extended');
                     i--;
@@ -250,24 +243,7 @@ async function generateTimestampsforSentencesInDb(){
             time_end = currDialogStartTimes[index+1];
             continue;
         }
-        
-        // let currSceneNum = fetchSceneNum();
-        //         // if current scene num (wrt time gap) is greater than current sentence's scene, just decrease the index
-        // if(currSceneNum > sentence_scene[i]){
-        //     index--;
-        //     continue;
-        // }
-        //         // if current scene num is less than sentence's scene, sentence's audio should be extended
-        // if(currSceneNum < sentence_scene[i]){
-        //     let presentSceneNum = sentence_scene[i];
-        //     while(presentSceneNum == sentence_scene[i]){
-        //         let sceneStartTime = scene_start_time[i];
-        //         await updateSentenceStartTime(sentence_id[i], sceneStartTime, 'extended');
-        //         i--;
-        //     }
-        //     continue;
-        // }
-
+    
         if(time_gap <= sentence_duration[i])
         {
             index--;
@@ -279,9 +255,9 @@ async function generateTimestampsforSentencesInDb(){
 
         while(start_time_sceneNum == end_time_sceneNum  && time_gap > sentence_duration[i]){
             await updateSentenceStartTime(sentence_id[i], time_start, 'inline');
-            time_gap -= (sentence_duration[i] + 0.5);
-            time_start -= (sentence_duration[i] + 0.5);
-            time_end -= (sentence_duration[i] + 0.5);
+            time_gap -= (sentence_duration[i] + 0.1);
+            time_start -= (sentence_duration[i] + 0.1);
+            time_end -= (sentence_duration[i] + 0.1);
             
             start_time_sceneNum = await fetchSceneNum(time_start, currVideo, sentence_id[i]);
             end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
@@ -292,7 +268,7 @@ async function generateTimestampsforSentencesInDb(){
     }
 
             // if time gap is between two different scenes, break the time gap into two parts for each scene
-        if(index==0)
+        if(index==0 && currVideo == sentence_video_id[i])
             {
                 let presentSceneNum = sentence_scene[i];
                 
@@ -302,18 +278,6 @@ async function generateTimestampsforSentencesInDb(){
                     i--;
             }
         }
-
-    //     if(currSceneNum != fetchSceneNum(time_start)){
-    //         while(currSceneNum == sentence_scene[i]){
-    //             let sceneStartTime = scene_start_time[i];
-    //             await updateSentenceStartTime(sentence_id[i], scene_start_time, 'extended');
-    //             i--;
-    //         }
-    //     }
-
-    //     if(time_gap <= sentence_duration[i])
-    //         index--;
-    // }
 
 }
 }
@@ -326,7 +290,10 @@ async function fetchSceneNum(timestamp, videoId, sentence_id){
 
     let sceneStartTimesArr = await db.query(`SELECT start_time FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
     let sceneNumArr = await db.query(`SELECT scene_num FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
-    console.log('Scene timestamps: '+sceneStartTimesArr[2]['start_time']+'  and '+sceneNumArr[2]['scene_num']);
+    console.log('Scene timestamps: '+sceneStartTimesArr+'  and '+sceneNumArr);
+    if(timestamp <= 0)
+        return -1;
+    
     for(let i=0; i<sceneNumArr.length; i++){
         if(sceneStartTimesArr[i]['start_time'] > timestamp)
             return sceneNumArr[i-1]['scene_num'];

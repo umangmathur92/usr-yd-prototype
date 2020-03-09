@@ -59,9 +59,9 @@ router.get('/getDialogTimeStamps', function(req, res, next) {
 router.get('/getSentences', function(req, res, next) {
   //let query = video.fetchKeyFrames();
   console.log('Sentences ',req);
-  let {videoId} = req.query;
-  console.log("The vals are: "+videoId);
-  let queryResult = video.fetchSentences(videoId);
+  let {videoId, userId} = req.query;
+  console.log("The vals are: "+videoId+' and '+userId);
+  let queryResult = video.fetchSentences(videoId,userId);
   queryResult.then(result => {
     console.log("The vals are: "+videoId);
        res.send(result);
