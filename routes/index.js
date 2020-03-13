@@ -9,12 +9,14 @@ const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
 const userStudy = require('./userStudy');
 const chatRoom = require('./chatRoom');
+const mergeScene = require('./mergeScene');
 
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
 router.use('/room', chatRoom);
+router.use('/merge', mergeScene);
 console.log({sceneModification: sceneModification.addModifiedScene})
 
 

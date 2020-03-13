@@ -1,5 +1,10 @@
+/*
+    contains all the apis related to scene table and merge_scene table
+*/
+
 const db = require('../db/database');
 const Utils = require('../backend/utils');
+
 
 class Scene {
     
@@ -12,7 +17,12 @@ class Scene {
         this.original_description = original_description;
         this.original_ocr = original_ocr;
     }
+
+    static async getSceneData(videoId, callback){
+        return db.query(`Select * from scene where video_id = '${videoId}' order by start_time`);
+    }
     
+
     setOriginalDescription(desc) {
         this.original_description = desc;
     }
@@ -56,6 +66,23 @@ class Scene {
         }
     }
 
+
+    static async addMergeSceneTable(sceneArr) {
+        console.log('DB Operation: Inserting Scenes');
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    console.log({scene})
+                    return t.one('INSERT INTO merge_scene(scene_id, block_id, scene_num, start_time, end_time, original_description, original_ocr, video_id, merged) VALUES(${scene_id},${block_id}, ${scene_num}, ${start_time}, ${end_time}, ${original_description}, ${original_ocr},${video_id}, ${merged}) RETURNING id', scene, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+
     static async aggregateShotOcrIntoSceneOcr(video) {
         console.log('DB Operation: Updating Scene table with OCR data from Shot table');
         return db.any("UPDATE scene SET original_ocr = (SELECT array_to_string(array_agg(original_ocr ORDER BY shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
@@ -80,7 +107,7 @@ class Scene {
         console.log('DB Operation: Updating Scene table by aggregating description data from Shot table');
         return db.any("UPDATE scene SET original_description = (SELECT distinct array_to_string(array_agg(shot.original_description ORDER BY shot.shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
     }
-
+    
 }
 
 module.exports = Scene;
