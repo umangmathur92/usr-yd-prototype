@@ -166,6 +166,7 @@ router.get('/uploadVideo', function (req, res) {
   if(url){
     let jsonPath = path.join(__dirname, '../videos/');
     console.log({jsonPath});
+    console.log({__dirname});
     const video = youtubedl(url,['--format=18'], jsonPath);
     
     // Will be called when the download starts.
@@ -185,20 +186,22 @@ router.get('/uploadVideo', function (req, res) {
     
     video.on('end', function() {
       console.log('finished downloading!');
-      accountAccessToken();
+      res.send('Downloaded');
+      // accountAccessToken();
      
     })
 
     video.on('error', function error(err) {
       console.log('error 2:', err);
-      accountAccessToken().then((response=>{
-        console.log({'success': response });
-      })).catch(err=>{
-        console.log(err);
-      });
+      // accountAccessToken().then((response=>{
+      //   console.log({'success': response });
+      // })).catch(err=>{
+      //   console.log(err);
+      // });
+      res.send(err);
     })
     
-    res.send('Downloaded');
+    // res.send('Downloaded');
   }
 });
 

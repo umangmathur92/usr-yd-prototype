@@ -4,15 +4,35 @@ let apiKey = 'dbbd2d92a19749759576466ed9cd61fa';
 
 $(document).ready(function() {
 
-    // var formUpload = document.getElementById('uploadVideoForm')
-    // formUpload.addEventListener('submit', testx);
-
     $("#videoInsightForm").submit(function (e) {
         e.preventDefault();
         let videoId = document.getElementById('videoId').value;
         getVideoInsight(videoId);
 
     });
+
+    $("#btnDownload").click(function (e) {
+        e.preventDefault();
+        console.log('download clicked');
+        let url = document.getElementById('url').value;
+        // http://www.youtube.com/watch?v=90AiXO1pAiA
+        console.log({url});
+        videoURL = '/userStudy/uploadVideo?video='+ url;
+        
+        $.ajax({
+            type: 'GET',
+            url : videoURL,
+            success: function (response) {
+                $('#alertDownload').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File downloaded successfully' +'</span></div>');
+                console.log(response);
+            },
+            error: function (response, textStatus, errorThrown) {
+                $('#alertDownload').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Error!</strong> An error occured while downloading the file' +'</span></div>')
+                console.log(JSON.stringify(response));
+            }
+        });
+    });
+
 
 
     $("#audioUploadForm").submit(function (e) {
@@ -133,8 +153,6 @@ function getVideoInsight(videoId){
       });
      
 }
-
-
 
 
 function execute(videoId){
@@ -260,25 +278,6 @@ function merge(videoInsight, audioInsight){
     // console.log({mergedList});
     return mergedList;
 }
-
-
-function downloadVideoFromLink(){
-    const video = youtubedl('http://www.youtube.com/watch?v=90AiXO1pAiA',
-    // Optional arguments passed to youtube-dl.
-    ['--format=18'],
-    // Additional options can be given for calling `child_process.execFile()`.
-    { cwd: __dirname })
-    
-    // Will be called when the download starts.
-    video.on('info', function(info) {
-    console.log('Download started')
-    console.log('filename: ' + info._filename)
-    console.log('size: ' + info.size)
-    })
-    
-    video.pipe(fs.createWriteStream('myvideo.mp4'))
-}
-
 
 
 function submitVideoData() {

@@ -2,11 +2,7 @@
     margin:20px;
 }
 
-#submitVideo, #submitAudio{
-    margin-top: 10px;
-}
-
-#btnInsight, #btnMerge{
+#submitVideo, #submitAudio, #btnInsight, #btnMerge, #btnDownload{
     margin-top: 10px;
 }
 
