@@ -10,7 +10,7 @@ router.get('/sceneData', function (req, res) {
     queryResult
       .then(data => {
         res.send(data);
-        console.log({data});
+        // console.log({data});
       })
       .catch((err) => {
         res.send(err);
@@ -18,8 +18,9 @@ router.get('/sceneData', function (req, res) {
   });
 
   router.post('/scene', function (req, res) {
-    let sceneArr = req.body;
-    console.log({body: sceneArr});
+    let sceneArr = req.body.mergedList;
+    
+    console.log({sceneArr});
     let queryResult =  scene.addMergeSceneTable(sceneArr);
     queryResult
       .then(data => {
@@ -27,6 +28,7 @@ router.get('/sceneData', function (req, res) {
         console.log({data});
       })
       .catch((err) => {
+        console.log('Post scene Data Error: ', err);
         res.send(err);
       });
   });

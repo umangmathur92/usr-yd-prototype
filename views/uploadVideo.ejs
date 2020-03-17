@@ -32,18 +32,40 @@
         </div>
       
         <div class="form-group">
-            <label for="upload">Upload file</label>
+            <label for="upload">Upload video file</label>
             <input type="file" class="form-control-file" id="file" name="file">
-            <button id="submitVideo" type="submit" class="btn btn-primary">Upload</button>
+            <button id="submitVideo" type="submit" class="btn btn-primary">Upload Video</button>
         </div>
     </form>
+
     <form id="videoInsightForm">
         <div class="form-group">
             <label for="Insight">Video Insight</label>
             <textarea class="form-control" rows="5" id="insight"></textarea>
             <button id="btnInsight" type="submit" class="btn btn-primary">Get Insight</button>
-          </div>
+        </div>
     </form>
+    <br>
+
+    <form id="audioUploadForm">
+        <div class="form-group">
+            Audio File: <input type="file" name="audiofile"><br>
+            Your Callback Url: <input type="text" id="callbackText" name="callbackurl" value=""><br>
+            <input type="hidden" name="appkey" value="yAOzHAy9LQBJQGtshcIGJX368IbC4Enx">
+            <button id="submitAudio" type="submit" class="btn btn-primary">Upload Audio</button>
+        </div>
+    </form>
+
+    <form id="audioInsightForm">
+        <div class="form-group">
+            <label for="Insight">Audio Insight</label>
+            <input type="text" name="orderid" id="orderid" value="OIVLXP20200212110759">
+            <button id="btnAudioInsight" type="submit" class="btn btn-primary">Get Audio Insight</button>
+            <textarea class="form-control" rows="5" id="audioInsight"></textarea>
+        </div>
+    </form>
+
+    <button id="btnMerge" class="btn btn-warning"> Merge Scenes</button>    
 </div>
 
 

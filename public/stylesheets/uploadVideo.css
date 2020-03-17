@@ -2,10 +2,15 @@
     margin:20px;
 }
 
-#submitVideo{
+#submitVideo, #submitAudio{
     margin-top: 10px;
 }
 
-#btnInsight{
+#btnInsight, #btnMerge{
     margin-top: 10px;
 }
+
+#callbackText, #btnAudioInsight{
+    margin: 10px
+}
+

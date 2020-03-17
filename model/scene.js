@@ -72,6 +72,9 @@ class Scene {
         try {
             return await db.tx(t => {
                 var queries = sceneArr.map(scene => {
+                    if(!scene.merged){
+                        scene.merged = ''; 
+                    }
                     console.log({scene})
                     return t.one('INSERT INTO merge_scene(scene_id, block_id, scene_num, start_time, end_time, original_description, original_ocr, video_id, merged) VALUES(${scene_id},${block_id}, ${scene_num}, ${start_time}, ${end_time}, ${original_description}, ${original_ocr},${video_id}, ${merged}) RETURNING id', scene, a => + a.id);
                 });
