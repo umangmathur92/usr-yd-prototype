@@ -61,6 +61,7 @@ router.get('/playvideo/:youtubeId', function(req, res, next) {
   if(isAiEnabled) {
     res.render('withai', { title: 'Express' });
   } else {
+    res.set('Access-Control-Allow-Origin', '*');
     res.render('withoutai', { title: 'Express' });
   }
 });
