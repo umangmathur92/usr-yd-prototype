@@ -21,6 +21,7 @@ console.log({sceneModification: sceneModification.addModifiedScene})
 router.get('/', function(req, res, next) {
   //res.render('homeUserStudy', { title: 'Express' });
   //res.render('home', { title: 'Express' });
+  res.set('Access-Control-Allow-Origin', '*');
   res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
