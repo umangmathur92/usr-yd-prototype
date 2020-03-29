@@ -9,12 +9,14 @@ const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
 const userStudy = require('./userStudy');
 const chatRoom = require('./chatRoom');
+const mergeScene = require('./mergeScene');
 
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
 router.use('/room', chatRoom);
+router.use('/merge', mergeScene);
 console.log({sceneModification: sceneModification.addModifiedScene})
 
 
@@ -28,6 +30,11 @@ router.get('/', function(req, res, next) {
 router.get('/addvideo', function(req, res, next) {
   res.render('addvideo', { title: 'Add Video' });
 });
+
+router.get('/uploadVideo', function(req, res, next) {
+  res.render('uploadVideo', { title: 'Upload Video' });
+});
+
 
 router.post('/addvideo', function(req, res, next) {
   let requestBody = req.body;
