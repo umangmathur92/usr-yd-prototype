@@ -11,13 +11,13 @@ const db = require('../db/database');
 const fs = require('fs');
 var path = require('path');
 const youtubedl = require('youtube-dl');
-let accountId = '5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b';
 let location1= 'Trial';
-let apiKey = 'dbbd2d92a19749759576466ed9cd61fa'; 
 const axios = require('axios');
-let FormData = require('form-data');
+const FormData = require('form-data');
 const fetch = require('node-fetch');
 var request = require('request');
+let accountId = '5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b';
+let apiKey = 'dbbd2d92a19749759576466ed9cd61fa'; 
 
 
 router.get('/', function (req, res) {
@@ -185,50 +185,77 @@ router.get('/uploadVideo', function (req, res) {
     })
     
     video.on('end', function() {
-      console.log('finished downloading!');
-      res.send('Downloaded');
-      // accountAccessToken();
-     
+        console.log('finished downloading!');
+        res.send('Downloaded');
+        // accountAccessToken();
+        console.log("Hello");
+        let tokenUrl = `https://api.videoindexer.ai/Auth/trial/Accounts?generateAccessTokens=true&allowEdit=true`;
+        axios({
+          method: 'get',
+          url: tokenUrl,
+          headers: { 'Ocp-Apim-Subscription-Key': apiKey },
+        })
+        .then(response => {
+          let accessToken = response.data[0].accessToken;
+          console.log('token->' + accessToken);
+
+          uploadVideo('', accessToken) 
+            .then(response => {
+              console.log('SUCCESS of Video Upload POST->' + response);
+            })
+            .catch(error => {
+              console.log(error);
+            });
+
+        })
+        .catch(error => {
+            console.log(error);
+        });
+      
+
     })
 
     video.on('error', function error(err) {
       console.log('error 2:', err);
-      // accountAccessToken().then((response=>{
-      //   console.log({'success': response });
-      // })).catch(err=>{
-      //   console.log(err);
-      // });
       res.send(err);
     })
-    
-    // res.send('Downloaded');
   }
 });
 
 
 
-// function uploadVideo1(accessToken, file){
-//   console.log('inside upload video');
-//   let name = 'youdescribe-5a8c6d';
-//   let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
-//   file = `/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/videos/7QZNpS0uos4.mp4`;
-//   var formdata = new FormData();
-//   formdata.append(file);
+async function uploadVideo(file, accessToken){
+  console.log('inside upload video');
+  let name = 'TEST 101';
+  let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
+  file = `/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/OkBaZLq7gnU.mp4`;
+  let formdata = new FormData();
 
-//   $.ajax({
-//       type: 'POST',
-//       url,
-//       data: formdata,
-//       contentType: 'application/x-www-form-urlencoded',
-//       success: function (response) {
-//           window.alert(JSON.stringify(response));
-//       },
-//       error: function (response, textStatus, errorThrown) {
-//           console.log(errorThrown);
-//           window.alert(JSON.stringify(response));
-//       }
-//     });
-// }
+  let rs = fs.createReadStream(file);
+  rs.on('error', function(err){ 
+    console.log(err) 
+  });
+  
+  formdata.append('file', fs.createReadStream(file));
+ 
+  const config = {
+        method: 'post',
+        url,
+        data: formdata,
+        headers: formdata.getHeaders()
+    }
+    try {
+      res = await axios(config);
+      // console.log(res.data);
+    } catch (err) {
+      console.log('Upload error: ', err.data);
+    }
+}
+
+
+
+
+
 
 async function accountAccessToken() {
   console.log('inside Access token');
@@ -267,25 +294,3 @@ async function accountAccessToken() {
   
 }
 
-
-async function uploadVideo(file, accessToken){
-  console.log('inside upload video');
-  let name = 'youdescribe-5a8c6d';
-  let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
-  file = `/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/videos/7QZNpS0uos4.mp4`;
-  var formdata = new FormData();
-  formdata.append('myFile', fs.createReadStream(file));
-    
-  const config = {
-        method: 'post',
-        url,
-        data: formdata,
-        headers: {'Content-Type': 'multipart/form-data' }
-    }
-    try {
-      res = await axios(config);
-      console.log({res});
-    } catch (err) {
-      console.log('Upload error: ', err);
-    }
-}
