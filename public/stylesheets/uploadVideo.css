@@ -1,0 +1,12 @@
+#container1{
+    margin:20px;
+}
+
+#submitVideo, #submitAudio, #btnInsight, #btnMerge, #btnDownload{
+    margin-top: 10px;
+}
+
+#callbackText, #btnAudioInsight{
+    margin: 10px
+}
+

@@ -63,6 +63,35 @@ async function fetchDialogTimeStamps(videoId) {
     // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
 }
 
+async function fetchVideoData(videoId, userId) {
+
+    try {
+        let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
+
+        let queryResult = await db.query(`select scene_id as sc_id, scene_num as sc_num, start_time, end_time, 
+                                        original_ocr, original_description from scene where video_id= $1 ORDER BY scene_num`, [videoId]);
+        queryResult.forEach(scene => {
+                scene.deletedScene = '';
+            });
+        
+        let modifiedData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
+                                        start_time, end_time, ocr as original_ocr,
+                                        description as original_description, merged_scene as "deletedScene"
+                                        from descriptions where volunteer_id = $1 and
+                                        has_ai=true and 
+                                        video_id= $2 ORDER BY scene_num` 
+                                        , [userId , videoId])
+        // console.log('over data', JSON.stringify(overrideData));
+        vidQueryResult.originalData = queryResult;
+        vidQueryResult.modifiedData = modifiedData;
+        console.log({vidQueryResult});
+        // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
+        return vidQueryResult;
+    } catch(e) {
+        throw e;
+    }
+}
+
 async function fetchVideoDataFromDb(videoId, userId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
@@ -76,6 +105,7 @@ async function fetchVideoDataFromDb(videoId, userId) {
              s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
              GROUP BY start_time, end_time, block_id, original_description, block_num,
               video_id ORDER BY block_num ASC ) s`, [videoId]);
+              
         let overrideData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
         start_time, end_time as finish_time, ocr as original_ocr,
         description as original_description, merged_scene as "deletedScene"
@@ -568,5 +598,6 @@ module.exports = {
     updateSceneOcr: updateSceneOcr,
     replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
     updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser,
-    updateBlockAndScene: updateBlockAndScene
+    updateBlockAndScene: updateBlockAndScene,
+    fetchVideoData: fetchVideoData
 }
