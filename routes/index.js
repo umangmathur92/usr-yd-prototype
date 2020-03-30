@@ -90,6 +90,23 @@ router.get('/fetchVideoData', function(req, res, next) {
   });
 });
 
+router.get('/videoData', function(req, res, next) {
+  console.log('req.query', req.query)
+  let {videoid, userId} = req.query;
+  let queryResult = video.fetchVideoData(videoid, userId);
+  let data= {'videoId': videoid, 
+              'userId':  userId
+            };
+
+  queryResult.then(result => {
+    quesAns.getQuestionAnswerByUserId(data).then( qnaList =>{
+      console.log({ resdata: qnaList});
+      result.qnaList = qnaList;
+      res.send(result);
+    });
+  });
+});
+
 router.post('/updateSceneDescription', function(req, res, next) {
   let inputJson = req.body;
   let queryResult = video.updateSceneDescription(inputJson);
