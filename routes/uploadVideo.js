@@ -54,10 +54,7 @@ router.get('/videoState', function (req, res) {
     res.send('Video not processed , id:', videoId);
     console.log('Video not processed , id:', videoId);
   }
-
-
 });
-
 
 
 router.get('/uploadVideo', function (req, res) {
@@ -78,8 +75,17 @@ router.get('/uploadVideo', function (req, res) {
         console.log('size: ' + info.size)
       })
   
-  
-      let fileName = videoId + '.mp4';
+      let date_ob = new Date();
+      let year = date_ob.getFullYear();
+      let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+      let date = ("0" + date_ob.getDate()).slice(-2);
+      let currentDateTime = year + "-" + month + "-" + date + "_" + Math.floor(Date.now()/1000);
+
+      let fileName = videoId + '_' + currentDateTime + '.mp4';
+      let filePath = path.join(__dirname, '../', fileName);
+      console.log({fileName});
+      console.log({filePath});
+      
       video.pipe(fs.createWriteStream(fileName));
       video.on('complete', function complete(info) {
         'use strict'
@@ -87,10 +93,8 @@ router.get('/uploadVideo', function (req, res) {
       })
       
       video.on('end', function() {
-          console.log('finished downloading!');
-          res.send('Downloaded');
-          // accountAccessToken();
-          console.log("Hello");
+          console.log('Finished downloading!');
+
           let tokenUrl = `https://api.videoindexer.ai/Auth/trial/Accounts?generateAccessTokens=true&allowEdit=true`;
           axios({
             method: 'get',
@@ -101,17 +105,15 @@ router.get('/uploadVideo', function (req, res) {
             let accessToken = response.data[0].accessToken;
             console.log('token->' + accessToken);
   
-            uploadVideo('', accessToken) 
-              .then(response => {
-                console.log('SUCCESS of Video Upload POST->' + response);
-              })
-              .catch(error => {
-                console.log(error);
-              });
-  
+            return uploadVideo(filePath, accessToken);
+           
+          }).then(response => {
+            res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
+            console.log('SUCCESS of Video Upload POST->' + response);
           })
           .catch(error => {
-              console.log(error);
+            res.status(400).send('FAILED: Video not uploaded to Video Indexer   ')
+            console.log(error);
           });
       })
   
@@ -129,25 +131,10 @@ router.get('/uploadVideo', function (req, res) {
 
   async function uploadVideo(file, accessToken){
     console.log('inside upload video');
-    // var params = {
-    //   // Request parameters
-    //     "privacy": "Public",
-    //     "indexingPreset": "Default",
-    //     "streamingPreset": "Default",
-    //     "sendSuccessEmail": "False",
-    //     accessToken,
-    //     "callbackUrl": "{string}"
-    //     // "videoUrl": "{string}",
-    //     // "fileName": "{string}",
-    // };
-    // let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&` + params;
-  
+    console.log({file});
     let name = 'TEST 101';
     let callbackUrl = '';
     let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}&callbackUrl=${callbackUrl}`;
-    
-    
-    file = `/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/OkBaZLq7gnU.mp4`;
     let formdata = new FormData();
   
     let rs = fs.createReadStream(file);
@@ -161,18 +148,16 @@ router.get('/uploadVideo', function (req, res) {
           method: 'post',
           url,
           data: formdata,
+          // maxContentLength: Infinity,
+          maxBodyLength: Infinity,
           headers: formdata.getHeaders()
       }
-      try {
-        res = await axios(config);
-        console.log(res.data);
-      } catch (err) {
-        console.log('Upload error: ', err);
-      }
+    res = await axios(config);
+    
+    return res.data;
+     
   }
-
-
-
+  
 
 
   module.exports = router;
