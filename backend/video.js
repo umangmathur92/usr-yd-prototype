@@ -254,35 +254,38 @@ async function addVideoDataToDb(inputJson) {
         await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
         //Parse, Sort, Process and insert OCR data into the shot table
         let ocrJsonArr = video.insights_json.ocr;
-        let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
-        ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
-        ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
-        ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
-        let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
-        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
-        //Aggregate OCR data from the Shot table and insert it into the scene table
-        for(let i=0; i<sceneArr.length; i++) {
-            try {
-                let currScene = sceneArr[i];
-                let currSceneId = currScene.scene_id;
-                let shotsOcrJsonArr = await db.any('SELECT original_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
-                let ocrArrForScene = [];
-                for(let j=0; j<shotsOcrJsonArr.length; j++) {
-                    ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
-                }
-                ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
-                let finalSceneOcr = '';
-                for (let j=0; j<ocrArrForScene.length; j++) {
-                    if(ocrArrForScene[j] != '' || ocrArrForScene[j] != undefined || ocrArrForScene[j] != ' ' || ocrArrForScene[j] != '\n') {
-                        finalSceneOcr = finalSceneOcr + '\n' + ocrArrForScene[j];
+        if(ocrJsonArr){
+            let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
+            ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
+            ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
+            ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
+            let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
+            await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
+            //Aggregate OCR data from the Shot table and insert it into the scene table
+            for(let i=0; i<sceneArr.length; i++) {
+                try {
+                    let currScene = sceneArr[i];
+                    let currSceneId = currScene.scene_id;
+                    let shotsOcrJsonArr = await db.any('SELECT original_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
+                    let ocrArrForScene = [];
+                    for(let j=0; j<shotsOcrJsonArr.length; j++) {
+                        ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
                     }
+                    ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
+                    let finalSceneOcr = '';
+                    for (let j=0; j<ocrArrForScene.length; j++) {
+                        if(ocrArrForScene[j] != '' || ocrArrForScene[j] != undefined || ocrArrForScene[j] != ' ' || ocrArrForScene[j] != '\n') {
+                            finalSceneOcr = finalSceneOcr + '\n' + ocrArrForScene[j];
+                        }
+                    }
+                    finalSceneOcr = finalSceneOcr.trim();
+                    await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
+                }catch(e) {
+                    console.log(e);
                 }
-                finalSceneOcr = finalSceneOcr.trim();
-                await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
-            }catch(e) {
-                console.log(e);
             }
         }
+ 
         //await Scene.aggregateShotOcrIntoSceneOcr(video);
         
         //Fetch captions for all keyframes and update the keyframes table
