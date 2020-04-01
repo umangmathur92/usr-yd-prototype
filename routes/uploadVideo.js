@@ -142,7 +142,7 @@ router.get('/uploadVideo', function (req, res) {
           method: 'post',
           url,
           data: formdata,
-          // maxContentLength: Infinity,
+          maxContentLength: Infinity,
           maxBodyLength: Infinity,
           headers: formdata.getHeaders()
       }
