@@ -14,11 +14,13 @@ class Video {
     }   
     
     static parseVideoFromIndexerJson(requestBody) {
-        let inputJson = JSON.parse(requestBody.inputJson);  
+        // console.log({parseVideoFromIndexerJson : requestBody});
+        // console.log({inputJson: requestBody.inputJson});
+        let inputJson = requestBody.inputJson;  
         let id = -1;
         let youtube_id = requestBody.youtubeId;
         let indexer_video_id = inputJson.id;
-        let title = requestBody.title;
+        let title = inputJson.name;
         let duration = Utils.parseSecondsFromString(inputJson.summarizedInsights.duration.time);
         let summarised_insights_json = inputJson.summarizedInsights;
         let insights_json = inputJson.videos[0].insights;

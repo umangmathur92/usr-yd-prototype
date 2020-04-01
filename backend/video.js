@@ -202,6 +202,7 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
 
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
+    // console.log({addVideoDataToDb: inputJson});
     try {
         // //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
@@ -231,7 +232,7 @@ async function addVideoDataToDb(inputJson) {
         // await Block.insertIntoBlockTable(blockArr);
         //Parse Scenes
         let sceneJsonArr = video.insights_json.scenes;
-        let sceneArr = Scene.parseSceneArr(sceneJsonArr);
+        let sceneArr = Scene.parseSceneArr(sceneJsonArr, video.youtube_id);
         //Generate blocks from scenes using logic - TODO: change this
         //let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
         //await Block.insertIntoBlockTable(blockArr);
@@ -317,7 +318,7 @@ async function addVideoDataToDb(inputJson) {
         return true;
     } catch(e) {
         console.log(e);
-        return false;
+        return e;
     }
 }
 

@@ -10,6 +10,7 @@ const sceneModification = require('./sceneModification');
 const userStudy = require('./userStudy');
 const chatRoom = require('./chatRoom');
 const mergeScene = require('./mergeScene');
+const uploadVideoRoute  = require('./uploadVideo'); 
 
 
 router.use('/userStudy',userStudy);
@@ -17,6 +18,8 @@ router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
 router.use('/room', chatRoom);
 router.use('/merge', mergeScene);
+router.use('/vi', uploadVideoRoute);
+
 console.log({sceneModification: sceneModification.addModifiedScene})
 
 

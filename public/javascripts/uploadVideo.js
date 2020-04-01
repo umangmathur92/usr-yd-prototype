@@ -17,7 +17,7 @@ $(document).ready(function() {
         let url = document.getElementById('url').value;
         // http://www.youtube.com/watch?v=90AiXO1pAiA
         console.log({url});
-        videoURL = '/userStudy/uploadVideo?video='+ url;
+        videoURL = '/vi/uploadVideo?video='+ url;
         
         $.ajax({
             type: 'GET',
