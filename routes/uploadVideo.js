@@ -29,30 +29,24 @@ router.get('/videoState', function (req, res) {
     console.log({url});
 
     axios.get(url)
-      .then(function (response) {
-          // res.send(response.data);
-          res.send('SUCCESS: Get video insight');
+      .then( (response) => {
           // console.log(response.data);
-          // console.log('name: ', response.data.name);
-
           let jsonBody = {
               youtubeId,
               'inputJson': response.data
           };
-
-          let queryResult = videoController.addVideoDataToDb(jsonBody);
-          queryResult.then(result => {
+          videoController.addVideoDataToDb(jsonBody)
+          .then(result => {
             res.send({success: result});
           });
-          
       })
-      .catch(function (error) {
+      .catch((error) => {
         res.send(error);
         console.log(error);
       })
   }else{
-    res.send('Video not processed , id:', videoId);
-    console.log('Video not processed , id:', videoId);
+    res.send('Video is not processed by Video Indexer , id:', videoId);
+    console.log('Video is not processed by Video Indexer , id:', videoId);
   }
 });
 
@@ -105,7 +99,7 @@ router.get('/uploadVideo', function (req, res) {
             let accessToken = response.data[0].accessToken;
             console.log('token->' + accessToken);
   
-            return uploadVideo(filePath, accessToken);
+            return uploadVideo(filePath, accessToken, videoId);
            
           }).then(response => {
             res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
@@ -129,11 +123,11 @@ router.get('/uploadVideo', function (req, res) {
 
 
 
-  async function uploadVideo(file, accessToken){
+  async function uploadVideo(file, accessToken, youtubeId){
     console.log('inside upload video');
     console.log({file});
-    let name = 'TEST 101';
-    let callbackUrl = '';
+    let name = youtubeId;
+    let callbackUrl = `http://18.221.192.73:5001/vi/videoState?youtubeId=${youtubeId}`;
     let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}&callbackUrl=${callbackUrl}`;
     let formdata = new FormData();
   
