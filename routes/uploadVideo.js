@@ -17,9 +17,10 @@ const videoController = require('../backend/video');
 let accountId = '5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b';
 let apiKey = 'dbbd2d92a19749759576466ed9cd61fa'; 
 let location = 'trial';
+var ffmpeg = require('ffmpeg');
 
 router.get('/videoState', function (req, res) {
-  // console.log({ param: req.query.userId });
+  console.log('INSIDe GET video State');
   let videoId = req.query.id;
   let state = req.query.state;
   let youtubeId = req.query.youtubeId;
@@ -121,14 +122,31 @@ router.get('/uploadVideo', function (req, res) {
     }
   });
 
-
+  function convertVideoToAudio(path, fileName){
+    try {
+      var process = new ffmpeg(path);
+      process.then(function (video) {
+        // Callback mode
+        // let audioFile = path + '/' + fileName+'.mp3';
+        video.fnExtractSoundToMP3(function (error, file) {
+          if (!error)
+            console.log('Audio file: ' + file);
+        });
+      }, function (err) {
+        console.log('Error: ' + err);
+      });
+    } catch (e) {
+      console.log(e.code);
+      console.log(e.msg);
+    }
+  }
 
   async function uploadVideo(file, accessToken, youtubeId){
     console.log('inside upload video');
     console.log({file});
     let name = youtubeId;
     let callbackUrl = `http://18.221.192.73:5001/vi/videoState?youtubeId=${youtubeId}`;
-    let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}&callbackUrl=${callbackUrl}`;
+    let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&callbackUrl=${callbackUrl}&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
     let formdata = new FormData();
   
     let rs = fs.createReadStream(file);
@@ -137,7 +155,7 @@ router.get('/uploadVideo', function (req, res) {
     });
     
     formdata.append('file', fs.createReadStream(file));
-   
+    console.log({callbackUrl});
     const config = {
           method: 'post',
           url,
@@ -147,7 +165,7 @@ router.get('/uploadVideo', function (req, res) {
           headers: formdata.getHeaders()
       }
     res = await axios(config);
-    
+    console.log(res.data);
     return res.data;
      
   }

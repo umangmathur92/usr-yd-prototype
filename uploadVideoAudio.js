@@ -1,7 +1,10 @@
 const fs = require('fs');
 const Utils = require('./backend/utils');
+var ffmpeg = require('ffmpeg');
 
 class AudioVideoMerge{
+
+    
 
     merge(videoFile, audioFile){
        let videoInsight = this.parseJson(videoFile);
@@ -116,12 +119,38 @@ class AudioVideoMerge{
         console.log(arr);
         return arr;
     }
-}
 
+
+    convertVideoToAudio(path, fileName){
+        let audioFile = path + '/' + fileName+'.mp3';
+        let videoFile = path + '/' + fileName + '.mp4'
+        console.log({path});
+        console.log({audioFile});
+        console.log({videoFile});
+
+        try {
+            var process = new ffmpeg(videoFile);
+            process.then(function (video) {
+                console.log({video});
+                video.fnExtractSoundToMP3(audioFile, function (error, file) {
+                    if (!error)
+                        console.log('Audio file: ' + file);
+                });
+            }, function (err) {
+                console.log('Error: ' + err);
+            });
+        } catch (e) {
+            console.log('err->', e);
+        }
+      }
+
+
+}
 
 let file = 'insight.json';
 let oceanFile = 'audio_ocean8.json';
 let audioVideoMerge = new AudioVideoMerge();
 // audioVideoMerge.parseJson(file);
 // audioVideoMerge.parseAudioFile(oceanFile);
-audioVideoMerge.merge(file,oceanFile);
+// audioVideoMerge.merge(file,oceanFile);
+audioVideoMerge.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
