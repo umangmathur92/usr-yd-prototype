@@ -38,6 +38,16 @@ class Video {
         }
     }
 
+    static async updateAudioId(data) {
+        console.log('DB Operation: Updating Audio');
+        try {
+             return await db.query('UPDATE video set audio_id=$1 where youtube_id=$2', [data.audioId, data.youtube_id]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
 }
 
 module.exports = Video;
