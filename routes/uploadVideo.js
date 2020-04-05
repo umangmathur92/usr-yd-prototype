@@ -25,47 +25,67 @@ const request = require('request');
 
 
 router.get('/audioInsight', function(req, res, next) {
-  console.log('req.query', req.query);
-  let audioData = req.query.data; 
-  
-  let obj = JSON.parse(audioData);
-  let sentence = obj.result.sentence;
-  let audioInsight =[];
-  for(let i=0; i< sentence.length; i++){
-      let start = sentence[i].startTime;
-      let end = sentence[i].endTime;
-      let data = {
-          start,
-          end
-      }
-      audioInsight.push(data);
-  }
-  console.log({audioInsight});
-  let queryResult =  scene.getSceneData(videoId);
-    queryResult
-      .then(data => {
-          let videoInsight = [];
-          let data = response;
-          for(let i=0; i< data.length; i++){
-              data[i].merged =  [];
+    console.log('req.query', req.query);
+    let audioId = req.query.order; 
+    let status = req.query.status;
+    if(status === '-1'){
+      res.status(400).send('Error: ListenByCode failed to process the audio file');
+    }else{
+      let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
+      axios.get(url)
+      .then((response) => {
+        console.log(response.data);
+        //AUDIO
+        let sentence = response.data.result.sentence;
+        let audioInsight =[];
+        for(let i=0; i< sentence.length; i++){
+            let start = sentence[i].startTime;
+            let end = sentence[i].endTime;
+            let data = {
+                start,
+                end
+            }
+            audioInsight.push(data);
+        }
+        console.log({audioInsight});
+        
+        //VIDEO
+        let videoInsight = [];
+        videoModel.getSceneByAudioId(audioId)
+          .then((data) => {
+            console.log(data);
+            for (let i = 0; i < data.length; i++) {
+              data[i].merged = [];
               videoInsight.push(data[i]);
-          }
-          console.log({videoInsight});
-          let mergedList = merge(videoInsight, audioInsight);
-          let result = scene.addMergeSceneTable(mergedList)
-          result
-            .then(data => {
-              console.log({ success: data });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+            }
+            console.log({ videoInsight });
+        
+            //MERGE
+            let mergedList = merge(videoInsight, audioInsight);
+            let result = scene.addMergeSceneTable(mergedList)
+            result
+              .then(data => {
+                console.log({ success: data });
+                res.status(200).send('Data merged successfully');
+              })
+              .catch((err) => {
+                console.log(err);
+                res.status(400).send(err);
+              });
 
-        res.send('Data added successfully in merge_scene table');
+          }).catch((error) => {
+            console.log(error);
+            res.status(400).send(error);
+          })
+
       })
-      .catch((err) => {
-        res.send(err);
-      });
+      .catch((error) => {
+        console.log(error);
+        res.status(400).send(error);
+      })
+    
+    }
+
 });
 
 
@@ -92,11 +112,11 @@ router.get('/videoState', function (req, res) {
           });
       })
       .catch((error) => {
-        res.send(error);
+        res.status(400).send(error);
         console.log(error);
       })
   } else {
-    res.send('Video is not processed by Video Indexer , id:', videoId);
+    res.status(400).send('Video is not processed by Video Indexer , id:', videoId);
     console.log('Video is not processed by Video Indexer , id:', videoId);
   }
 });
@@ -139,49 +159,28 @@ router.get('/uploadVideo', function (req, res) {
     })
     let name = '';
     video.on('end', function () {
-      console.log('Finished downloading!');
+        console.log('Finished downloading!');
 
-      let tokenUrl = `https://api.videoindexer.ai/Auth/trial/Accounts?generateAccessTokens=true&allowEdit=true`;
-      axios({
-        method: 'get',
-        url: tokenUrl,
-        headers: { 'Ocp-Apim-Subscription-Key': apiKey },
-      })
+        let tokenUrl = `https://api.videoindexer.ai/Auth/trial/Accounts?generateAccessTokens=true&allowEdit=true`;
+        axios({
+          method: 'get',
+          url: tokenUrl,
+          headers: { 'Ocp-Apim-Subscription-Key': apiKey },
+        })
         .then(response => {
           let accessToken = response.data[0].accessToken;
           console.log('token->' + accessToken);
-
-          // return uploadVideo(filePath, accessToken, videoId);           
-        }).then(() => {
-          // return convertVideoToAudio(filePath);
-            let audioFile = '/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/GXWpEjEFWkM_2020-04-02_1585852150.mp3';
-            let formdata = new FormData();
-           
-            let rs = fs.createReadStream(audioFile);
-            rs.on('error', function (err) {
-              console.log(err);
-              reject(err);
-            });
-            const formData = {
-              appkey: 'yAOzHAy9LQBJQGtshcIGJX368IbC4Enx',
-              language: "en",
-              file: rs,
-              callbackurl: '',
-            };
-            
-            request.post({url:"https://www.listenbycode.com/api/v1/upload", formData: formData}, function optionalCallback(err, response, body) {
-              var jsonObj = JSON.parse(body);
-              var orderId = jsonObj.result.orderId;
-              console.log(body);
-            });
-        }).then((response) => {
-          // console.log({ name });
-
+          return uploadVideo(filePath, accessToken, videoId);           
+        })
+        .then(() => {
+            return convertVideoToAudio(filePath);
+        })
+        .then((response) => {
           res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
           console.log('SUCCESS of Video Upload POST->' + response);
         })
         .catch(error => {
-          res.status(400).send('FAILED: Video not uploaded to Video Indexer   ')
+          res.status(400).send('FAILED: Video not uploaded to Video Indexer ');
           console.log(error);
         });
     })
@@ -190,10 +189,13 @@ router.get('/uploadVideo', function (req, res) {
       console.log('error 2:', err);
       res.send(err);
     })
+
   } else {
     console.log('video url not provided');
     res.send('video url not provided');
   }
+
+  
 });
 
 
@@ -201,10 +203,10 @@ async function convertVideoToAudio(videoFilePath) {
 
   let index1 = videoFilePath.lastIndexOf('.mp4');
   let index2 = videoFilePath.lastIndexOf('/');
-  let name = videoFilePath.substring(index1 + 1, index2);
+  let videoId = videoFilePath.substring(index1 + 1, index2);
   let rootPath = videoFilePath.substring(0, index2);
 
-  let audioFile = rootPath + name + 'mp3';
+  let audioFile = rootPath + videoId + 'mp3';
   console.log({ rootPath });
   console.log({ audioFile });
   console.log({ videoFilePath });
@@ -217,35 +219,44 @@ async function convertVideoToAudio(videoFilePath) {
       video.fnExtractSoundToMP3(audioFile,
         function (error, file) {
           if (error) {
-            throw error;
+            console.log('Error converting video to audio file');
+            reject(error);
           } else {
             console.log('video extraction succeeded:', file);
-            let formdata = new FormData();
-            let rs = fs.createReadStream(audioFile);
-            rs.on('error', function (err) {
+            ///----
+            // let audioFile = '/Users/vaishalibisht/Desktop/SFSU/YouDescribe/usr-yd-prototype/GXWpEjEFWkM_2020-04-02_1585852150.mp3';
+            let readStream = fs.createReadStream(audioFile);
+            readStream.on('error', function (err) {
               console.log(err);
               reject(err);
             });
-            formdata.append('file', rs);
-            // formdata.append('appkey','yAOzHAy9LQBJQGtshcIGJX368IbC4Enx');
 
-            console.log({formdata});
-            axios({
-              method: 'post',
-              url: 'http://18.221.192.73:8081/v1/audioclips/startspeechtotext',
-              data: formdata,
-              headers: formdata.getHeaders(),
-              appkey:'yAOzHAy9LQBJQGtshcIGJX368IbC4Enx',
-            })
-            .then(response => {
-              console.log('SpeechToText: ', response);
-              resolve(response.data);
-            })
-            .catch(error => {
-              console.log('AXIOS POST->', error);
+            const formData = {
+              appkey: 'yAOzHAy9LQBJQGtshcIGJX368IbC4Enx',
+              language: "en",
+              file: readStream,
+              callbackurl: '',
+            };
+            
+            request.post({url:"https://www.listenbycode.com/api/v1/upload", formData}, function optionalCallback(err, response, body) {
+              var jsonObj = JSON.parse(body);
+              var audioId = jsonObj.result.orderId;
+              console.log(body);
+              let data  = {
+                audioId,
+                videoId
+              }
+              console.log(data);
+              videoModel.updateAudioId({audioId, videoId})
+              .then((result)=>{
+                console.log(result);
+                resolve('Audio file uploaded to SpeechToText api');
+              })
+              .catch((e)=>{
+                console.log('Error while uploading audio file to SpeechTotextApi:', err);
+                reject(err);
+              })
             });
-
-
 
           }
         })

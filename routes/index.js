@@ -221,8 +221,14 @@ async function deleteMergedScenes(sceneArr, videoId, user_id) {
     return  db.query(sql, sceneArr); 
 }
 
-
-
+async function updateDeletedScenes(sceneArr, videoId, user_id) { 
+  let sql = '';
+  for(let i=0; i< sceneArr.length; i++){
+   sql +=   `Update descriptions set isdeleted = true where scene_id = '${sceneArr[i]}' and video_id='${videoId}' and volunteer_id='${user_id}';`;
+  }
+   console.log({'INSIDE updateDeletedScenes': sql})
+   return  db.query(sql, sceneArr); 
+}
 
 
 
@@ -285,7 +291,54 @@ router.post('/saveNonAiDescription', function(req, res, next) {
 
 });
 
+router.post('/saveModifiedDescription', function(req, res, next) {
+  let inputJson = req.body;
+  console.log('inside saveModifiedDescription:', inputJson);
+  
+  let {qnaData, user_id, videoId} = inputJson;
+  let resArr = [];
+  for (let key in qnaData) {
+    if (qnaData.hasOwnProperty(key)) {
+        for(let i= 0; i< qnaData[key].length; i++){
+          resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
+        }
+    }
+  }
 
+  for(let key in inputJson.scene_arr) {
+     console.log({key});
+    let currScene = inputJson.scene_arr[key];
+    let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene=[]} = currScene;
+    console.log('deleted scene===>', deletedScene)
+    
+    resArr = [...resArr, addModifiedScene({
+      scene_id,
+      user: user_id,
+      scene_num: key,
+      video_id: req.body.videoId,
+      description: modified_description,
+      ocr:  modified_ocr,
+      start_time,
+      end_time,
+      has_ai,
+      deletedScene
+    })];
+    if(deletedScene.length > 0) {
+      console.log('INSIDE DELETE CALLL');
+      resArr = [...resArr, updateDeletedScenes(deletedScene, videoId, user_id)]
+    }
+  }
+
+
+  Promise.all(resArr).then((data) => {
+      res.send({success: true});  
+      console.log(data)
+    }).catch((e) => {
+    console.log(e);
+    res.send({success: false});
+  })
+
+});
 
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;

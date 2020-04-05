@@ -42,7 +42,7 @@ $(document).ready(function() {
         $.ajax({
             type: 'POST',
             enctype: 'multipart/form-data',
-            url : 'http://52.53.151.37:8080/v1/audioclips/startspeechtotext',
+            url : 'http://18.221.192.73:8081/v1/audioclips/startspeechtotext',
             data,
             processData: false,
             contentType: false,

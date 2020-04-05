@@ -132,6 +132,7 @@ function fetchVideoInfo(youtubeId) {
         initializeDescriptionsUI();
         if(response.qnaList){
             renderQnaList(response.qnaList);
+            console.log('qnaList:', response.qnaList);
         }
     });
 
@@ -166,7 +167,7 @@ function initializeDescriptionsUI() {
 
 
 function renderScenes(currScene, scene_num) {
-    // console.log({currScene})
+    console.log({currScene})
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
     let scStartTime = currScene.start_time;
@@ -472,7 +473,7 @@ async function updateTime() {
                 console.log("Extended fault");
                 if(currAudio && currAudio!==null)
                     {currAudio.pause(); player.setVolume(50);}
-                    console.log("Current Audio is paused: 0"+STATE_TIME);
+                     console.log("Current Audio is paused: 0"+STATE_TIME);
                 STATE = 2;
             }
         else if(STATE == 2)
@@ -779,7 +780,7 @@ async function updateAll(shoudShowAlert) {
     const qnaData = getNewQnAData();    
     postJson.qnaData = qnaData;
     postJson.videoId = youtubeId;
-    console.log({'HERE': postJson});
+    console.log({postJson});
     try{
         await $.post('/saveAiDescription', postJson, function (response) {
             if(shoudShowAlert) {
@@ -915,7 +916,7 @@ function populateSceneIdToListPosition(blocksJsonArr) {
 
 function getSceneFromTime(currentTime) {
     let listContainer = document.querySelector('.list-container');
-    console.log('This: '+listContainer.dataset);
+    // console.log('This: '+listContainer.dataset);
     sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
     
     let startTimesArr = [];
