@@ -40,6 +40,7 @@ let YT_FLAG = false;
 let YT_FLAG_Dial = false;
 let YT_FLAG_EXT = false;
 let first_extend_flag = true;
+let desc_flag = false;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
@@ -142,7 +143,6 @@ function fetchVideoInfo(youtubeId) {
         initializeDescriptionsUI();
         if(response.qnaList){
             renderQnaList(response.qnaList);
-            console.log('qnaList:', response.qnaList);
         }
     });
 
@@ -245,7 +245,7 @@ function initializeDescriptionsUI() {
 
 
 function renderScenes(currScene, scene_num) {
-    console.log({currScene})
+    // console.log({currScene})
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
     let scStartTime = currScene.start_time;
@@ -513,9 +513,8 @@ async function onPlayerReady(event) {
 
 async function updateTime() {
     while(true){
+        if(desc_flag){
     var oldTime = videotime;
-    if(player.getPlayerState() == YT.PlayerState.ENDED && currAudio != null)
-    {currAudio.play(); break;}
      if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
         // console.log("No state change");
@@ -551,8 +550,8 @@ async function updateTime() {
                 YT_FLAG = true;
                 console.log("Extended fault");
                 if(currAudio && currAudio!==null)
-                    {currAudio.pause(); player.setVolume(50);}
-                     console.log("Current Audio is paused: 0"+STATE_TIME);
+                    currAudio.pause();
+                    console.log("Current Audio is paused: 0"+STATE_TIME);
                 STATE = 2;
             }
         else if(STATE == 2)
@@ -563,7 +562,6 @@ async function updateTime() {
             videotime = player.getCurrentTime();
             if(currAudio && currAudio!==null)
                 currAudio.play();
-                player.setVolume(5);
                 STATE = 1;
         }
     }
@@ -571,11 +569,12 @@ async function updateTime() {
         // console.log("Paused");  // modify currAudio.onended func
 
     if(STATE == 0 && currAudio && currAudio!==null && isPlaying(currAudio))
-        {currAudio.pause(); player.setVolume(50);}
+        currAudio.pause();
 }
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
     console.log("Time event");
-    // msleep(100);  
+    // msleep(100);
+}  
     await new Promise(r => setTimeout(r, 100));    
 }
     
@@ -617,6 +616,7 @@ async function updateProgress(currentTime){
     // else
     //     currAudio = null;
     if (currAudio !== null && isPlaying(currAudio))
+        currAudio.pause(); 
         currAudio = null;
         player.setVolume(75);
 }
@@ -828,9 +828,6 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
-            console.log("CurrAudio appeared here");
-            if(currAudio != null)
-                currAudio.play();
         case YT.PlayerState.CUED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
@@ -888,7 +885,7 @@ async function updateAll(shoudShowAlert) {
     const qnaData = getNewQnAData();    
     postJson.qnaData = qnaData;
     postJson.videoId = youtubeId;
-    console.log({postJson});
+    console.log({'HERE': postJson});
     try{
         await $.post('/saveAiDescription', postJson, function (response) {
             if(shoudShowAlert) {
@@ -1018,13 +1015,14 @@ function populateSceneIdToListPosition(blocksJsonArr) {
         }
         listPositionIndex++;
     }
+    desc_flag = true;
     return sceneListPositionMap;
 }
 
 
 function getSceneFromTime(currentTime) {
     let listContainer = document.querySelector('.list-container');
-    // console.log('This: '+listContainer.dataset);
+    console.log('This: '+listContainer.dataset);
     sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
     
     let startTimesArr = [];
