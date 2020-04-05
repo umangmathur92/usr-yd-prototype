@@ -38,6 +38,32 @@ class Video {
         }
     }
 
+    static async updateAudioId(data) {
+        console.log('DB Operation: Updating Audio');
+        try {
+             return await db.query('UPDATE video set audio_id=$1 where youtube_id=$2', [data.audioId, data.videoId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async getSceneByAudioId(audioId) {
+        console.log('get scene data by audio Id:', audioId);
+        try {
+
+            let query = `select s.video_id, s.id, s.scene_id, s.block_id, s.scene_num, s.start_time, s.end_time, s.original_description, s.original_ocr
+                         from video v, scene s
+                         where v.youtube_id = s.video_id and v.audio_id = $1
+                         order by scene_num`;
+
+             return await db.query(query, [audioId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
 }
 
 module.exports = Video;
