@@ -82,7 +82,31 @@ async function updateDescriptionTable(duration, currVideoId, volunteerId, hasAi,
     }
 }
 
+async function generateMp3DurationForText(inputText) {
+    try {
+        const client = new textToSpeech.TextToSpeechClient();
+        const request = {
+            input: {text: inputText},
+            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3'},
+        };
+        const [response] = await client.synthesizeSpeech(request);
+        const writeFile = util.promisify(fs.writeFile);
+        const fileNamePath = 'public/audio/output.mp3';
+        await writeFile(fileNamePath, response.audioContent, 'binary');
+        console.log('Audio content written to file: output.mp3');
+
+        let duration = await getAudioDurationInSeconds(fileNamePath);
+
+        return {'success': true, 'duration': duration};
+    } catch (error) {
+        console.log(error);
+        return {'success': false, 'duration': 'None'};
+    }
+}
+
 module.exports = {
     generateMp3ForText: generateMp3ForText,
-    generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb
+    generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb,
+    generateMp3DurationForText: generateMp3DurationForText
 }

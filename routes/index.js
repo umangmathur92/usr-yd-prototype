@@ -11,6 +11,7 @@ const userStudy = require('./userStudy');
 const chatRoom = require('./chatRoom');
 const mergeScene = require('./mergeScene');
 const uploadVideoRoute  = require('./uploadVideo'); 
+const sentences = require('../backend/sentences.js')
 
 
 router.use('/userStudy',userStudy);
@@ -70,6 +71,19 @@ router.get('/getDialogTimeStamps', function(req, res, next) {
        res.send(result);
     });
 });
+
+router.get('/getSentences', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+  console.log('Sentences ',req);
+  let {videoId, userId} = req.query;
+  console.log("The vals are: "+videoId+' and '+userId);
+  let queryResult = video.fetchSentences(videoId,userId);
+  queryResult.then(result => {
+    console.log("The vals are: "+videoId);
+       res.send(result);
+    });
+});
+
 
 router.get('/playvideo/:youtubeId', function(req, res, next) {
   let isAiEnabled = req.query.ai === 'yes';
@@ -416,6 +430,61 @@ router.get('/generateMp3FromDescriptions', function(req, res, next) {
     res.send({success: result});
   });
 });
+          // texttospeech -> duration
+router.post('/descriptionDuration', function(req, res, next) {  
+  let inputJson = req.body;
+  let inputText = inputJson.inputText;
+  let task = textToSpeech.generateMp3DurationForText(inputText);
+  task.then(result => {
+    res.send({success: result.success, duration: result.duration});
+  });
+});
+
+                  /*  For sentence generation starts*/
+router.get('/generateSentencesFromDescriptions', function(req, res, next) {
+  let task = sentences.generateSentencesForAllDescriptionsInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateMp3ForAllSentences', function(req, res, next) {
+  let task = sentences.generateMp3ForAllSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateTimestampsforSentences', function(req, res, next) {
+  let task = sentences.generateTimestampsforSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateTimestampsforSentencesInDbWithInfo', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id,vol_id} = inputJson;
+  console.log('GET params: ',vid_id,' and: ',vol_id);
+  let task = sentences.generateTimestampsforSentencesInDbWithInfo(vid_id,vol_id);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/mergeSentencesInDb', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id, vol_id} = inputJson;
+  console.log('GET params: ',vid_id);
+  let task = sentences.mergeSentenceAudios(vid_id, vol_id);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+              /*  For sentence generation ends  */
 
 router.get('/playVideoAudio/:youtubeId', function(req, res, next) {
   res.render('videoaudio');
