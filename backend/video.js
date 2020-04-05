@@ -65,7 +65,7 @@ async function fetchDialogTimeStamps(videoId) {
 
 async function fetchSentences(videoId, userId) {
     console.log("Now: testking");
-    return await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${userId}' ORDER BY sentence_id`);
+    return await db.any(`SELECT * FROM descriptions_new_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${userId}' ORDER BY scene_num, sentence_id`);
     // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
 }
 
