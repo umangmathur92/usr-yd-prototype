@@ -21,7 +21,7 @@ router.use('/room', chatRoom);
 router.use('/merge', mergeScene);
 router.use('/vi', uploadVideoRoute);
 
-console.log({sceneModification: sceneModification.addModifiedScene})
+// console.log({sceneModification: sceneModification.addModifiedScene})
 
 
 router.get('/', function(req, res, next) {
