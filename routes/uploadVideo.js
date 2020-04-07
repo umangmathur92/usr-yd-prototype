@@ -182,23 +182,33 @@ router.get('/uploadVideo', function (req, res) {
           url: tokenUrl,
           headers: { 'Ocp-Apim-Subscription-Key': apiKey },
         })
-        .then(response => {
-          let accessToken = response.data[0].accessToken;
-          console.log('token->' + accessToken);
-          return uploadVideo(filePath, accessToken, videoId, videoTitle);           
-        })
-        .then(() => {
-            return convertVideoToAudio(videoId, filePath);
-        })
-        .then((response) => {
-          res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
-          console.log('SUCCESS of Video Upload POST->' + response);
-
-        })
-        .catch(error => {
-          res.status(400).send('FAILED: Video not uploaded to Video Indexer ');
-          console.log(error);
-        });
+          .then(response => {
+            let accessToken = response.data[0].accessToken;
+            console.log('token->' + accessToken);
+            uploadVideo(filePath, accessToken, videoId, videoTitle)
+              .then( (videoData) => {
+                console.log({videoData});
+                let data = {
+                  youtubeId: videoId,
+                  video_id: videoData.id,
+                  title: videoTitle
+                }
+                console.log({videoAudioData: data});
+                videoModel.insertIntoVideoAudioTable(data)
+                  .then(()=>{
+                    convertVideoToAudio(videoId, filePath)
+                      .then((audioData)=>{
+                        console.log({audioData});
+                        res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
+                        console.log('SUCCESS: Video uploaded to Video Indexer');
+                    })
+                  })
+              })
+          })
+          .catch(error => {
+            res.status(400).send('FAILED: Video not uploaded to Video Indexer ');
+            console.log(error);
+          });
     })
 
     video.on('error', function error(err) {
@@ -264,7 +274,7 @@ async function convertVideoToAudio(youtubeId, videoFilePath) {
               videoModel.updateAudioId_VideoAudio(data)
               .then((result)=>{
                 console.log(result);
-                resolve('Audio file uploaded to SpeechToText api');
+                resolve(data);
               })
               .catch((e)=>{
                 console.log('Error while uploading audio file to SpeechTotextApi:', err);
@@ -307,22 +317,16 @@ async function uploadVideo(file, accessToken, youtubeId, videoTitle) {
     maxBodyLength: Infinity,
     headers: formdata.getHeaders()
   }
-  res = await axios(config);
-  console.log(res.data);
-  let data = {
-    youtubeId,
-    video_id: res.data.id,
-    title: videoTitle
+ 
+  try{
+    res = await axios(config);
+    console.log(res.data);
+  }catch(e){
+    console.log(e);
+    throw e;
   }
-  videoModel.insertIntoVideoAudioTable(data)
-    .then((res)=>{
-      return res;
-    })
-    .catch((e)=>{
-      console.log(e);
-      throw e;
-    })
 
+  return res.data;
 }
 
 
