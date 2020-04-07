@@ -1,77 +1,209 @@
 const fs = require('fs');
 const Utils = require('./backend/utils');
 var ffmpeg = require('ffmpeg');
+let videoModel = require('./model/video.js');
+
+
+const axios = require('axios');
+var ffmpeg = require('ffmpeg');
+let scene = require('./model/scene');
 
 class AudioVideoMerge{
 
+    async test(){
+        return  this.fetchAudioInsight('PFOKXT20200408065152', 'GXWpEjEFWkM')
+                    .then((result)=>{
+                        console.log(result);
+                    })
+            .catch(e => {
+                console.log(e);
+            })
+    }
+
+
+    async fetchAudioInsight(audioId, videoId){
+        return new Promise((resolve, reject) => {
+            let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
+            axios.get(url)
+            .then((response) => {
+                console.log(response.data);
+    
+                //VIDEO
+                let videoInsight = [];
+                scene.getSceneData(videoId)
+                  .then((data) => {
+                    console.log(data);
+                    for (let i = 0; i < data.length; i++) {
+                      data[i].merged = [];
+                      videoInsight.push(data[i]);
+                    }
+                    console.log({ videoInsight });
+    
+                //AUDIO
+                let sentence = response.data.result.sentence;
+                let audioInsight =[];
+                for(let i=0; i< sentence.length; i++){
+                    let start = sentence[i].startTime;
+                    let end = sentence[i].endTime;
+                    let data = {
+                        start,
+                        end
+                    }
+                    audioInsight.push(data);
+                }
+                console.log({audioInsight});
+              
+                //MERGE
+                let mergedList = this.merge(videoInsight, audioInsight);
+                let result = scene.addMergeSceneTable(mergedList)
+                result
+                  .then(data => {
+                    console.log({ success: data });
+                    resolve('Success: Scene Merged');
+                  })
+                })
+            .catch((error) => {
+                  console.log(error);
+                  reject(error);
+                })
+            });
+        })
+    
+    }
     
 
-    merge(videoFile, audioFile){
-       let videoInsight = this.parseJson(videoFile);
-       let audioInsight = this.parseAudioFile(audioFile);
-        // let videoInsight = [
-        //     { start: 0, end: 5 },
-        //     { start: 5, end: 10},
-        //     { start: 10, end: 15 },
-        //     { start: 15, end: 20 },
-        //     { start: 20, end: 25 },
-        //     { start: 25, end: 30 },
-        // ]
-
-        // let audioInsight = [
-        //     { start: 0, end: 1 },
-        //     { start: 2, end: 4},
-        //     { start: 5, end: 7 },
-        //     { start: 10, end: 12 },
-        //     { start: 12, end: 18 },
-
-        // ]
-
-       let videoIndex = 0;
-       let mergedList = [];
-       mergedList.push(videoInsight[videoIndex++]);
-       let i = 0;
-       while(i < audioInsight.length && videoIndex < videoInsight.length){
+    merge(videoInsight, audioInsight){
+        let videoIndex = 0;
+        let mergedList = [];
+        mergedList.push(videoInsight[videoIndex++]);
+        let i = 0;
+        while(i < audioInsight.length && videoIndex < videoInsight.length){
             let size = mergedList.length;
-            let s1 = mergedList[size-1].start;
-            let e1 = mergedList[size-1].end;
-   
+            let s1 = mergedList[size-1].start_time;
+            let e1 = mergedList[size-1].end_time;
+      
             let s2 = audioInsight[i].start;
             let e2 = audioInsight[i].end;
-
+      
             if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
-				i++;
-				continue;
+                i++;
+                continue;
             }
             
             if(Math.min(s2, e2) >= e1) {
-				mergedList.push(videoInsight[videoIndex++]);
-				continue;
-			}
-           
+                mergedList.push(videoInsight[videoIndex++]);
+                continue;
+            }
+            
             //merge condition
             if(s2 >= s1 && e2 > e1) {
-				let next = videoInsight[videoIndex++]; 
-				let min = Math.min(s1,  next.start);
-                let max = Math.max(e1,next.end);
-                let data ={
-                    start : min,
-                    end : max
-                }
+                let sceneObj = mergedList[mergedList.length-1];
+                let next = videoInsight[videoIndex++]; 
+                let min = Math.min(s1,  next.start_time);
+                let max = Math.max(e1, next.end_time);
+                sceneObj.start_time = min;
+                sceneObj.end_time = max;
+                // let arr = sceneObj.merged;
+                // arr.push(next.scene_id);
+                sceneObj.merged.push(next.scene_id);
                 mergedList.splice(mergedList.length-1);
-                mergedList.push(data);
-			}else if(s2 >= e1) {
-				mergedList.push(videoInsight[videoIndex++]);
-			}
-			
-			i++;
+                mergedList.push(sceneObj);
+            }else if(s2 >= e1) {
+                mergedList.push(videoInsight[videoIndex++]);
+            }
+      
+            i++;
         }
-
+      
         for(let j = videoIndex; j<videoInsight.length; j++) {
-			mergedList.push(videoInsight[j]);
-		}
-        console.log({mergedList});
-    }
+            mergedList.push(videoInsight[j]);
+        }
+      
+        for(let k=0; k< mergedList.length; k++){
+            let scene_id = mergedList[k].scene_id;
+            let merged = mergedList[k].merged;
+            let start_time = mergedList[k].start_time;
+            let end_time = mergedList[k].end_time;
+            // console.log(scene_id ,'-' ,start_time, '-', end_time, ',', JSON.stringify(merged));
+        }
+        
+        // console.log({mergedList});
+        return mergedList;
+      }
+      
+
+
+
+
+
+
+
+    // merge(videoFile, audioFile){
+    //    let videoInsight = this.parseJson(videoFile);
+    //    let audioInsight = this.parseAudioFile(audioFile);
+    //     // let videoInsight = [
+    //     //     { start: 0, end: 5 },
+    //     //     { start: 5, end: 10},
+    //     //     { start: 10, end: 15 },
+    //     //     { start: 15, end: 20 },
+    //     //     { start: 20, end: 25 },
+    //     //     { start: 25, end: 30 },
+    //     // ]
+
+    //     // let audioInsight = [
+    //     //     { start: 0, end: 1 },
+    //     //     { start: 2, end: 4},
+    //     //     { start: 5, end: 7 },
+    //     //     { start: 10, end: 12 },
+    //     //     { start: 12, end: 18 },
+
+    //     // ]
+
+    //    let videoIndex = 0;
+    //    let mergedList = [];
+    //    mergedList.push(videoInsight[videoIndex++]);
+    //    let i = 0;
+    //    while(i < audioInsight.length && videoIndex < videoInsight.length){
+    //         let size = mergedList.length;
+    //         let s1 = mergedList[size-1].start;
+    //         let e1 = mergedList[size-1].end;
+   
+    //         let s2 = audioInsight[i].start;
+    //         let e2 = audioInsight[i].end;
+
+    //         if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
+	// 			i++;
+	// 			continue;
+    //         }
+            
+    //         if(Math.min(s2, e2) >= e1) {
+	// 			mergedList.push(videoInsight[videoIndex++]);
+	// 			continue;
+	// 		}
+           
+    //         //merge condition
+    //         if(s2 >= s1 && e2 > e1) {
+	// 			let next = videoInsight[videoIndex++]; 
+	// 			let min = Math.min(s1,  next.start);
+    //             let max = Math.max(e1,next.end);
+    //             let data ={
+    //                 start : min,
+    //                 end : max
+    //             }
+    //             mergedList.splice(mergedList.length-1);
+    //             mergedList.push(data);
+	// 		}else if(s2 >= e1) {
+	// 			mergedList.push(videoInsight[videoIndex++]);
+	// 		}
+			
+	// 		i++;
+    //     }
+
+    //     for(let j = videoIndex; j<videoInsight.length; j++) {
+	// 		mergedList.push(videoInsight[j]);
+	// 	}
+    //     console.log({mergedList});
+    // }
 
     
 
@@ -153,4 +285,5 @@ let audioVideoMerge = new AudioVideoMerge();
 // audioVideoMerge.parseJson(file);
 // audioVideoMerge.parseAudioFile(oceanFile);
 // audioVideoMerge.merge(file,oceanFile);
-audioVideoMerge.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
+// audioVideoMerge.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
+audioVideoMerge.test();

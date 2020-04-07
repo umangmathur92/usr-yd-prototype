@@ -192,41 +192,47 @@ router.get('/uploadVideo', function (req, res) {
               }
               console.log({ videoAudioData: data });
 
-              let videoState = '';
-              //-----
-              let timeId = setInterval( ()=> {
-                      let url = `https://api.videoindexer.ai/${location}/accounts/${accountId}/videos/${videoData.id}/Index/?language=en-US`;
-                      console.log({ url });
-                      
-                      axios.get(url)
-                        .then((response) => {
-                          let videoState = response.data.state;
-                          console.log('Video State: ', videoState);
-                          if(videoState === 'Processed'){
-                            let jsonBody = {
-                              youtubeId: videoId,
-                              'inputJson': response.data
-                            };
-                            videoController.addVideoDataToDb(jsonBody)
-                              .then(result => {
-                                console.log({ success: result });
-                                clearInterval(timeId);
-                              })
-                          }
-                        })
-                        .catch((error) => {
-                          clearInterval(timeId);
-                          console.log(error);
-                        })
-                    }, 10000);
-
-              //-------------
-
               videoModel.insertIntoVideoAudioTable(data)
                 .then(() => {
                   convertVideoToAudio(videoId, filePath)
                     .then((audioData) => {
                       console.log({ audioData });
+                      let audioId = audioData.audioId;
+                      //----------------
+                      let timeId = setInterval( ()=> {
+                            let url = `https://api.videoindexer.ai/${location}/accounts/${accountId}/videos/${videoData.id}/Index/?language=en-US`;
+                            console.log({ url });
+                            
+                            axios.get(url)
+                              .then((response) => {
+                                let videoState = response.data.state;
+                                console.log('Video State: ', videoState);
+                                if(videoState === 'Processed'){
+                                  let jsonBody = {
+                                    youtubeId: videoId,
+                                    'inputJson': response.data
+                                  };
+                                  clearInterval(timeId);
+                                  videoController.addVideoDataToDb(jsonBody)
+                                    .then(result => {
+                                      console.log({ success: result });
+                                          fetchAudioInsight(audioId, videoId)
+                                            .then((result)=>{
+                                              console.log(result);
+                                            })
+                                        })
+                                    .catch((e)=>{
+                                      console.log(e);
+                                    })
+                                }
+                              })
+                              .catch((error) => {
+                                    clearInterval(timeId);
+                                    console.log(error);
+                                  })
+                              }, 10000);
+                      //------------------------------------
+
                       res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
                       console.log('SUCCESS: Video uploaded to Video Indexer');
                     })
@@ -251,6 +257,57 @@ router.get('/uploadVideo', function (req, res) {
 
 });
 
+
+
+async function fetchAudioInsight(audioId, videoId){
+    return new Promise((resolve, reject) => {
+        let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
+        axios.get(url)
+        .then((response) => {
+            console.log(response.data);
+
+            //VIDEO
+            let videoInsight = [];
+            scene.getSceneData(videoId)
+              .then((data) => {
+                console.log(data);
+                for (let i = 0; i < data.length; i++) {
+                  data[i].merged = [];
+                  videoInsight.push(data[i]);
+                }
+                console.log({ videoInsight });
+
+            //AUDIO
+            let sentence = response.data.result.sentence;
+            let audioInsight =[];
+            for(let i=0; i< sentence.length; i++){
+                let start = sentence[i].startTime;
+                let end = sentence[i].endTime;
+                let data = {
+                    start,
+                    end
+                }
+                audioInsight.push(data);
+            }
+            console.log({audioInsight});
+          
+            //MERGE
+            let mergedList = merge(videoInsight, audioInsight);
+            let result = scene.addMergeSceneTable(mergedList)
+            result
+              .then(data => {
+                console.log({ success: data });
+                resolve('Success: Scene Merged');
+              })
+            })
+        .catch((error) => {
+              console.log(error);
+              reject(error);
+            })
+        });
+    })
+
+}
 
 async function convertVideoToAudio(youtubeId, videoFilePath) {
   let index1 = videoFilePath.lastIndexOf('.mp4');
