@@ -93,39 +93,54 @@ router.get('/videoState', function (req, res) {
   console.log('INSIDe GET video State');
   let videoId = req.query.id;
   let state = req.query.state;
-  let youtubeId = req.query.youtubeId;
+  console.log(req.query);
 
   if (state === 'Processed') {
-    let url = `https://api.videoindexer.ai/${location}/accounts/${accountId}/videos/${videoId}/Index/?language=en-US`;
-    console.log({ url });
-
-    axios.get(url)
-      .then((response) => {
-        // console.log(response.data);
-        let jsonBody = {
-          youtubeId,
-          'inputJson': response.data
-        };
-        videoController.addVideoDataToDb(jsonBody)
-          .then(result => {
-            res.send({ success: result });
-          });
+    videoModel.getVideoAudioByVideoId(videoId)
+      .then((data)=>{
+        console.log({data});
+        let youtubeId = data[0].youtube_id;
+        audioId = data[0].audio_id;
+        console.log({youtubeId, audioId });
+        
+        let url = `https://api.videoindexer.ai/${location}/accounts/${accountId}/videos/${videoId}/Index/?language=en-US`;
+        console.log({ url });
+        
+        axios.get(url)
+          .then((response) => {
+            // console.log(response.data);
+            let jsonBody = {
+              youtubeId,
+              'inputJson': response.data
+            };
+            videoController.addVideoDataToDb(jsonBody)
+              .then(result => {
+                res.send({ success: result });
+              });
+          })
+          .catch((error) => {
+            res.status(400).send(error);
+            console.log(error);
+          })
+      }).catch((err)=>{
+        res.send(err);
       })
-      .catch((error) => {
-        res.status(400).send(error);
-        console.log(error);
-      })
-  } else {
-    res.status(400).send('Video is not processed by Video Indexer , id:', videoId);
-    console.log('Video is not processed by Video Indexer , id:', videoId);
+  }else {
+      res.status(400).send('Video is not processed by Video Indexer , id:', videoId);
+      console.log('Video is not processed by Video Indexer , id:', videoId);
   }
+
+ 
 });
 
 
 router.get('/uploadVideo', function (req, res) {
-  console.log({ param: req.query.video });
+  console.log({ param: req.query });
   let url = req.query.video;
   let videoId = url.substr(url.indexOf('v=') + 2);
+  let  videoTitle = req.query.title;
+  console.log({ videoTitle});
+
 
   if (url) {
     let jsonPath = path.join(__dirname, '../videos/');
@@ -170,14 +185,15 @@ router.get('/uploadVideo', function (req, res) {
         .then(response => {
           let accessToken = response.data[0].accessToken;
           console.log('token->' + accessToken);
-          return uploadVideo(filePath, accessToken, videoId);           
+          return uploadVideo(filePath, accessToken, videoId, videoTitle);           
         })
         .then(() => {
-            return convertVideoToAudio(filePath);
+            return convertVideoToAudio(videoId, filePath);
         })
         .then((response) => {
           res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
           console.log('SUCCESS of Video Upload POST->' + response);
+
         })
         .catch(error => {
           res.status(400).send('FAILED: Video not uploaded to Video Indexer ');
@@ -195,12 +211,10 @@ router.get('/uploadVideo', function (req, res) {
     res.send('video url not provided');
   }
 
-  
 });
 
 
-async function convertVideoToAudio(videoFilePath) {
-
+async function convertVideoToAudio(youtubeId, videoFilePath) {
   let index1 = videoFilePath.lastIndexOf('.mp4');
   let index2 = videoFilePath.lastIndexOf('/');
   let videoId = videoFilePath.substring(index1 + 1, index2);
@@ -244,10 +258,10 @@ async function convertVideoToAudio(videoFilePath) {
               console.log(body);
               let data  = {
                 audioId,
-                videoId
+                youtubeId
               }
               console.log(data);
-              videoModel.updateAudioId({audioId, videoId})
+              videoModel.updateAudioId_VideoAudio(data)
               .then((result)=>{
                 console.log(result);
                 resolve('Audio file uploaded to SpeechToText api');
@@ -266,19 +280,16 @@ async function convertVideoToAudio(videoFilePath) {
         reject(err);
       });
   });
-  
-
-
 }
 
 
 
-async function uploadVideo(file, accessToken, youtubeId) {
+async function uploadVideo(file, accessToken, youtubeId, videoTitle) {
   console.log('inside upload video');
   console.log({ file });
   let name = youtubeId;
   let callbackUrl = `http://18.221.192.73:5001/vi/videoState?youtubeId=${youtubeId}`;
-  let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${name}&privacy=Public&callbackUrl=${callbackUrl}&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
+  let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${videoTitle}&privacy=Public&callbackUrl=${callbackUrl}&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
   let formdata = new FormData();
 
   let rs = fs.createReadStream(file);
@@ -297,9 +308,20 @@ async function uploadVideo(file, accessToken, youtubeId) {
     headers: formdata.getHeaders()
   }
   res = await axios(config);
- 
   console.log(res.data);
-  return res.data;
+  let data = {
+    youtubeId,
+    video_id: res.data.id,
+    title: videoTitle
+  }
+  videoModel.insertIntoVideoAudioTable(data)
+    .then((res)=>{
+      return res;
+    })
+    .catch((e)=>{
+      console.log(e);
+      throw e;
+    })
 
 }
 

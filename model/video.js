@@ -38,6 +38,29 @@ class Video {
         }
     }
 
+    static async insertIntoVideoAudioTable(newVid) {
+        console.log('DB Operation: Inserting into video_audio:', newVid);
+        let query = `INSERT INTO video_audio (youtube_id, video_id, video_title) VALUES ( $1, $2, $3)
+                     ON CONFLICT(youtube_id) DO UPDATE
+                     SET video_id = $2 , video_title = $3`
+        try {
+            return await db.query(query, [newVid.youtubeId, newVid.video_id, newVid.title]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async updateAudioId_VideoAudio(data) {
+        console.log('DB Operation: Updating audio_id in table video_audio');
+        try {
+             return await db.query('UPDATE video_audio set audio_id=$1 where youtube_id=$2', [data.audioId, data.youtubeId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
     static async updateAudioId(data) {
         console.log('DB Operation: Updating Audio');
         try {
@@ -63,6 +86,18 @@ class Video {
             throw e;
         }
     }
+
+
+    static async getVideoAudioByVideoId(videoId) {
+        console.log('get video data from video_audio table by video Id:', videoId);
+        try {
+            return await db.query(`select * from video_audio where video_id = $1`, [videoId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+    
 
 }
 
