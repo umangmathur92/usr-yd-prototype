@@ -83,7 +83,6 @@ router.get('/audioInsight', function(req, res, next) {
         console.log(error);
         res.status(400).send(error);
       })
-    
     }
 
 });
@@ -129,8 +128,6 @@ router.get('/videoState', function (req, res) {
       res.status(400).send('Video is not processed by Video Indexer , id:', videoId);
       console.log('Video is not processed by Video Indexer , id:', videoId);
   }
-
- 
 });
 
 
@@ -174,41 +171,72 @@ router.get('/uploadVideo', function (req, res) {
     })
     let name = '';
     video.on('end', function () {
-        console.log('Finished downloading!');
+      console.log('Finished downloading!');
 
-        let tokenUrl = `https://api.videoindexer.ai/Auth/trial/Accounts?generateAccessTokens=true&allowEdit=true`;
-        axios({
-          method: 'get',
-          url: tokenUrl,
-          headers: { 'Ocp-Apim-Subscription-Key': apiKey },
-        })
-          .then(response => {
-            let accessToken = response.data[0].accessToken;
-            console.log('token->' + accessToken);
-            uploadVideo(filePath, accessToken, videoId, videoTitle)
-              .then( (videoData) => {
-                console.log({videoData});
-                let data = {
-                  youtubeId: videoId,
-                  video_id: videoData.id,
-                  title: videoTitle
-                }
-                console.log({videoAudioData: data});
-                videoModel.insertIntoVideoAudioTable(data)
-                  .then(()=>{
-                    convertVideoToAudio(videoId, filePath)
-                      .then((audioData)=>{
-                        console.log({audioData});
-                        res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
-                        console.log('SUCCESS: Video uploaded to Video Indexer');
+      let tokenUrl = `https://api.videoindexer.ai/Auth/trial/Accounts?generateAccessTokens=true&allowEdit=true`;
+      axios({
+        method: 'get',
+        url: tokenUrl,
+        headers: { 'Ocp-Apim-Subscription-Key': apiKey },
+      })
+        .then(response => {
+          let accessToken = response.data[0].accessToken;
+          console.log('token->' + accessToken);
+          uploadVideo(filePath, accessToken, videoId, videoTitle)
+            .then((videoData) => {
+              console.log({ videoData });
+              let data = {
+                youtubeId: videoId,
+                video_id: videoData.id,
+                title: videoTitle
+              }
+              console.log({ videoAudioData: data });
+
+              let videoState = '';
+              //-----
+              let timeId = setInterval( ()=> {
+                      let url = `https://api.videoindexer.ai/${location}/accounts/${accountId}/videos/${videoData.id}/Index/?language=en-US`;
+                      console.log({ url });
+                      
+                      axios.get(url)
+                        .then((response) => {
+                          let videoState = response.data.state;
+                          console.log('Video State: ', videoState);
+                          if(videoState === 'Processed'){
+                            let jsonBody = {
+                              youtubeId: videoId,
+                              'inputJson': response.data
+                            };
+                            videoController.addVideoDataToDb(jsonBody)
+                              .then(result => {
+                                console.log({ success: result });
+                                clearInterval(timeId);
+                              })
+                          }
+                        })
+                        .catch((error) => {
+                          clearInterval(timeId);
+                          console.log(error);
+                        })
+                    }, 10000);
+
+              //-------------
+
+              videoModel.insertIntoVideoAudioTable(data)
+                .then(() => {
+                  convertVideoToAudio(videoId, filePath)
+                    .then((audioData) => {
+                      console.log({ audioData });
+                      res.status(200).send('SUCCESS: Video uploaded to Video Indexer');
+                      console.log('SUCCESS: Video uploaded to Video Indexer');
                     })
-                  })
-              })
-          })
-          .catch(error => {
-            res.status(400).send('FAILED: Video not uploaded to Video Indexer ');
-            console.log(error);
-          });
+                })
+            })
+        })
+        .catch(error => {
+          res.status(400).send('FAILED: Video not uploaded to Video Indexer ');
+          console.log(error);
+        });
     })
 
     video.on('error', function error(err) {
