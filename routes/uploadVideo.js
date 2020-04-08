@@ -424,6 +424,8 @@ function merge(videoInsight, audioInsight){
       let size = mergedList.length;
       let s1 = mergedList[size-1].start_time;
       let e1 = mergedList[size-1].end_time;
+      let description = mergedList[size-1].original_description;
+      let ocr = mergedList[size-1].original_ocr;
 
       let s2 = audioInsight[i].start;
       let e2 = audioInsight[i].end;
@@ -446,6 +448,8 @@ function merge(videoInsight, audioInsight){
           let max = Math.max(e1, next.end_time);
           sceneObj.start_time = min;
           sceneObj.end_time = max;
+          sceneObj.original_description = description + next.original_description;
+          sceneObj.original_ocr = ocr + next.original_ocr;
           // let arr = sceneObj.merged;
           // arr.push(next.scene_id);
           sceneObj.merged.push(next.scene_id);

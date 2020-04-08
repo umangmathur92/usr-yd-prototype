@@ -63,7 +63,7 @@ $(document).ready(function() {
         console.log("audio insight called");
         e.preventDefault();
         let orderid = document.getElementById('orderid').value;
-        let url = 'http://52.53.151.37:8080/v1/audioclips/getspeechtotextresult?orderid=' + orderid; 
+        let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + orderid; 
 
         $.get(url, function(response) {
             console.log(response);
