@@ -7,11 +7,20 @@ let videoModel = require('./model/video.js');
 const axios = require('axios');
 var ffmpeg = require('ffmpeg');
 let scene = require('./model/scene');
+let videoDialogue = require('./model/videoDialogue');
+
 
 class AudioVideoMerge{
+    
+   
 
-    async test(){
-        return  this.fetchAudioInsight('PFOKXT20200408065152', 'GXWpEjEFWkM')
+    async getAudioInsightAndMerge(){
+        // let data = { 'NDAUMF20200408105803': 'OkBaZLq7gnU'};
+        // data = { audioId: 'NZTJTD20200408120207', youtubeId: '7QZNpS0uos4' }
+        // data = { audioId: 'POFZRY20200408120928', youtubeId: 'elpUGB9Ap1Y' }
+        //{ audioId: 'EFUPVK20200408121751', youtubeId: '2wwC9c3iYK4' }
+
+        return  this.fetchAudioInsight('EFUPVK20200408121751', '2wwC9c3iYK4')
                     .then((result)=>{
                         console.log(result);
                     })
@@ -81,6 +90,8 @@ class AudioVideoMerge{
             let size = mergedList.length;
             let s1 = mergedList[size-1].start_time;
             let e1 = mergedList[size-1].end_time;
+            let description = mergedList[size-1].original_description;
+            let ocr = mergedList[size-1].original_ocr;
       
             let s2 = audioInsight[i].start;
             let e2 = audioInsight[i].end;
@@ -103,6 +114,9 @@ class AudioVideoMerge{
                 let max = Math.max(e1, next.end_time);
                 sceneObj.start_time = min;
                 sceneObj.end_time = max;
+                sceneObj.original_description = description + next.original_description;
+                sceneObj.original_ocr = ocr + next.original_ocr;
+
                 // let arr = sceneObj.merged;
                 // arr.push(next.scene_id);
                 sceneObj.merged.push(next.scene_id);
@@ -276,6 +290,29 @@ class AudioVideoMerge{
         }
       }
 
+      insertIntoVideoDialogue(){
+        let arr = [];
+        let data = {
+            start_time: 1.0,
+            end_time: 2.0,
+            sentence: 'test test',
+        }
+        let data1 = {
+            start_time: 2.0,
+            end_time: 3.0,
+            sentence: 'NO test',
+        }
+        arr.push(data);
+        arr.push(data1);
+            
+        videoDialogue.insertDataIntoVideoDialogue(arr, 'GXWpEjEFWkM', 'audio123')
+            .then(res=>{
+                console.log(res);
+            }).catch(e=>{
+                console.log(e);
+            })
+    }
+
 
 }
 
@@ -286,4 +323,5 @@ let audioVideoMerge = new AudioVideoMerge();
 // audioVideoMerge.parseAudioFile(oceanFile);
 // audioVideoMerge.merge(file,oceanFile);
 // audioVideoMerge.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
-audioVideoMerge.test();
+// audioVideoMerge.getAudioInsightAndMerge();
+audioVideoMerge.insertIntoVideoDialogue();

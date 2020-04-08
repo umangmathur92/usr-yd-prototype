@@ -21,6 +21,7 @@ var ffmpeg = require('ffmpeg');
 let scene = require('../model/scene');
 let videoModel = require('../model/video.js');
 const request = require('request');
+let videoDialogue = require('../model/videoDialogue');
 
 
 
@@ -265,7 +266,10 @@ async function fetchAudioInsight(audioId, videoId){
         axios.get(url)
         .then((response) => {
             console.log(response.data);
-
+            let status = response.data.status
+            if(status !== 'success'){
+              reject(`Audio not processed for audioId=${audioId}, videoId= ${videoId}`);
+            }
             //VIDEO
             let videoInsight = [];
             scene.getSceneData(videoId)
@@ -283,9 +287,12 @@ async function fetchAudioInsight(audioId, videoId){
             for(let i=0; i< sentence.length; i++){
                 let start = sentence[i].startTime;
                 let end = sentence[i].endTime;
+                let desc  = sentence[i].sentence;
+
                 let data = {
                     start,
-                    end
+                    end,
+                    sentence: desc
                 }
                 audioInsight.push(data);
             }
@@ -297,7 +304,11 @@ async function fetchAudioInsight(audioId, videoId){
             result
               .then(data => {
                 console.log({ success: data });
-                resolve('Success: Scene Merged');
+                videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId)
+                  .then(res=>{
+                    console.log(res);
+                    resolve('Success: Scene Merged');
+                  })
               })
             })
         .catch((error) => {
