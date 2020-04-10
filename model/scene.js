@@ -106,11 +106,33 @@ class Scene {
         }
     }
 
+    static async updatePythiaCaptionForAllScenes(sceneArr) {
+        console.log('DB Operation: Updating Scene table with pythia caption');
+        try {
+            let sql = '';
+            sceneArr.forEach((data) => {
+                    sql += `UPDATE scene SET pythia_caption = '${data.caption}'
+                            WHERE scene_id = '${data.sceneId}';`;
+                    
+                });
+            sql = 'START TRANSACTION;' + sql + 'COMMIT;'
+            console.log({sql});
+
+            return await db.query(sql);
+        } catch(e) {
+            throw e;
+        }
+    }
+
     //Do not use
     static async aggregateShotCaptionsIntoSceneDescription(video) {
         console.log('DB Operation: Updating Scene table by aggregating description data from Shot table');
         return db.any("UPDATE scene SET original_description = (SELECT distinct array_to_string(array_agg(shot.original_description ORDER BY shot.shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
     }
+
+
+
+
     
 }
 

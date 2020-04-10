@@ -11,7 +11,8 @@ const userStudy = require('./userStudy');
 const chatRoom = require('./chatRoom');
 const mergeScene = require('./mergeScene');
 const uploadVideoRoute  = require('./uploadVideo'); 
-const sentences = require('../backend/sentences.js')
+const sentences = require('../backend/sentences.js');
+const pythiaCaption = require('../routes/pythiaCaption');
 
 
 router.use('/userStudy',userStudy);
@@ -20,6 +21,7 @@ router.use('/sceneModification', sceneModification);
 router.use('/room', chatRoom);
 router.use('/merge', mergeScene);
 router.use('/vi', uploadVideoRoute);
+router.use('/pythia',pythiaCaption);
 
 // console.log({sceneModification: sceneModification.addModifiedScene})
 
