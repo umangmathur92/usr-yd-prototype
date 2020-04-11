@@ -288,13 +288,15 @@ async function fetchAudioInsight(audioId, videoId){
                 let start = sentence[i].startTime;
                 let end = sentence[i].endTime;
                 let desc  = sentence[i].sentence;
-
-                let data = {
+                desc = desc.replace(/'/g, '');
+                if(!desc.toLowerCase().includes('noise')){
+                  let data = {
                     start,
                     end,
                     sentence: desc
+                  }
+                  audioInsight.push(data);
                 }
-                audioInsight.push(data);
             }
             console.log({audioInsight});
           

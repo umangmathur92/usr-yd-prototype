@@ -1,26 +1,25 @@
 const fs = require('fs');
-const Utils = require('./backend/utils');
+const Utils = require('../backend/utils');
 var ffmpeg = require('ffmpeg');
-let videoModel = require('./model/video.js');
+let videoModel = require('../model/video.js');
 
 
 const axios = require('axios');
 var ffmpeg = require('ffmpeg');
-let scene = require('./model/scene');
-let videoDialogue = require('./model/videoDialogue');
+const scene = require('../model/scene');
+const videoDialogue = require('../model/videoDialogue');
+const uploadVideoRoute = require('../routes/uploadVideo');
 
 
-class AudioVideoMerge{
+class UploadVideoController{
     
-   
-
     async getAudioInsightAndMerge(){
         // let data = { 'NDAUMF20200408105803': 'OkBaZLq7gnU'};
         // data = { audioId: 'NZTJTD20200408120207', youtubeId: '7QZNpS0uos4' }
         // data = { audioId: 'POFZRY20200408120928', youtubeId: 'elpUGB9Ap1Y' }
         //{ audioId: 'EFUPVK20200408121751', youtubeId: '2wwC9c3iYK4' }
 
-        return  this.fetchAudioInsight('EFUPVK20200408121751', '2wwC9c3iYK4')
+        return  this.fetchAudioInsight('NUILEE20200411072029', '4d1OmRA6yyI')
                     .then((result)=>{
                         console.log(result);
                     })
@@ -30,13 +29,16 @@ class AudioVideoMerge{
     }
 
 
-    async fetchAudioInsight(audioId, videoId){
+    async  fetchAudioInsight(audioId, videoId){
         return new Promise((resolve, reject) => {
             let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
             axios.get(url)
             .then((response) => {
                 console.log(response.data);
-    
+                let status = response.data.status
+                if(status !== 'success'){
+                  reject(`Audio not processed for audioId=${audioId}, videoId= ${videoId}`);
+                }
                 //VIDEO
                 let videoInsight = [];
                 scene.getSceneData(videoId)
@@ -54,11 +56,16 @@ class AudioVideoMerge{
                 for(let i=0; i< sentence.length; i++){
                     let start = sentence[i].startTime;
                     let end = sentence[i].endTime;
-                    let data = {
+                    let desc  = sentence[i].sentence;
+                    desc = desc.replace(/'/g, '');
+                    if(!desc.toLowerCase().includes('noise')){
+                      let data = {
                         start,
-                        end
+                        end,
+                        sentence: desc
+                      }
+                      audioInsight.push(data);
                     }
-                    audioInsight.push(data);
                 }
                 console.log({audioInsight});
               
@@ -68,7 +75,11 @@ class AudioVideoMerge{
                 result
                   .then(data => {
                     console.log({ success: data });
-                    resolve('Success: Scene Merged');
+                    videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId)
+                      .then(res=>{
+                        console.log(res);
+                        resolve('Success: Scene Merged');
+                      })
                   })
                 })
             .catch((error) => {
@@ -79,6 +90,7 @@ class AudioVideoMerge{
         })
     
     }
+
     
 
     merge(videoInsight, audioInsight){
@@ -145,79 +157,6 @@ class AudioVideoMerge{
         return mergedList;
       }
       
-
-
-
-
-
-
-
-    // merge(videoFile, audioFile){
-    //    let videoInsight = this.parseJson(videoFile);
-    //    let audioInsight = this.parseAudioFile(audioFile);
-    //     // let videoInsight = [
-    //     //     { start: 0, end: 5 },
-    //     //     { start: 5, end: 10},
-    //     //     { start: 10, end: 15 },
-    //     //     { start: 15, end: 20 },
-    //     //     { start: 20, end: 25 },
-    //     //     { start: 25, end: 30 },
-    //     // ]
-
-    //     // let audioInsight = [
-    //     //     { start: 0, end: 1 },
-    //     //     { start: 2, end: 4},
-    //     //     { start: 5, end: 7 },
-    //     //     { start: 10, end: 12 },
-    //     //     { start: 12, end: 18 },
-
-    //     // ]
-
-    //    let videoIndex = 0;
-    //    let mergedList = [];
-    //    mergedList.push(videoInsight[videoIndex++]);
-    //    let i = 0;
-    //    while(i < audioInsight.length && videoIndex < videoInsight.length){
-    //         let size = mergedList.length;
-    //         let s1 = mergedList[size-1].start;
-    //         let e1 = mergedList[size-1].end;
-   
-    //         let s2 = audioInsight[i].start;
-    //         let e2 = audioInsight[i].end;
-
-    //         if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
-	// 			i++;
-	// 			continue;
-    //         }
-            
-    //         if(Math.min(s2, e2) >= e1) {
-	// 			mergedList.push(videoInsight[videoIndex++]);
-	// 			continue;
-	// 		}
-           
-    //         //merge condition
-    //         if(s2 >= s1 && e2 > e1) {
-	// 			let next = videoInsight[videoIndex++]; 
-	// 			let min = Math.min(s1,  next.start);
-    //             let max = Math.max(e1,next.end);
-    //             let data ={
-    //                 start : min,
-    //                 end : max
-    //             }
-    //             mergedList.splice(mergedList.length-1);
-    //             mergedList.push(data);
-	// 		}else if(s2 >= e1) {
-	// 			mergedList.push(videoInsight[videoIndex++]);
-	// 		}
-			
-	// 		i++;
-    //     }
-
-    //     for(let j = videoIndex; j<videoInsight.length; j++) {
-	// 		mergedList.push(videoInsight[j]);
-	// 	}
-    //     console.log({mergedList});
-    // }
 
     
 
@@ -290,38 +229,54 @@ class AudioVideoMerge{
         }
       }
 
-      insertIntoVideoDialogue(){
-        let arr = [];
-        let data = {
-            start_time: 1.0,
-            end_time: 2.0,
-            sentence: 'test test',
-        }
-        let data1 = {
-            start_time: 2.0,
-            end_time: 3.0,
-            sentence: 'NO test',
-        }
-        arr.push(data);
-        arr.push(data1);
-            
-        videoDialogue.insertDataIntoVideoDialogue(arr, 'GXWpEjEFWkM', 'audio123')
-            .then(res=>{
-                console.log(res);
-            }).catch(e=>{
-                console.log(e);
-            })
-    }
 
+    async insertIntoVideoDialogue1(){
+        let audioId = 'OMHPXC20200411053439';
+        let videoId = 'vBkBS4O3yvY';
+
+        try{
+
+            let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
+            let response = await axios.get(url);
+    
+              //AUDIO
+              let sentence = response.data.result.sentence;
+              let audioInsight =[];
+              for(let i=0; i< sentence.length; i++){
+                  let start = sentence[i].startTime;
+                  let end = sentence[i].endTime;
+                  let desc  = sentence[i].sentence;
+                  desc = desc.replace(/'/g, '');
+    
+                  let data = {
+                      start,
+                      end,
+                      sentence: desc
+                  }
+                  audioInsight.push(data);
+              }
+              console.log({audioInsight});
+
+              await videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId)
+              
+            console.log('inserted');
+        }catch (e){
+            console.log(e);
+        }
+       
+
+     
+
+    }
 
 }
 
 let file = 'insight.json';
 let oceanFile = 'audio_ocean8.json';
-let audioVideoMerge = new AudioVideoMerge();
-// audioVideoMerge.parseJson(file);
-// audioVideoMerge.parseAudioFile(oceanFile);
-// audioVideoMerge.merge(file,oceanFile);
-// audioVideoMerge.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
-// audioVideoMerge.getAudioInsightAndMerge();
-audioVideoMerge.insertIntoVideoDialogue();
+let controller = new UploadVideoController();
+// controller.parseJson(file);
+// controller.parseAudioFile(oceanFile);
+// controller.merge(file,oceanFile);
+// controller.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
+controller.getAudioInsightAndMerge();
+// controller.insertIntoVideoDialogue1();
