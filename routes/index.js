@@ -215,6 +215,8 @@ function addModifiedScene (data, callback) {
   // console.log({INSIDEpSOT: data});
   // console.log({descriptionId});
   let mergedSceneArr = JSON.stringify(deletedScene);
+  description = description.replace(/'/g, '');
+  ocr = ocr.replace(/'/g, '');
   console.log('MERGED SCENE ARR:', mergedSceneArr);
   const sql = `
   START TRANSACTION;
@@ -372,12 +374,15 @@ router.post('/saveAiDescription', function(req, res, next) {
     }
 
   }
-
+  let deletedSceneArr = [];
   for(let key in inputJson.scene_arr) {
-     console.log({key});
     let currScene = inputJson.scene_arr[key];
-    let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene=[]} = currScene;
-    console.log('deleted scene===>', deletedScene)
+    // console.log({currScene});
+    let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene} = currScene;
+    if(deletedScene){
+      deletedSceneArr = [...deletedSceneArr, ...deletedScene]; 
+    }
+    console.log({deletedSceneArr});
     
     resArr = [...resArr, addModifiedScene({
       scene_id,
@@ -391,24 +396,27 @@ router.post('/saveAiDescription', function(req, res, next) {
       has_ai,
       deletedScene
     })];
-    if(deletedScene.length > 0) {
-      console.log('INSIDE DELETE CALLL');
-      resArr = [...resArr, deleteMergedScenes(deletedScene, videoId, user_id)]
-    }
   }
 
+  console.log({deletedSceneArr});
 
-  Promise.all(resArr).then(() => {
-    let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
-    console.log({inputJson})
 
-    queryResult.then(result => {
-      res.send({success: true});  
-    }).catch((err) => {
-      console.log(err)
-      res.send({success: false});
-    });
-  }).catch((e) => {
+  Promise.all(resArr)
+  .then(() => {
+      if(deletedSceneArr.length > 0){
+        deleteMergedScenes(deletedSceneArr, videoId, user_id)
+        .then((response)=>{
+            let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+            console.log({inputJson})
+            queryResult.then(result => {
+              res.send({success: true});  
+            })
+        })
+      }else{
+        res.send({success: true});  
+      }
+  })
+  .catch((e) => {
     console.log(e);
     res.send({success: false});
   })
