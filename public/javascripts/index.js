@@ -314,8 +314,8 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             console.log(e.target.id);
             console.log({"Inside merge:" : sceneDetails});
             listContainer.dataset.sceneDetails = JSON.stringify(sceneDetails);
-            updateAll();
-            fetchVideoInfo(youtubeId);
+            updateAll(false);
+             fetchVideoInfo(youtubeId);
             // let currentTime = player.getCurrentTime();
             // player.seekTo(currentTime);
          
