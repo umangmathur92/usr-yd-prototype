@@ -264,6 +264,7 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             let curSceneId = e.target.id.substring(index);
             console.log({curSceneId});
             let curSceneDescElement = document.getElementById('s_d_'+ curSceneId);
+            let curSceneOCRElement = document.getElementById('s_o_'+ curSceneId);
             console.log({curSceneDescElement});
             
             //next Sibling
@@ -298,9 +299,11 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             // console.log({allSceneArr});
             console.log({nextSiblingSceneId});
             let nextSceneDescElement = document.getElementById('s_d_'+ nextSiblingSceneId);
+            let nextSceneOCRElement = document.getElementById('s_o_'+ nextSiblingSceneId);
             console.log({nextSceneDescElement});
     
             curSceneDescElement.value += '\n' + nextSceneDescElement.value;
+            curSceneOCRElement.value += '\n' + nextSceneOCRElement.value;
             // document.getElementById(curSceneDescElement+'.'+'txt-scene-description').autogrow();
             nextSibling.remove();
             //delete next scene
@@ -506,7 +509,7 @@ async function updateAll(shoudShowAlert) {
     }catch(e){
 
         console.log(e);
-        response.send(e);
+        // response.send(e);
     }
    
 }
@@ -528,27 +531,36 @@ function fetchJsonBodyForAllTextFields(userId) {
         let currSceneOcrTextId = '#s_o_' + currSceneId;
         let sceneJsonObj = {};
         sceneJsonObj.scene_id = currSceneId;
-        let csTestbox = $(currSceneDescTextId)
+        let csTestbox = $(currSceneDescTextId);
+        // if(csTestbox && csTestbox.val()){
+        //     sceneJsonObj.modified_description = csTestbox.val().trim();
+        //     sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+        //     sceneJsonObj.start_time = currScene.start_time;
+        //     sceneJsonObj.end_time = currScene.finish_time;
+        //     sceneJsonObj.has_ai = enableAi;
+        //     sceneJsonObj.deletedScene = currScene.deletedScene;
+        //     sceneArrJson.push(sceneJsonObj);
+        // }else{
+            
         if(csTestbox && csTestbox.val()){
-            // if(!csTestbox.val()){
-            //     sceneJsonObj.modified_description = "";
-            // }else{
-            //     sceneJsonObj.modified_description = csTestbox.val().trim();
-            // }
-            // if($(currSceneOcrTextId).val()){
-            //     sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-            // }else{
-            //     sceneJsonObj.modified_ocr = "";
-            // }
             sceneJsonObj.modified_description = csTestbox.val().trim();
-            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-            sceneJsonObj.start_time = currScene.start_time;
-            sceneJsonObj.end_time = currScene.finish_time;
-            sceneJsonObj.has_ai = enableAi;
-            sceneJsonObj.deletedScene = currScene.deletedScene;
-            sceneArrJson.push(sceneJsonObj);
+        }else{
+            sceneJsonObj.modified_description = '';
         }
+   
+        let ocrValue = $(currSceneOcrTextId);
+        if( ocrValue && ocrValue.val()){
+            sceneJsonObj.modified_ocr = ocrValue.val().trim();
+        }else{
+            sceneJsonObj.modified_ocr = '';
+        }
+        sceneJsonObj.start_time = currScene.start_time;
+        sceneJsonObj.end_time = currScene.finish_time;
+        sceneJsonObj.has_ai = enableAi;
+        sceneJsonObj.deletedScene = currScene.deletedScene;
+        sceneArrJson.push(sceneJsonObj);
     }
+    
 
     parentJsonBody.user_id = userId;
     parentJsonBody.scene_arr = sceneArrJson;

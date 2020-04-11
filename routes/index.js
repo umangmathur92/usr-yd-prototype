@@ -153,6 +153,8 @@ function addModifiedScene (data, callback) {
   // console.log({INSIDEpSOT: data});
   // console.log({descriptionId});
   let mergedSceneArr = JSON.stringify(deletedScene);
+  description = description.replace(/'/g, '');
+  ocr = ocr.replace(/'/g, '');
   console.log('MERGED SCENE ARR:', mergedSceneArr);
   const sql = `
   START TRANSACTION;
@@ -161,7 +163,7 @@ function addModifiedScene (data, callback) {
   ON CONFLICT(scene_id, volunteer_id) DO UPDATE SET description ='${description}' , merged_scene = '${mergedSceneArr}', end_time= ${end_time}, start_time=${start_time}, ocr='${ocr}' ;
   COMMIT;`;
 
-  console.log({sql});
+  // console.log({sql});
   return db.query(sql, callback);
 }
 
@@ -174,11 +176,6 @@ async function deleteMergedScenes(sceneArr, videoId, user_id) {
     console.log({'INSIDE DELETE': sql})
     return  db.query(sql, sceneArr); 
 }
-
-
-
-
-
 
 router.post('/updatefeedback', function(req, res, next) {
   let rating = req.body.rating;
@@ -243,7 +240,8 @@ router.post('/saveNonAiDescription', function(req, res, next) {
 
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;
-  console.log('TEST Save AI:', inputJson);
+  console.log('SAVE AI DESCRiption');
+  // console.log('TEST Save AI:', inputJson);
   let {qnaData, user_id, videoId} = inputJson;
   //saving Q&A for user study phase 3
   let resArr = [];
@@ -258,48 +256,54 @@ router.post('/saveAiDescription', function(req, res, next) {
 
   }
 
+  let deletedSceneArr = [];
   for(let key in inputJson.scene_arr) {
-     console.log({key});
-    let currScene = inputJson.scene_arr[key];
-    let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene=[]} = currScene;
-    console.log('deleted scene===>', deletedScene)
-    
-    resArr = [...resArr, addModifiedScene({
-      scene_id,
-      user: user_id,
-      scene_num: key,
-      video_id: req.body.videoId,
-      description: modified_description,
-      ocr:  modified_ocr,
-      start_time,
-      end_time,
-      has_ai,
-      deletedScene
-    })];
-    if(deletedScene.length > 0) {
-      console.log('INSIDE DELETE CALLL');
-       resArr = [...resArr, deleteMergedScenes(deletedScene, videoId, user_id)]
-    }
+   
+      let currScene = inputJson.scene_arr[key];
+      console.log({currScene});
+      let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene} = currScene;
+      if(deletedScene){
+        deletedSceneArr = [...deletedSceneArr, ...deletedScene]; 
+      }
+      
+      console.log({deletedSceneArr});
+      resArr = [...resArr, addModifiedScene({
+        scene_id,
+        user: user_id,
+        scene_num: key,
+        video_id: req.body.videoId,
+        description: modified_description,
+        ocr:  modified_ocr,
+        start_time,
+        end_time,
+        has_ai,
+        deletedScene
+      })];
   }
+  
+  console.log({deletedSceneArr});
 
 
-  Promise.all(resArr).then(() => {
-    let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
-    console.log({inputJson})
-
-    queryResult.then(result => {
-      res.send({success: true});  
-    }).catch((err) => {
-      console.log(err)
-      res.send({success: false});
-    });
-  }).catch((e) => {
+  Promise.all(resArr)
+  .then(() => {
+      if(deletedSceneArr.length > 0){
+        deleteMergedScenes(deletedSceneArr, videoId, user_id)
+        .then((response)=>{
+            let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+            console.log({inputJson})
+            queryResult.then(result => {
+              res.send({success: true});  
+            })
+        })
+      }else{
+        res.send({success: true});  
+      }
+  })
+  .catch((e) => {
     console.log(e);
     res.send({success: false});
   })
-
 });
-
 
 router.post('/texttospeech', function(req, res, next) {
   let inputJson = req.body;
