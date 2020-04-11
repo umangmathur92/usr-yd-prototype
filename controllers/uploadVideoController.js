@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Utils = require('../backend/utils');
+const db = require('../db/database');
 var ffmpeg = require('ffmpeg');
 let videoModel = require('../model/video.js');
 
@@ -269,6 +270,46 @@ class UploadVideoController{
 
     }
 
+
+    async copyFromMergeToDescription(){
+        let videoId = '6ZLCmVlQBLo';
+        let user = '464e02d0-7b90-11ea-bc55-0242ac130003';
+
+
+        try {
+            let data =  await db.query(`select * from merge_scene where video_id = $1 order by start_time`, [videoId]);
+            console.log({data});
+            let sql = '';
+            for(let i=0; i<data.length; i++){
+                let {video_id, scene_id,scene_num ,start_time,end_time, original_description, original_ocr, merged} = data[i];
+                let descriptionId = user + '_' + video_id + '_ai_' +  scene_num;
+                original_description =  original_description.replace(/'/g, '');
+                original_ocr =  original_ocr.replace(/'/g, '');
+                // console.log({descriptionId});
+                sql+= `INSERT INTO descriptions(desc_id, video_id, has_ai, volunteer_id, scene_id, scene_num, 
+                                                start_time, end_time, description, ocr, audioconflict_merge) 
+                                VALUES('${descriptionId}', '${video_id}', true,'${user}', '${scene_id}',
+                                        ${scene_num}, ${start_time}, ${end_time}, '${original_description}', 
+                                        '${original_ocr}', '${merged}') ;`
+                                        // console.log({sql});
+            }
+            console.log({sql});
+            sql = 'Start transaction;' + sql + 'commit;';
+
+            await db.query(sql);
+            console.log('success');
+
+
+
+        } catch(e) {
+            console.log({'error': e});
+           
+        }
+
+
+
+    }
+
 }
 
 let file = 'insight.json';
@@ -278,5 +319,6 @@ let controller = new UploadVideoController();
 // controller.parseAudioFile(oceanFile);
 // controller.merge(file,oceanFile);
 // controller.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
-controller.getAudioInsightAndMerge();
+// controller.getAudioInsightAndMerge();
 // controller.insertIntoVideoDialogue1();
+controller.copyFromMergeToDescription();
