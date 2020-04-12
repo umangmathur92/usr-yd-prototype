@@ -214,11 +214,11 @@ router.get('/userStudy2/users/', function (req, res) {
 
 
 function addModifiedScene (data, callback) {
-  // console.log('inside modified scene:', data);
+  console.log('inside modified scene:', data);
   let { has_ai, video_id, scene_id, user, block_id, scene_num, start_time, end_time,  description, ocr, deletedScene=[]} = data;
   let descriptionId = user + '_' + video_id + '_ai_' + scene_num;
-  // console.log({INSIDEpSOT: data});
-  // console.log({descriptionId});
+  console.log({INSIDEpSOT: data});
+  console.log({descriptionId});
   let mergedSceneArr = JSON.stringify(deletedScene);
   description = description.replace(/'/g, '');
   ocr = ocr.replace(/'/g, '');
@@ -316,10 +316,9 @@ router.post('/saveNonAiDescription', function(req, res, next) {
 
 router.post('/saveModifiedDescription', function(req, res, next) {
   let inputJson = req.body;
-  console.log('inside saveModifiedDescription');
-  // console.log('inside saveModifiedDescription:', inputJson);
+  // console.log('inside saveModifiedDescription');
+  console.log('inside saveModifiedDescription:', inputJson);
   
-
   let {qnaData, user_id, videoId} = inputJson;
   //saving Q&A for user study phase 3
   let resArr = [];
@@ -374,12 +373,12 @@ router.post('/saveModifiedDescription', function(req, res, next) {
             })
         })
       }else{
-        res.send({success: true});  
+        res.status(200).send('Data saved succefully');  
       }
   })
   .catch((e) => {
     console.log(e);
-    res.send({success: false});
+    res.status(400).send(e);
   })
 });
 
