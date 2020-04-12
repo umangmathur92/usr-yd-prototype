@@ -60,6 +60,22 @@ router.get('/getAllVideos', function(req, res, next) {
   });
 });
 
+router.get('/getDialogTimeStampsFromDb', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+  console.log('Dialog TS:',req);
+  let {videoId} = req.query;
+  console.log("The vals are: "+videoId);
+  let queryResult = video.fetchDialogTimeStampsFromDb(videoId);
+  queryResult.then(result => {
+    console.log("The vals are: "+videoId);
+    if(result.length > 0)
+       res.send(result);
+    else
+      res.send("Invalid video ID");
+    });
+});
+
+
 router.get('/getDialogTimeStamps', function(req, res, next) {
   //let query = video.fetchKeyFrames();
   console.log('Dialog TS:',req);
@@ -448,8 +464,30 @@ router.get('/generateSentencesFromDescriptions', function(req, res, next) {
   });
 });
 
+router.get('/generateSentencesFromDescriptionsWithInfo', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id,vol_id} = inputJson;
+  console.log('GET params: ',vid_id,' and: ',vol_id);
+  let task = sentences.generateSentencesForDescriptionsInDbWithInfo(vid_id,vol_id);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
 router.get('/generateMp3ForAllSentences', function(req, res, next) {
   let task = sentences.generateMp3ForAllSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateMp3ForSentencesWithInfo', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id,vol_id} = inputJson;
+  console.log('GET params: ',vid_id,' and: ',vol_id);
+  let task = sentences.generateMp3ForSentencesInDbWithInfo(vid_id,vol_id);
   task.then(result => {
     res.send({success: result});
   });

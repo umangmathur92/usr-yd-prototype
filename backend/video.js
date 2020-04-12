@@ -63,6 +63,12 @@ async function fetchDialogTimeStamps(videoId) {
     // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
 }
 
+async function fetchDialogTimeStampsFromDb(videoId) {
+    console.log("Fetching dialogs");
+    return await db.any(`SELECT start_time, end_time FROM video_dialogs WHERE video_id = '${videoId}' ORDER BY start_time`);
+    // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
+}
+
 async function fetchVideoData(videoId, userId) {
 
     try {
@@ -602,6 +608,7 @@ module.exports = {
     addVideoDataToDb: addVideoDataToDb,
     clearDb: clearDb,
     fetchDialogTimeStamps: fetchDialogTimeStamps,
+    fetchDialogTimeStampsFromDb: fetchDialogTimeStampsFromDb,
     fetchSentences: fetchSentences,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,

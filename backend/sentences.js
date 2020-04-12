@@ -83,10 +83,93 @@ async function generateMp3ForAllSentencesInDb() {
     }
 }
 
+async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
+
+    try{
+        let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by scene_num, sentence_id`);
+
+        for(let i=0; i<sentenceListArr.length; i++) {
+
+            let currSentence = sentenceListArr[i];
+            let currDescriptionId = currSentence.desc_id;
+            let currVideoId = currSentence.video_id;
+            let currSceneId = currSentence.scene_id;
+            let currScene_start_time = currSentence.start_time;
+            let currScene_end_time = currSentence.end_time;
+            let volunteerId = currSentence.volunteer_id;
+            let hasAi = currSentence.has_ai;
+            let descriptionText = currSentence.description;
+            let ocrText = currSentence.ocr;
+            let sceneNum = currSentence.scene_num;
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            let finalText = descriptionText + ocrText;
+            let descType = hasAi ? 'ai' : 'non_ai';
+            let sent = currSentence.sentence;
+            let str = currSentence.sentence_id;
+            let newstr = str.split('_');
+            let sentNum = newstr[newstr.length - 1]; 
+            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+            let relativePath = fileNamePath.replace('public', '..');
+
+            await generateMp3ForTextInFileystem(fileNamePath, sent);
+            let duration = await getAudioDurationInSeconds(fileNamePath);
+            console.log(duration);
+            await updateSentencesDescriptionTable(duration, currVideoId, volunteerId, hasAi, sceneNum, relativePath, str);
+        }
+        return true;
+
+    } catch(error){
+        console.log(error);
+        return false;
+    }
+}
 
 async function generateSentencesForAllDescriptionsInDb() {
     try {
         let descriptionListArr = await db.any('SELECT * FROM descriptions order by id');
+        for(let i=0; i<descriptionListArr.length; i++) {
+            let currDescription = descriptionListArr[i];
+            let currDescriptionId = currDescription.desc_id;
+            let currVideoId = currDescription.video_id;
+            let currSceneId = currDescription.scene_id;
+            let currScene_start_time = currDescription.start_time;
+            let currScene_end_time = currDescription.end_time;
+            let volunteerId = currDescription.volunteer_id;
+            let hasAi = currDescription.has_ai;
+            let descriptionText = currDescription.description;
+            let ocrText = currDescription.ocr;
+            let sceneNum = currDescription.scene_num;
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            let finalText = descriptionText + ocrText;
+            let descType = hasAi ? 'ai' : 'non_ai';
+            // let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}.mp3`;
+            // let relativePath = fileNamePath.replace('public', '..');
+            sentences = finalText.replace(/([.?!])\s*(?=[A-Za-z])/g, "$1|").split("|")
+            let sentence_id_key = 0;
+
+            for(s of sentences)
+            {
+                let sentence_id = currDescriptionId + '_' + sentence_id_key;
+                await insertDescriptionSentencesTable(currDescriptionId,currVideoId,currSceneId,
+                                                        currScene_start_time,currScene_end_time,volunteerId,hasAi,descriptionText,ocrText,
+                                                        sceneNum,finalText,sentence_id,s);
+                sentence_id_key += 1;
+            }
+            // await generateMp3ForTextInFileystem(fileNamePath, finalText);
+            // let duration = await getAudioDurationInSeconds(fileNamePath);
+            // console.log(duration);
+            // await updateDescriptionTable(duration, currVideoId, volunteerId, hasAi, sceneNum, relativePath);
+        }
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
+    try {
+        let descriptionListArr = await db.any(`SELECT * FROM descriptions WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}'order by id`);
         for(let i=0; i<descriptionListArr.length; i++) {
             let currDescription = descriptionListArr[i];
             let currDescriptionId = currDescription.desc_id;
@@ -466,7 +549,8 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
                     }
                         // dialog end time is next scene (?)
                     else{
-                        time_gap = currDialogStartTimes[index] - Math.max(currDialogEndTimes[index-1],scene_start_time[i]);
+                        //time_gap = currDialogStartTimes[index] - Math.max(currDialogEndTimes[index-1],scene_start_time[i]);
+                        time_gap = 0.01;
                         time_end = currDialogStartTimes[index];
                         time_start = time_end - sentence_duration[i];
                         break;
@@ -701,9 +785,11 @@ async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneN
 module.exports = {
     generateMp3ForText: generateMp3ForText,
     generateMp3ForAllSentencesInDb: generateMp3ForAllSentencesInDb,
+    generateMp3ForSentencesInDbWithInfo: generateMp3ForSentencesInDbWithInfo,
     generateTimestampsforSentencesInDb: generateTimestampsforSentencesInDb,
     generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo,
     // generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb,
     generateSentencesForAllDescriptionsInDb: generateSentencesForAllDescriptionsInDb,
+    generateSentencesForDescriptionsInDbWithInfo: generateSentencesForDescriptionsInDbWithInfo,
     mergeSentenceAudios: mergeSentenceAudios
 }
