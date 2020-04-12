@@ -12,35 +12,6 @@ let enableAi = false;
 let autoPauseAtEachScene = true;
 let timeElapsedOnPage = 0;
 let isTimerPaused = false;
-let allSceneArr = [];
-let allBlockArr = [];
-let audioArr = [];
-let allDialogArraySTartTimes = [];
-let allDialogArrayEndTimes = [];
-
-let allSentenceStartTimes = [];
-let allSentenceEndTimes = [];
-let isSceneExtended = []; // Required to check if a scene has to be auto-paused to play the extended audio
-let allSentenceAudioType = [];
-let allSentenceSceneNum = [];
-let scene_audio_extend_set = new Set();
-let sentenceAudioMap = {};
-let allSentenceInlineStartTimeArr = [];
-let allSentenceInlineDurArr = [];
-let allSentenceInlineArr = [];
-
-let currAudio = null;
-let currAudioTime;
-let wasCurrAudioPaused = false;
-let STATE = 0;
-let YT_STATE = 0;
-let STATE_TIME = -1;
-let STATE_CHANGE = 0;
-let YT_FLAG = false;
-let YT_FLAG_Dial = false;
-let YT_FLAG_EXT = false;
-let first_extend_flag = true;
-let desc_flag = false;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
@@ -99,30 +70,14 @@ function fetchVideoInfo(youtubeId) {
         let vidTitle = vidJson.title;
         let vidLength = vidJson.duration;
         let blocksJsonArr = vidJson.info;
-        
         overrideData = vidJson.overrideData || [];
         overrideData = overrideData.map( (over) => {
             let { deletedScene='[]', ...rest } = over
             return {
                 deletedScene: JSON.parse(deletedScene),
                 ...rest,
-            }           
+            }
         })
-        
-        populateAllSceneArrAndAllBlockArr(blocksJsonArr);
-            sceneIdToListPositionMap = populateSceneIdToListPosition(blocksJsonArr);
-            console.log(sceneIdToListPositionMap);
-            // for (var [key, value] of sceneIdToListPositionMap) {
-            //     let sceneId = key;
-            //     let sceneNum = sceneId.split('_')[2]-1;
-            //     let randomNum = Math.random();
-            //     let descType = enableAi ? 'ai' : 'non_ai';
-            //     let src = `../audio/${youtubeId}/${descType}/${userId}/${sceneNum}.mp3` + '?random='+randomNum;
-            //     // console.log(src);
-            //     let audioFile = new Audio(src);
-            //     audioArr.push(audioFile);
-            // }
-
         $('#txtVidtitle').html(vidTitle);
      
         //setting the data attribute for list-container\
@@ -145,87 +100,6 @@ function fetchVideoInfo(youtubeId) {
             renderQnaList(response.qnaList);
         }
     });
-
-    let target_url = '/getDialogTimeStamps' + '?videoId=' + youtubeId;
-        $.get(target_url, function (response) {
-            // KeyFramesArr = response;
-            // debugger;
-            console.log('Dialog timestamps'+response[0]);
-            for(val of response)
-            {
-                allDialogArraySTartTimes.push(val['start_time']);
-                allDialogArrayEndTimes.push(val['end_time']);
-            // debugger;    
-        }});
-        console.log('Times',allDialogArraySTartTimes);
-
-        let target_url_sentence = '/getSentences' + '?videoId=' + youtubeId + '&userId=' + userId;
-        $.get(target_url_sentence, function (response) {
-            // KeyFramesArr = response;
-            // debugger;
-            console.log('sentence start times'+response[0]);
-            allSentenceArr = response;
-            for(val of response)
-            {
-                allSentenceStartTimes.push(val['audio_start_time']);
-                // allSentenceEndTimes.push(val['audio_end_time']);
-                allSentenceAudioType.push(val['audio_type']);
-                allSentenceSceneNum.push(val['scene_num']);
-                
-                // let sceneId = val['scene_id'];
-                let sceneNum = val['scene_num'];
-                let randomNum = Math.random();
-                // let descType = val['has_ai'] ? 'ai' : 'non_ai';
-                let descType = 'ai';
-                // let sentNumArr = val['sentence_id'].split('_');
-                // let sentNum = sentNumArr[sentNumArr.length - 1];
-                let audioType = val['audio_type'];
-                let path = val['audio_path'].split('/');
-                let path_ext = path[path.length - 1];
-                let src = `../audio/${youtubeId}/${descType}/${userId}/${sceneNum}/new/${path_ext}` + '?random='+randomNum;
-                // let src = path ;
-                console.log(typeof(src));
-                let audioFile = new Audio(src);
-                // audioArr.push(audioFile);
-             
-                if(!scene_audio_extend_set.has(val['scene_num']) && val['audio_type'] == 'extended')
-                    {scene_audio_extend_set.add(val['scene_num']);
-                    //create audio object
-                    sentenceAudioMap[val['scene_num']] = [audioFile];
-                }
-
-                else if(val['audio_type'] == 'extended'){
-                    // create audio object
-                    sentenceAudioMap[val['scene_num']].push(audioFile);
-                }
-                else if(val['audio_type'] == 'inline'){
-                    
-                    allSentenceInlineStartTimeArr.push(val['audio_start_time']);
-                    allSentenceInlineDurArr.push(val['audio_length']);
-                    allSentenceInlineArr.push(audioFile);
-                }
-
-                    // debugger;    
-        }
-            let j = 0, num=0;
-            let presentScene = allSentenceArr[0]['scene_num'];
-            let flag = true;
-            for(val of allSentenceArr){
-
-                if (val['scene_num'] != presentScene){
-                    if(flag)
-                    isSceneExtended.push(false);
-                    flag = true;    
-                }
-
-                if(flag && val['audio_type'] == 'extended')
-                {   isSceneExtended.push(true);    
-                    flag = false    
-                }
-                }
-    });
-        console.log('Times',allDialogArraySTartTimes);
-
 }
 
 function initializeDescriptionsUI() {
@@ -245,7 +119,7 @@ function initializeDescriptionsUI() {
 
 
 function renderScenes(currScene, scene_num) {
-    // console.log({currScene})
+    console.log({currScene})
     let sceneId = currScene.sc_id;
     let sceneNum = currScene.sc_num;
     let scStartTime = currScene.start_time;
@@ -390,6 +264,7 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             let curSceneId = e.target.id.substring(index);
             console.log({curSceneId});
             let curSceneDescElement = document.getElementById('s_d_'+ curSceneId);
+            let curSceneOCRElement = document.getElementById('s_o_'+ curSceneId);
             console.log({curSceneDescElement});
             
             //next Sibling
@@ -414,17 +289,21 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
 
             console.log({ nextSceneData,  currSceneData})
 
-            let newStartTime = currSceneData.start_time;
-            let newEndTime = nextSceneData.finish_time;
+            let newStartTime = Math.min(currSceneData.start_time, nextSceneData.start_time);
+            let newEndTime = Math.max(currSceneData.finish_time, nextSceneData.finish_time);
             currSceneData.finish_time = newEndTime;
+            currSceneData.start_time = newStartTime;
+            console.log('New time', newStartTime, '->', newEndTime);
 
             document.getElementById(`time:${curSceneId}`).innerHTML = `${millisToMinutesAndSeconds(newStartTime)} to ${millisToMinutesAndSeconds(newEndTime)} minutes`
             // console.log({allSceneArr});
             console.log({nextSiblingSceneId});
             let nextSceneDescElement = document.getElementById('s_d_'+ nextSiblingSceneId);
+            let nextSceneOCRElement = document.getElementById('s_o_'+ nextSiblingSceneId);
             console.log({nextSceneDescElement});
     
             curSceneDescElement.value += '\n' + nextSceneDescElement.value;
+            curSceneOCRElement.value += '\n' + nextSceneOCRElement.value;
             // document.getElementById(curSceneDescElement+'.'+'txt-scene-description').autogrow();
             nextSibling.remove();
             //delete next scene
@@ -435,10 +314,12 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             console.log(e.target.id);
             console.log({"Inside merge:" : sceneDetails});
             listContainer.dataset.sceneDetails = JSON.stringify(sceneDetails);
-            updateAll();
-            fetchVideoInfo(youtubeId);
+            updateAll(false);
+            // window.location.reload();
+              fetchVideoInfo(youtubeId);
             // let currentTime = player.getCurrentTime();
             // player.seekTo(currentTime);
+         
         }
 
     }
@@ -458,7 +339,7 @@ function scrollToPosition(position) {
         $('#ul-scene-list>.newscene-list:eq(0)').position().top 
     }, 'slow');
     let newSceneList = document.querySelectorAll('.newscene-list');
-    
+
     newSceneList.forEach(sceneItem => {
         sceneItem.firstChild.classList.remove('highlight');
     })
@@ -497,321 +378,50 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// function msleep(n){
-//     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
-//     // Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
-// }
-
-async function onPlayerReady(event) {
-    player.setVolume(75);
+function onPlayerReady(event) {
     $('#total_time').text(formatTime(player.getDuration()));
-    // timeupdater = setInterval(updateTime, 100);
-    await new Promise(r => setTimeout(r, 500));  
-    updateTime();
-    // console.log("player state");
+    timeupdater = setInterval(updateTime, 100);
 }
 
-async function updateTime() {
-    while(true){
-        if(desc_flag){
+function updateTime() {
     var oldTime = videotime;
-     if(player && player.getCurrentTime) {
+    if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
-        // console.log("No state change");
     }
-
-    if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
-        console.log("Forward");
-        STATE = 0;
-        await updateProgress(videotime); // S1 Different func
+    if(videotime !== oldTime) {
+        onProgress(videotime);
     }
-
-    else if(oldTime - videotime > 0.3) {
-        console.log("Rewind");
-        STATE = 0;
-        await updateProgress(videotime); //  S1 Different func
-    }
-    
-    else if(YT_FLAG)
-            YT_FLAG = false;
-    else if(videotime !== oldTime) {
-        console.log("Playing: oldtime: "+oldTime+" videotime: "+videotime+" State time: "+ STATE_TIME); // S2 Different func
-        if(STATE==0){
-            // currAudio.play();
-            await onProgress(videotime);
-        }
-        else if(STATE == 1)
-            {
-                if(YT_FLAG_EXT)
-                {YT_FLAG_EXT=false; continue;}
-
-                pauseVideo();
-                YT.currentTime = STATE_TIME;
-                YT_FLAG = true;
-                console.log("Extended fault");
-                if(currAudio && currAudio!==null)
-                    currAudio.pause();
-                    console.log("Current Audio is paused: 0"+STATE_TIME);
-                STATE = 2;
-            }
-        else if(STATE == 2)
-        {
-            pauseVideo();
-            YT.currentTime = STATE_TIME;
-            YT_FLAG = true;
-            videotime = player.getCurrentTime();
-            if(currAudio && currAudio!==null)
-                currAudio.play();
-                STATE = 1;
-        }
-    }
-    else {
-        // console.log("Paused");  // modify currAudio.onended func
-
-    if(STATE == 0 && currAudio && currAudio!==null && isPlaying(currAudio))
-        currAudio.pause();
-}
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
-    console.log("Time event");
-    // msleep(100);
-}  
-    await new Promise(r => setTimeout(r, 100));    
-}
-    
 }
 
 // when the time changes, this will be called.
-
-async function updateProgress(currentTime){
-    currentTime = currentTime.toFixed(3);
-    let currScene = getSceneFromTime(currentTime, allSceneArr);
-    // let sceneId = currScene.sc_id;
-    // console.log("The scene id : " + sceneId);
-    let sceneNum = currScene.sc_num;
-    // let sceneStartTime = currScene.start_time;
-    // let sceneEndTime = currScene.finish_time;
-    // YT_FLAG_Dial = false;
-    prevSceneNum = sceneNum;
-    // let currAudTime = currentTime - sceneStartTime;
-    // if(currAudio !== null && isPlaying(currAudio))
-    //     {currAudio.pause(); currAudio.currentTime = 0;}
-    // currAudio = audioArr[sceneNum];
-
-    // if(currAudio.duration > currAudTime){
-    // currAudio.currentTime = currAudTime;
-
-    // if(player.getPlayerState() == YT.PlayerState.PAUSED)
-    //         currAudio.pause();
-    // else
-    //         currAudio.play(); // May have to check YT_STATE
-    //         currAudio.onended = function() {
-    //             console.log("This curr Audio ended");
-    //             if(player.getPlayerState() == YT.PlayerState.PAUSED) {                
-    //                 STATE = 0;
-    //                 playVideo();
-    //             }
-    //             currAudio = null;
-    //         }
-    // }
-    // else
-    //     currAudio = null;
-    if (currAudio !== null && isPlaying(currAudio))
-        currAudio.pause(); 
-        currAudio = null;
-        player.setVolume(75);
-}
-
-async function onProgress(currentTime) {
-    // debugger;
+function onProgress(currentTime) {
     currentTime = currentTime.toFixed(3);
     let currScene = getSceneFromTime(currentTime);
     let sceneId = currScene.sc_id;
-    // console.log("The scene id : " + sceneId);
     let sceneNum = currScene.sc_num;
     let sceneEndTime = currScene.finish_time;
-    
-    if(prevSceneNum == -1 && first_extend_flag)
-    {first_extend_flag = false;}
-
-    else if(sceneNum != prevSceneNum) {   
-        if(scene_audio_extend_set.has(sceneNum)) {
-            STATE = 1;
-            pauseVideo();
-            let totalAudios = sentenceAudioMap[sceneNum];
-            let flag = true;
-            let i=0;
-            YT_FLAG = true;
-                if(flag && currAudio==null)
-                {currAudio = sentenceAudioMap[sceneNum][0];
-                    console.log("Will play now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                player.setVolume(15);
-                currAudio.play();
-                currAudio.onended = function() {
-                            console.log('player state is: ' + player.getPlayerState());
-                    if(player.getPlayerState() == YT.PlayerState.PAUSED) {
-                        console.log('I was called');
-                        STATE = 0;
-                        STATE_TIME = -1;
-                        currAudio = null;
-                        player.setVolume(75);
-                        playVideo();
-                    }}
-            // while(i<totalAudios.length)
-            // {
-            //     if(flag && currAudio==null)
-            //     {currAudio = audioArr[sceneNum];
-            //     currAudio.play();
-            
-            //     currAudio.onended = function() {
-            //         console.log('player state is: ' + player.getPlayerState());
-            //         if(player.getPlayerState() == YT.PlayerState.PAUSED) {
-            //             console.log('I was called');
-            //             STATE = 0;
-            //             STATE_TIME = -1;
-            //             currAudio = null;
-            //             i++;
-            //             if(i==totalAudios.length)
-            //                 flag = false;
-            //         }}
-            //     }
-            //     else if(!flag) break;
-            //     else await new Promise(r => setTimeout(r, 100));    
-
-            // }
-
-            prevSceneNum = sceneNum;
-
-            
-            // YT_FLAG_EXT = true;
-            STATE = 1;
-            STATE_CHANGE = 1;
-            console.log("STATE: EXTENDED");
-            
-            STATE_TIME = player.getCurrentTime();
-            // debugger;
-            // prevSceneNum = sceneNum-1;
-        } 
-            prevSceneNum = sceneNum;
-        }
-        prevSceneNum = sceneNum;
+    if(prevSceneNum != sceneNum) {
+        let listContainer = document.querySelector('.list-container');
+        let sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
+        let sceneIdToListPositionMap = populateSceneIdToListPositionMap(sceneDetails);
+        let listPosition = sceneIdToListPositionMap.get(sceneId);
+        console.log({sceneIdToListPositionMap, listPosition});
+        scrollToPosition(listPosition);
     }
-    
-    else if(currAudio !== null && !isPlaying(currAudio))
-        currAudio.play();
-        // logic for inline
-    else{ 
-
-        let res = isInlineAudio(currentTime);
-        let index = res[1];
-        if(res[0] && currAudio == null && index >= 0)
-    {
-        currAudio = allSentenceInlineArr[index];
-        let diff = res[2];
-        currAudio.currentTime = diff;
-        player.setVolume(15);
-        currAudio.play();
-        currAudio.onended = function(){
-            currAudio = null;
-            console.log('Test1: ', index);
-            player.setVolume(75);
-        }
+    prevSceneNum = sceneNum;
+    if(timeAtWhichLastPaused > currentTime) {
+        timeAtWhichLastPaused = currentTime;
     }
+    if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
+        pauseVideo();
+        timeAtWhichLastPaused = currentTime;
     }
-    // else{
-    //     // YT_FLAG_Dial = false;
-    //     if(currAudio!==null && !isPlaying(currAudio) && !YT_FLAG_Dial)
-    //     currAudio.play();
-    // }
+    let sceneElementId = '#sc_cont_' + sceneId;
+    // $(previouslyHighlightedContainerId).removeClass('highlight');
+    $(sceneElementId).addClass('highlight');
+    previouslyHighlightedContainerId = sceneElementId;
 }
-/********************************************* */
-// function updateTime() {
-//     var oldTime = videotime;
-//     if(player && player.getCurrentTime) {
-//         videotime = player.getCurrentTime();
-//     }
-//     if(videotime !== oldTime) {
-//         onProgress(videotime);
-//     }
-//     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
-// }
-
-// when the time changes, this will be called.
-// function onProgress(currentTime) {
-//     currentTime = currentTime.toFixed(3);
-//     let currScene = getSceneFromTime(currentTime);
-//     let sceneId = currScene.sc_id;
-//     let sceneNum = currScene.sc_num;
-//     let sceneEndTime = currScene.finish_time;
-//     if(prevSceneNum != sceneNum) {
-//         let listContainer = document.querySelector('.list-container');
-//         let sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
-//         let = sceneIdToListPositionMap = populateSceneIdToListPositionMap(sceneDetails);
-//         let listPosition = sceneIdToListPositionMap.get(sceneId);
-//         console.log({sceneIdToListPositionMap, listPosition});
-//         scrollToPosition(listPosition);
-//     }
-//     prevSceneNum = sceneNum;
-//     if(timeAtWhichLastPaused > currentTime) {
-//         timeAtWhichLastPaused = currentTime;
-//     }
-//     if(sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
-//         pauseVideo();
-//         timeAtWhichLastPaused = currentTime;
-//     }
-//     let sceneElementId = '#sc_cont_' + sceneId;
-//     // $(previouslyHighlightedContainerId).removeClass('highlight');
-//     $(sceneElementId).addClass('highlight');
-//     previouslyHighlightedContainerId = sceneElementId;
-// }
-
-// function onProgress(currentTime) {
-//     let descType = enableAi ? 'ai' : 'non_ai';
-//     let randomNum = Math.random();
-//     let src = `../audio/${youtubeId}/${descType}/${userId}/1.mp3` + '?random='+randomNum;
-//     console.log('src: '+src);
-//     currentTime = currentTime.toFixed(3);
-//     let currScene = getSceneFromTime(currentTime);
-//     let sceneId = currScene.sc_id;
-//     let sceneNum = currScene.sc_num -1;
-//     let sceneEndTime = currScene.finish_time;
-//     if(prevSceneNum != sceneNum) {
-//         if((currAudio !== null) && (sceneNum !==0) && (isPlaying(currAudio))) {
-//             pauseVideo();
-//             prevSceneNum = sceneNum-1;
-//         } else {
-//             let listPosition = sceneIdToListPositionMap.get(sceneId);
-//             scrollToPosition(listPosition);
-
-//             currAudio = audioArr[sceneNum];
-//             currAudio.play();
-//             currAudio.onended = function() {
-//                 console.log('player state is: ' + player.getPlayerState());
-//                 if(player.getPlayerState() == YT.PlayerState.PAUSED) {
-//                     console.log('I was called');
-//                     playVideo();
-//                 } else {
-//                     prevSceneNum = sceneNum;
-//                 }
-//             };
-//             prevSceneNum = sceneNum;
-//         }
-//     }
-//     //prevSceneNum = sceneNum;
-//     if(timeAtWhichLastPaused > currentTime) {
-//         timeAtWhichLastPaused = currentTime;
-//     }
-//     if((currAudio !== null) && (sceneNum !==0) && (isPlaying(currAudio)) && sceneEndTime - currentTime < 0.1 && currentTime - timeAtWhichLastPaused > 0.5 && autoPauseAtEachScene) {
-//         pauseVideo();
-//         timeAtWhichLastPaused = currentTime;
-//         //if(sceneToBlockMap.has(sceneId)) {//Check if it's the last scene of the current block
-//         // let blockId = sceneToBlockMap.get(sceneId);
-//         // let blockElementId = '#bl_cont_' + blockId;
-//     }
-//     let sceneElementId = '#sc_cont_' + sceneId;
-//     $(previouslyHighlightedContainerId).removeClass('highlight');
-//     $(sceneElementId).addClass('highlight');
-//     previouslyHighlightedContainerId = sceneElementId;
-// }
 
 function onPlayerStateChange(event) {
     let playerState = event.data;
@@ -828,7 +438,7 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
-        case YT.PlayerState.CUED:
+        case YT.PlayerState.CUED:n
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log('i was called: cued state')
@@ -841,7 +451,6 @@ function playVideo() {
 }
 
 function pauseVideo() {
-    console.log("This is the file");
     player.pauseVideo();
 }
 
@@ -901,7 +510,7 @@ async function updateAll(shoudShowAlert) {
     }catch(e){
 
         console.log(e);
-        response.send(e);
+        // response.send(e);
     }
    
 }
@@ -923,17 +532,36 @@ function fetchJsonBodyForAllTextFields(userId) {
         let currSceneOcrTextId = '#s_o_' + currSceneId;
         let sceneJsonObj = {};
         sceneJsonObj.scene_id = currSceneId;
-        let csTestbox = $(currSceneDescTextId)
+        let csTestbox = $(currSceneDescTextId);
+        // if(csTestbox && csTestbox.val()){
+        //     sceneJsonObj.modified_description = csTestbox.val().trim();
+        //     sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+        //     sceneJsonObj.start_time = currScene.start_time;
+        //     sceneJsonObj.end_time = currScene.finish_time;
+        //     sceneJsonObj.has_ai = enableAi;
+        //     sceneJsonObj.deletedScene = currScene.deletedScene;
+        //     sceneArrJson.push(sceneJsonObj);
+        // }else{
+            
         if(csTestbox && csTestbox.val()){
             sceneJsonObj.modified_description = csTestbox.val().trim();
-            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-            sceneJsonObj.start_time = currScene.start_time;
-            sceneJsonObj.end_time = currScene.finish_time;
-            sceneJsonObj.has_ai = enableAi;
-            sceneJsonObj.deletedScene = currScene.deletedScene;
-            sceneArrJson.push(sceneJsonObj);
+        }else{
+            sceneJsonObj.modified_description = '';
         }
+   
+        let ocrValue = $(currSceneOcrTextId);
+        if( ocrValue && ocrValue.val()){
+            sceneJsonObj.modified_ocr = ocrValue.val().trim();
+        }else{
+            sceneJsonObj.modified_ocr = '';
+        }
+        sceneJsonObj.start_time = currScene.start_time;
+        sceneJsonObj.end_time = currScene.finish_time;
+        sceneJsonObj.has_ai = enableAi;
+        sceneJsonObj.deletedScene = currScene.deletedScene;
+        sceneArrJson.push(sceneJsonObj);
     }
+    
 
     parentJsonBody.user_id = userId;
     parentJsonBody.scene_arr = sceneArrJson;
@@ -997,34 +625,12 @@ function populateSceneIdToListPositionMap(sceneDetailsArr) {
     return sceneListPositionMap;
 }
 
-function populateSceneIdToListPosition(blocksJsonArr) {
-    let listPositionIndex = 0;
-    let sceneListPositionMap = new Map();
-    for(let i=0; i<blocksJsonArr.length; i++) {
-        listPositionIndex++;
-        let currBlock = blocksJsonArr[i];
-        let currBlockId = currBlock.block_id;
-        let childSceneArr = currBlock.child_scenes;
-        for(let j=0; j<childSceneArr.length; j++) {
-            listPositionIndex++;
-            let currSceneId = childSceneArr[j].sc_id;
-            sceneListPositionMap.set(currSceneId, listPositionIndex);//sceneToBlockMap
-            if(j == childSceneArr.length-1) {
-                sceneToBlockMap.set(currSceneId, currBlockId);
-            }
-        }
-        listPositionIndex++;
-    }
-    desc_flag = true;
-    return sceneListPositionMap;
-}
 
 
 function getSceneFromTime(currentTime) {
     let listContainer = document.querySelector('.list-container');
-    console.log('This: '+listContainer.dataset);
     sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
-    
+
     let startTimesArr = [];
     for(let i=0; i< sceneDetails.length; i++) {
         let startTime = parseFloat(sceneDetails[i].start_time);
@@ -1032,34 +638,6 @@ function getSceneFromTime(currentTime) {
     }
     let sceneIndex = getIndexOfInputArrForTargetVal(currentTime, startTimesArr);
     return sceneDetails[sceneIndex];
-}
-
-function getSceneFromTime2(currentTime, sceneArr) {
-    let startTimesArr = [];
-    for(let i=0; i<sceneArr.length; i++) {
-        let startTime = parseFloat(sceneArr[i].start_time);
-        startTimesArr.push(startTime);
-    }
-    let sceneIndex = getIndexOfInputArrForTargetVal(currentTime, startTimesArr);
-    return sceneArr[sceneIndex];
-}
-// Convert to Binary search
-function getDialogFromTime(currentTime) {
-    
-    let index=allDialogArraySTartTimes.length-1;
-    for(let i=0; i< allDialogArraySTartTimes.length; i++) {
-        if(Number(currentTime) < allDialogArraySTartTimes[i])
-        {   index = i-1;
-            console.log("**************************************       "+i);
-            break;}
-    }
-        // console.log("Dialog times: i: "+i+" currentTime: "+currentTime);
-        console.log("cTime: "+typeof(currentTime)+" typeof Dialog: "+typeof(allDialogArraySTartTimes[4]) +"  i: "+index);
-        if(Number(currentTime) < allDialogArrayEndTimes[index])
-            {   console.log("##########################################################");
-                return true;}
-        else
-            return false;
 }
 
 //Returns index of array item whose value is equal-to or lesser-than(also nearest-in-value) the target (binary search algorithm)
@@ -1080,30 +658,6 @@ function getIndexOfInputArrForTargetVal(target, inputArr) {
         }
     }
     return index;
-}
-
-function isInlineAudio(target) {
-    let inputArr = allSentenceInlineStartTimeArr;
-    let start = 0;
-    let end = inputArr.length - 1;
-    let index = -1;
-    while(start <= end) {
-        let mid = Math.floor((start + end)/2);
-        if(inputArr[mid] == target) {
-            index = mid;
-            break;
-        } else if(inputArr[mid] < target) {
-            index = mid;
-            start = mid + 1;
-        } else {
-            end = mid - 1;
-        }
-    }
-    console.log('inside inline: ',target,' and ',allSentenceInlineStartTimeArr[index] + allSentenceInlineDurArr[index]);
-    if(index < 0 || target > allSentenceInlineStartTimeArr[index] + allSentenceInlineDurArr[index])
-        return [false,index, 0];
-    else // may return the difference of current time and inline start time
-        return [true, index, target - allSentenceInlineStartTimeArr[index]];
 }
 
 function getUrlVars() {
@@ -1154,18 +708,4 @@ function onPlayPauseButtonClick() {
         playVideo();
         break;
     }
-}
-
-function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
-    for(let i=0; i<blocksJsonArr.length; i++) {
-        let currBlock = blocksJsonArr[i];
-        allBlockArr.push(currBlock);
-        let childSceneArr = currBlock.child_scenes;
-        allSceneArr.push.apply(allSceneArr, childSceneArr);
-    }
-}
-
-function isPlaying(audioElement) {
-    if(audioElement!=null)  
-        return !audioElement.paused; 
 }
