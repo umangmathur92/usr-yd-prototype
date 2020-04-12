@@ -314,11 +314,11 @@ document.getElementById('ul-scene-list').addEventListener('click', (e) => {
             console.log(e.target.id);
             console.log({"Inside merge:" : sceneDetails});
             listContainer.dataset.sceneDetails = JSON.stringify(sceneDetails);
-            updateAll(false);
-            window.location.reload();
-            //   fetchVideoInfo(youtubeId);
-            // let currentTime = player.getCurrentTime();
-            // player.seekTo(currentTime);
+            updateAll(false).then(()=>{
+                fetchVideoInfo(youtubeId);
+            }).catch((e)=>{
+                alert('Error merging scenes');
+            })
          
         }
 
@@ -506,6 +506,7 @@ async function updateAll(shoudShowAlert) {
                     alert('Update Status: ' + response.success);
                 }
             }
+            console.log(response);
         });
     }catch(e){
 
