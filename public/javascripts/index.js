@@ -438,7 +438,7 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
-        case YT.PlayerState.CUED:n
+        case YT.PlayerState.CUED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
         console.log('i was called: cued state')
