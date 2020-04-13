@@ -1,8 +1,8 @@
 
 const fs = require('fs');
-const Utils = require('./backend/utils');
+const Utils = require('../backend/utils');
 const axios = require('axios');
-const scene = require('./model/scene');
+const scene = require('../model/scene');
 
 class MergeSceneController{
 

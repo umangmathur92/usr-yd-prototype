@@ -3,13 +3,14 @@ const Utils = require('../backend/utils');
 const db = require('../db/database');
 var ffmpeg = require('ffmpeg');
 let videoModel = require('../model/video.js');
-
+const youtubedl = require('youtube-dl');
 
 const axios = require('axios');
 var ffmpeg = require('ffmpeg');
 const scene = require('../model/scene');
 const videoDialogue = require('../model/videoDialogue');
 const uploadVideoRoute = require('../routes/uploadVideo');
+var path = require('path');
 
 
 class UploadVideoController{
@@ -310,6 +311,49 @@ class UploadVideoController{
 
     }
 
+
+    async downloadVideo(url, videoTitle){
+        let videoId = url.substr(url.indexOf('v=') + 2);
+        console.log({ videoTitle});
+
+        if (url) {
+            let jsonPath = path.join(__dirname, '../videos/');
+            console.log({ jsonPath });
+            console.log({ __dirname });
+            const video = youtubedl(url, ['--format=18']);
+
+            // Will be called when the download starts.
+            video.on('info', function (info) {
+            console.log('Download started')
+            console.log('filename: ' + info._filename)
+            console.log('size: ' + info.size)
+            })
+
+            let date_ob = new Date();
+            let year = date_ob.getFullYear();
+            let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+            let date = ("0" + date_ob.getDate()).slice(-2);
+            let currentDateTime = year + "-" + month + "-" + date + "_" + Math.floor(Date.now() / 1000);
+
+            let rootName = videoId + '_' + currentDateTime;
+            let fileName = videoId + '_' + currentDateTime + '.mp4';
+            let filePath = path.join(__dirname, '../videos/', fileName);
+            console.log({ fileName });
+            console.log({ filePath });
+
+            video.pipe(fs.createWriteStream(filePath));
+            video.on('complete', function complete(info) {
+            'use strict'
+            console.log('filename: ' + info._filename + ' already downloaded.')
+            })
+            let name = '';
+            video.on('end', function () {
+            console.log('Finished downloading!');
+
+            })
+        }
+    }
+
 }
 
 let file = 'insight.json';
@@ -321,4 +365,5 @@ let controller = new UploadVideoController();
 // controller.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
 // controller.getAudioInsightAndMerge();
 // controller.insertIntoVideoDialogue1();
-controller.copyFromMergeToDescription();
+// controller.copyFromMergeToDescription();
+controller.downloadVideo('https://www.youtube.com/watch?v=OkBaZLq7gnU', 'OkBaZLq7gnU');
