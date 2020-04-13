@@ -11,27 +11,27 @@ $(document).ready(function() {
 
     });
 
-    $("#btnDownload").click(function (e) {
-        e.preventDefault();
-        console.log('download clicked');
-        let url = document.getElementById('url').value;
-        // http://www.youtube.com/watch?v=90AiXO1pAiA
-        console.log({url});
-        videoURL = '/vi/uploadVideo?video='+ url;
+    // $("#btnDownload").click(function (e) {
+    //     e.preventDefault();
+    //     console.log('download clicked');
+    //     let url = document.getElementById('url').value;
+    //     // http://www.youtube.com/watch?v=90AiXO1pAiA
+    //     console.log({url});
+    //     videoURL = '/vi/uploadVideo?video='+ url;
         
-        $.ajax({
-            type: 'GET',
-            url : videoURL,
-            success: function (response) {
-                $('#alertDownload').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File downloaded successfully' +'</span></div>');
-                console.log(response);
-            },
-            error: function (response, textStatus, errorThrown) {
-                $('#alertDownload').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Error!</strong> An error occured while downloading the file' +'</span></div>')
-                console.log(JSON.stringify(response));
-            }
-        });
-    });
+    //     $.ajax({
+    //         type: 'GET',
+    //         url : videoURL,
+    //         success: function (response) {
+    //             $('#alertDownload').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File downloaded successfully' +'</span></div>');
+    //             console.log(response);
+    //         },
+    //         error: function (response, textStatus, errorThrown) {
+    //             $('#alertDownload').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Error!</strong> An error occured while downloading the file' +'</span></div>')
+    //             console.log(JSON.stringify(response));
+    //         }
+    //     });
+    // });
 
 
 
@@ -75,8 +75,13 @@ $(document).ready(function() {
 
     
     $("#uploadVideoForm").submit(function (e) {
+        
+        
         console.log("submit called");
         e.preventDefault();
+
+
+        $('#alertUpload').html('<div class="alert alert-warning"><a class="close" data-dismiss="alert">×</a><span>'+ 'Please wait...' +'</span></div>');
         let data = new FormData(e.target);
         for(let entry of data.entries()){
             console.log(entry);  
@@ -108,9 +113,13 @@ $(document).ready(function() {
                         console.log(response);
                         let id = response.id;
                         document.getElementById('videoId').value = id;
+                        $('#alertUpload').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File Uploaded to Video Indexer' +'</span></div>');
                     },
                     error: function (response, textStatus, errorThrown) {
+                        let errMessage = JSON.stringify(response);
                         console.log(JSON.stringify(response));
+                        $('#alertDownload').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ `<strong>Error!</strong> An error occured while uploading the file: ${errMessage}` +'</span></div>')
+
                     }
                 });
 

@@ -20,8 +20,8 @@
         <div class="form-group">
             <label for="url">Video Url</label>
             <input type="text" class="form-control" id="url" placeholder="Please provide the url of the youtube video">
-            <button id="btnDownload" class="btn btn-primary">Download</button><br>
-            <div id = "alertDownload"></div>
+            <!-- <button id="btnDownload" class="btn btn-primary">Download</button><br>
+            <div id = "alertDownload"></div> -->
         </div>
     </form>
 
@@ -36,15 +36,16 @@
             <input type="text" class="form-control" id="videoName" placeholder="Please enter name of the video">
         </div>
         <div class="form-group">
-            <label for="videoId">Video Id</label>
-            <input type="text" class="form-control" id="videoId" placeholder="">
-            <small class="form-text text-muted">Please provide the youtube id of the video.</small>
-        </div>
-      
-        <div class="form-group">
             <label for="upload">Upload video file</label>
             <input type="file" class="form-control-file" id="file" name="file">
-            <button id="submitVideo" type="submit" class="btn btn-primary">Upload Video</button>
+            <button id="submitVideo" type="submit" class="btn btn-primary">Upload Video</button><br>
+            <div id = "alertUpload"></div>
+        </div>
+        <div class="form-group">
+            <label for="videoId">Video Id</label>
+            <input type="text" class="form-control" id="videoId" placeholder="Id returned by the Video Indexer">
+            <!-- <small class="form-text text-muted"> Id returned by the Video Indexer.</small> -->
+            
         </div>
     </form>
 
