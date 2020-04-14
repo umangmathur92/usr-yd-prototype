@@ -11,33 +11,67 @@ $(document).ready(function() {
 
     });
 
-    // $("#btnDownload").click(function (e) {
-    //     e.preventDefault();
-    //     console.log('download clicked');
-    //     let url = document.getElementById('url').value;
-    //     // http://www.youtube.com/watch?v=90AiXO1pAiA
-    //     console.log({url});
-    //     videoURL = '/vi/uploadVideo?video='+ url;
+    $("#btnInsertVideo").click(function (e) {
+        e.preventDefault();
+        console.log('insert');
+        let youtubeId = document.getElementById('youtubeId').value;
+        let title =  document.getElementById('videoName').value;
+        let inputJson = JSON.parse(document.getElementById('insight').value); 
+        let jsonBody = {
+            "youtubeId": youtubeId,
+            "title": title,
+            "inputJson": inputJson
+        };
+        console.log({jsonBody});
+        $.ajax({
+            type: 'POST',
+            timeout: 1*60*60*1000,
+            url : "/addvideo",
+            dataType: "json",
+            async:true,
+            crossDomain:true,
+            data: jsonBody,
+            success: function (response) {
+                window.alert(JSON.stringify(response));
+            },
+            error: function (response, textStatus, errorThrown) {
+                console.log(errorThrown);
+                window.alert(JSON.stringify(response));
+            }
+        });
+    });
+       
+
+    $("#btnDownload").click(function (e) {
+        e.preventDefault();
+        console.log('download clicked');
+        let url = document.getElementById('url').value;
+        let videoName = document.getElementById('videoName').value;
+        // http://www.youtube.com/watch?v=90AiXO1pAiA
+        console.log({url});
+        videoURL = '/vi/downloadVideo?videoUrl='+ url+ '&title='+videoName;
         
-    //     $.ajax({
-    //         type: 'GET',
-    //         url : videoURL,
-    //         success: function (response) {
-    //             $('#alertDownload').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File downloaded successfully' +'</span></div>');
-    //             console.log(response);
-    //         },
-    //         error: function (response, textStatus, errorThrown) {
-    //             $('#alertDownload').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Error!</strong> An error occured while downloading the file' +'</span></div>')
-    //             console.log(JSON.stringify(response));
-    //         }
-    //     });
-    // });
+        $.ajax({
+            type: 'GET',
+            url : videoURL,
+            success: function (response) {
+                $('#alertDownload').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File downloaded successfully' +'</span></div>');
+                console.log(response);
+            },
+            error: function (response, textStatus, errorThrown) {
+                $('#alertDownload').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Error!</strong> An error occured while downloading the file' +'</span></div>')
+                console.log(JSON.stringify(response));
+            }
+        });
+    });
 
 
 
     $("#audioUploadForm").submit(function (e) {
         console.log("audio upload called");
         e.preventDefault();
+        $('#alertUploadAudio').html('<div class="alert alert-warning"><a class="close" data-dismiss="alert">×</a><span>'+ 'File uploading...' +'</span></div>');
+
         let data = new FormData(e.target);
         $.ajax({
             type: 'POST',
@@ -48,12 +82,14 @@ $(document).ready(function() {
             contentType: false,
             cache: false,
             success: function (response) {
-                window.alert(JSON.stringify(response));
+                document.getElementById('orderid').value = response.result.orderId;
+                $('#alertUploadAudio').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Success!</strong> File uploaded successfully' +'</span></div>');
                 console.log(response);
             },
             error: function (response, textStatus, errorThrown) {
-                window.alert(JSON.stringify(response));
-                console.log(JSON.stringify(response));
+                let err = JSON.stringify(response);
+                $('#alertUploadAudio').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">×</a><span>'+ '<strong>Error! </strong>' + 'File not uploaded' +'</span></div>');
+                console.log(err);
             }
         });
 
@@ -134,8 +170,25 @@ $(document).ready(function() {
 
     $("#btnMerge").click(function (e) {
         console.log('merge clicked');
-        let youtubeId = document.getElementById('youtubeId').value;
-        execute(youtubeId);
+        let videoId = document.getElementById('youtubeId').value;
+        let audioId = document.getElementById('orderid').value;
+        let url = '/merge/mergeAudioVideo?videoId=' + videoId + '&audioId=' + audioId;
+        let params = {audioId, videoId}
+        console.log('Inside merge:', params);
+        console.log({url});
+        $.ajax({
+            url,
+            type: 'GET',
+            success: function (response) {
+                window.alert('Scenes merged successfully');
+                console.log({Success : response});
+            },
+            error: function (response, textStatus, errorThrown) {
+                console.log(errorThrown.data);
+                console.log({response});
+                window.alert('Error: Merge unsuccessful');
+            }
+          });
     
     });
 });
@@ -154,7 +207,7 @@ function getVideoInsight(videoId){
         success: function (response) {
             let insight = JSON.stringify(response);
             document.getElementById('insight').value = insight;
-            console.log(insight);
+            // console.log(insight);
         },
         error: function (response, textStatus, errorThrown) {
             console.log(errorThrown);
@@ -164,154 +217,136 @@ function getVideoInsight(videoId){
 }
 
 
-function execute(videoId){
-    let oceanFile = 'audio_ocean8.json';
-    let audioData = document.getElementById('audioInsight').value; 
-    let audioInsight = this.parseAudioFile(audioData);
-    console.log({audioInsight});
+// function execute(videoId){
+//     let audioData = document.getElementById('audioInsight').value; 
+//     let audioInsight = this.parseAudioFile(audioData);
+//     console.log({audioInsight});
 
-    let url = '/merge/sceneData?videoId=' + videoId;
+//     let url = '/merge/sceneData?videoId=' + videoId;
 
-    $.ajax({
-        url,
-        dataType: 'json',
-        type: 'GET',
-        success: function (response) {
-            console.log({scene: response});
-            let videoInsight = [];
-            let data = response;
-            for(let i=0; i< data.length; i++){
-                data[i].merged =  [];
-                videoInsight.push(data[i]);
-            }
-            // console.log({videoInsight});
-            let mergedList = merge(videoInsight, audioInsight);
-            console.log({arr: mergedList});
+//     $.ajax({
+//         url,
+//         dataType: 'json',
+//         type: 'GET',
+//         success: function (response) {
+//             console.log({scene: response});
+//             let videoInsight = [];
+//             let data = response;
+//             for(let i=0; i< data.length; i++){
+//                 data[i].merged =  [];
+//                 videoInsight.push(data[i]);
+//             }
+//             console.log({videoInsight});
+//             let mergedList = merge(videoInsight, audioInsight);
+//             console.log({arr: mergedList});
          
-            $.ajax({
-                url : '/merge/scene',
-                type: 'POST',
-                data : {mergedList},
-                datatype: 'json',
-                success: function (response) {
-                    window.alert('Success: ', JSON.stringify(response));
-                },
-                error: function (response, textStatus, errorThrown) {
-                    window.alert('Error: ', JSON.stringify(response));
-                    console.log(JSON.stringify(response));
-                }
-            });
-        },
-        error: function (response, textStatus, errorThrown) {
-            console.log(errorThrown);
-        }
-      });
+//             $.ajax({
+//                 url : '/merge/scene',
+//                 type: 'POST',
+//                 data : {mergedList},
+//                 datatype: 'json',
+//                 success: function (response) {
+//                     window.alert('Success: ', JSON.stringify(response));
+//                 },
+//                 error: function (response, textStatus, errorThrown) {
+//                     window.alert('Error: Merge failed');
+//                     console.log(JSON.stringify(errorThrown));
+//                 }
+//             });
+//         },
+//         error: function (response, textStatus, errorThrown) {
+
+//             console.log(errorThrown);
+//             response.send(errorThrown);
+//         }
+//       });
 
     
-}
+// }
 
 
-function parseAudioFile(data){
-    let obj = JSON.parse(data);
-    let sentence = obj.result.sentence;
-    let arr =[];
-    for(let i=0; i< sentence.length; i++){
-        // let instance = scenes[i].instances[0];
-        let start = sentence[i].startTime;
-        let end = sentence[i].endTime;
-        let data = {
-            start,
-            end
-        }
-        arr.push(data);
-    }
+// function parseAudioFile(data){
+//     let obj = JSON.parse(data);
+//     let sentence = obj.result.sentence;
+//     let arr =[];
+//     for(let i=0; i< sentence.length; i++){
+//         // let instance = scenes[i].instances[0];
+//         let start = sentence[i].startTime;
+//         let end = sentence[i].endTime;
+//         let data = {
+//             start,
+//             end
+//         }
+//         arr.push(data);
+//     }
     
-    return arr;
-}
+//     return arr;
+// }
 
-function merge(videoInsight, audioInsight){
-    let videoIndex = 0;
-    let mergedList = [];
-    mergedList.push(videoInsight[videoIndex++]);
-    let i = 0;
-    while(i < audioInsight.length && videoIndex < videoInsight.length){
-        let size = mergedList.length;
-        let s1 = mergedList[size-1].start_time;
-        let e1 = mergedList[size-1].end_time;
 
-        let s2 = audioInsight[i].start;
-        let e2 = audioInsight[i].end;
 
-        if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
-            i++;
-            continue;
-        }
+// function merge(videoInsight, audioInsight){
+//     let videoIndex = 0;
+//     let mergedList = [];
+//     mergedList.push(videoInsight[videoIndex++]);
+//     let i = 0;
+//     while(i < audioInsight.length && videoIndex < videoInsight.length){
+//         let size = mergedList.length;
+//         let s1 = mergedList[size-1].start_time;
+//         let e1 = mergedList[size-1].end_time;
+//         let description = mergedList[size-1].original_description;
+//         let ocr = mergedList[size-1].original_ocr;
+  
+//         let s2 = audioInsight[i].start;
+//         let e2 = audioInsight[i].end;
+  
+//         if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
+//             i++;
+//             continue;
+//         }
         
-        if(Math.min(s2, e2) >= e1) {
-            mergedList.push(videoInsight[videoIndex++]);
-            continue;
-        }
+//         if(Math.min(s2, e2) >= e1) {
+//             mergedList.push(videoInsight[videoIndex++]);
+//             continue;
+//         }
         
-        //merge condition
-        if(s2 >= s1 && e2 > e1) {
-            let sceneObj = mergedList[mergedList.length-1];
-            let next = videoInsight[videoIndex++]; 
-            let min = Math.min(s1,  next.start_time);
-            let max = Math.max(e1, next.end_time);
-            sceneObj.start_time = min;
-            sceneObj.end_time = max;
-            // let arr = sceneObj.merged;
-            // arr.push(next.scene_id);
-            sceneObj.merged.push(next.scene_id);
-            mergedList.splice(mergedList.length-1);
-            mergedList.push(sceneObj);
-        }else if(s2 >= e1) {
-            mergedList.push(videoInsight[videoIndex++]);
-        }
+//         //merge condition
+//         if(s2 >= s1 && e2 > e1) {
+//             let sceneObj = mergedList[mergedList.length-1];
+//             let next = videoInsight[videoIndex++]; 
+//             let min = Math.min(s1,  next.start_time);
+//             let max = Math.max(e1, next.end_time);
+//             sceneObj.start_time = min;
+//             sceneObj.end_time = max;
+//             sceneObj.original_description = description + next.original_description;
+//             sceneObj.original_ocr = ocr + next.original_ocr;
 
-        i++;
-    }
-
-    for(let j = videoIndex; j<videoInsight.length; j++) {
-        mergedList.push(videoInsight[j]);
-    }
-
-    for(let k=0; k< mergedList.length; k++){
-        let scene_id = mergedList[k].scene_id;
-        let merged = mergedList[k].merged;
-        let start_time = mergedList[k].start_time;
-        let end_time = mergedList[k].end_time;
-        // console.log(scene_id ,'-' ,start_time, '-', end_time, ',', JSON.stringify(merged));
-    }
+//             // let arr = sceneObj.merged;
+//             // arr.push(next.scene_id);
+//             sceneObj.merged.push(next.scene_id);
+//             mergedList.splice(mergedList.length-1);
+//             mergedList.push(sceneObj);
+//         }else if(s2 >= e1) {
+//             mergedList.push(videoInsight[videoIndex++]);
+//         }
+  
+//         i++;
+//     }
+  
+//     for(let j = videoIndex; j<videoInsight.length; j++) {
+//         mergedList.push(videoInsight[j]);
+//     }
+  
+//     for(let k=0; k< mergedList.length; k++){
+//         let scene_id = mergedList[k].scene_id;
+//         let merged = mergedList[k].merged;
+//         let start_time = mergedList[k].start_time;
+//         let end_time = mergedList[k].end_time;
+//         // console.log(scene_id ,'-' ,start_time, '-', end_time, ',', JSON.stringify(merged));
+//     }
     
-    // console.log({mergedList});
-    return mergedList;
-}
+//     // console.log({mergedList});
+//     return mergedList;
+//   }
 
 
-function submitVideoData() {
-    let youtubeId = $('#youtubeId').val();
-    let title = $('#title').val();
-    let inputJson = $('#inputJson').val();
-    let jsonBody = {
-        "youtubeId": youtubeId,
-        "title": title,
-        "inputJson": inputJson
-    };
-    $.ajax({
-        type: 'POST',
-        timeout: 1*60*60*1000,
-        url : "/addvideo",
-        dataType: "json",
-        async:true,
-        crossDomain:true,
-        data: jsonBody,
-        success: function (response) {
-            window.alert(JSON.stringify(response));
-        },
-        error: function (response, textStatus, errorThrown) {
-            console.log(errorThrown);
-            window.alert(JSON.stringify(response));
-        }
-      });
-}

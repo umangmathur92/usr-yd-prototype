@@ -2,7 +2,7 @@
     margin:20px;
 }
 
-#submitVideo, #submitAudio, #btnInsight, #btnMerge, #btnDownload{
+#submitVideo, #submitAudio, #btnMerge, #btnDownload{
     margin-top: 10px;
 }
 
@@ -10,3 +10,7 @@
     margin: 10px
 }
 
+#btnInsight{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

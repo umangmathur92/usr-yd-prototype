@@ -20,8 +20,8 @@
         <div class="form-group">
             <label for="url">Video Url</label>
             <input type="text" class="form-control" id="url" placeholder="Please provide the url of the youtube video">
-            <!-- <button id="btnDownload" class="btn btn-primary">Download</button><br>
-            <div id = "alertDownload"></div> -->
+            <button id="btnDownload" class="btn btn-primary">Download</button><br>
+            <div id = "alertDownload"></div>
         </div>
     </form>
 
@@ -54,29 +54,35 @@
             <label for="Insight">Video Insight</label>
             <textarea class="form-control" rows="5" id="insight"></textarea>
             <button id="btnInsight" type="submit" class="btn btn-primary">Get Insight</button>
+            <hr>
+            <p>Insert the video Insight into Database</p>
+            <button id="btnInsertVideo" class="btn btn-warning">Insert into Database</button>
         </div>
     </form>
+    <hr>
     <br>
-
     <form id="audioUploadForm">
         <div class="form-group">
             Audio File: <input type="file" name="audiofile"><br>
             Your Callback Url: <input type="text" id="callbackText" name="callbackurl" value=""><br>
             <input type="hidden" name="appkey" value="yAOzHAy9LQBJQGtshcIGJX368IbC4Enx">
             <button id="submitAudio" type="submit" class="btn btn-primary">Upload Audio</button>
+            <div id = "alertUploadAudio"></div>
         </div>
     </form>
 
     <form id="audioInsightForm">
         <div class="form-group">
             <label for="Insight">Audio Insight</label>
-            <input type="text" name="orderid" id="orderid" value="OIVLXP20200212110759">
+            <input type="text" name="orderid" id="orderid" value="EAFGNH20200414123341">
             <button id="btnAudioInsight" type="submit" class="btn btn-primary">Get Audio Insight</button>
             <textarea class="form-control" rows="5" id="audioInsight"></textarea>
         </div>
     </form>
-
-    <button id="btnMerge" class="btn btn-warning"> Merge Scenes</button>    
+    <hr>
+    <p>Merge scenes based on audio timestamps</p>
+    <button id="btnMerge" class="btn btn-warning"> Merge Scenes</button> 
+    <hr>   
 </div>
 
 

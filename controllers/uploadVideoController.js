@@ -15,7 +15,7 @@ var path = require('path');
 
 class UploadVideoController{
     
-    async getAudioInsightAndMerge(){
+    static async getAudioInsightAndMerge(){
         // let data = { 'NDAUMF20200408105803': 'OkBaZLq7gnU'};
         // data = { audioId: 'NZTJTD20200408120207', youtubeId: '7QZNpS0uos4' }
         // data = { audioId: 'POFZRY20200408120928', youtubeId: 'elpUGB9Ap1Y' }
@@ -31,7 +31,7 @@ class UploadVideoController{
     }
 
 
-    async  fetchAudioInsight(audioId, videoId){
+    static async fetchAudioInsight(audioId, videoId){
         return new Promise((resolve, reject) => {
             let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
             axios.get(url)
@@ -45,57 +45,61 @@ class UploadVideoController{
                 let videoInsight = [];
                 scene.getSceneData(videoId)
                   .then((data) => {
-                    console.log(data);
-                    for (let i = 0; i < data.length; i++) {
-                      data[i].merged = [];
-                      videoInsight.push(data[i]);
-                    }
-                    console.log({ videoInsight });
-    
-                //AUDIO
-                let sentence = response.data.result.sentence;
-                let audioInsight =[];
-                for(let i=0; i< sentence.length; i++){
-                    let start = sentence[i].startTime;
-                    let end = sentence[i].endTime;
-                    let desc  = sentence[i].sentence;
-                    desc = desc.replace(/'/g, '');
-                    if(!desc.toLowerCase().includes('noise')){
-                      let data = {
-                        start,
-                        end,
-                        sentence: desc
-                      }
-                      audioInsight.push(data);
-                    }
-                }
-                console.log({audioInsight});
-              
-                //MERGE
-                let mergedList = this.merge(videoInsight, audioInsight);
-                let result = scene.addMergeSceneTable(mergedList)
-                result
-                  .then(data => {
-                    console.log({ success: data });
-                    videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId)
-                      .then(res=>{
-                        console.log(res);
-                        resolve('Success: Scene Merged');
-                      })
-                  })
+                        console.log(data);
+                        for (let i = 0; i < data.length; i++) {
+                        data[i].merged = [];
+                        videoInsight.push(data[i]);
+                        }
+                        console.log({ videoInsight });
+        
+                        //AUDIO
+                        let sentence = response.data.result.sentence;
+                        let audioInsight =[];
+                        for(let i=0; i< sentence.length; i++){
+                            let start = sentence[i].startTime;
+                            let end = sentence[i].endTime;
+                            let desc  = sentence[i].sentence;
+                            desc = desc.replace(/'/g, '');
+                            if(!desc.toLowerCase().includes('noise')){
+                            let data = {
+                                start,
+                                end,
+                                sentence: desc
+                            }
+                            audioInsight.push(data);
+                            }
+                        }
+                        console.log({audioInsight});
+                
+                        //MERGE
+                        let mergedList = this.merge(videoInsight, audioInsight);
+                        scene.addMergeSceneTable(mergedList)
+                            .then(data => {
+                                console.log({ success: data });
+                                videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId)
+                                    .then(res=>{
+                                        console.log(res);
+                                        resolve();
+                                    })
+                            }).catch((error) => {
+                                console.log(error);
+                                reject(error);
+                            })
+                            
                 })
+            
+            })
             .catch((error) => {
-                  console.log(error);
-                  reject(error);
-                })
-            });
-        })
+                console.log(error);
+                reject(error);
+            })
+      });
     
     }
 
     
 
-    merge(videoInsight, audioInsight){
+    static merge(videoInsight, audioInsight){
         let videoIndex = 0;
         let mergedList = [];
         mergedList.push(videoInsight[videoIndex++]);
@@ -162,7 +166,7 @@ class UploadVideoController{
 
     
 
-    parseJson(file){
+      static parseJson(file){
         let rawdata = fs.readFileSync(file);
         let videoJsonObj = JSON.parse(rawdata);
         let scenes = videoJsonObj.videos[0].insights.scenes;
@@ -183,7 +187,7 @@ class UploadVideoController{
         return arr;
     }
 
-    parseAudioFile(file){
+    static parseAudioFile(file){
         console.log("here");
         let rawdata = fs.readFileSync(file);
         let obj = JSON.parse(rawdata);
@@ -208,7 +212,7 @@ class UploadVideoController{
     }
 
 
-    convertVideoToAudio(path, fileName){
+    static convertVideoToAudio(path, fileName){
         let audioFile = path + '/' + fileName+'.mp3';
         let videoFile = path + '/' + fileName + '.mp4'
         console.log({path});
@@ -232,7 +236,7 @@ class UploadVideoController{
       }
 
 
-    async insertIntoVideoDialogue1(){
+      static async insertIntoVideoDialogue1(){
         let audioId = 'OMHPXC20200411053439';
         let videoId = 'vBkBS4O3yvY';
 
@@ -272,7 +276,7 @@ class UploadVideoController{
     }
 
 
-    async copyFromMergeToDescription(){
+    static async copyFromMergeToDescription(){
         let videoId = '6ZLCmVlQBLo';
         let user = '464e02d0-7b90-11ea-bc55-0242ac130003';
 
@@ -312,7 +316,7 @@ class UploadVideoController{
     }
 
 
-    async downloadVideo(url, videoTitle){
+    static async downloadVideo(url, videoTitle){
         let videoId = url.substr(url.indexOf('v=') + 2);
         console.log({ videoTitle});
 
@@ -356,14 +360,17 @@ class UploadVideoController{
 
 }
 
-let file = 'insight.json';
-let oceanFile = 'audio_ocean8.json';
-let controller = new UploadVideoController();
-// controller.parseJson(file);
-// controller.parseAudioFile(oceanFile);
-// controller.merge(file,oceanFile);
-// controller.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
-// controller.getAudioInsightAndMerge();
-// controller.insertIntoVideoDialogue1();
-// controller.copyFromMergeToDescription();
-controller.downloadVideo('https://www.youtube.com/watch?v=OkBaZLq7gnU', 'OkBaZLq7gnU');
+module.exports = UploadVideoController;
+
+// let file = 'insight.json';
+// let oceanFile = 'audio_ocean8.json';
+// let controller = new UploadVideoController();
+// // controller.parseJson(file);
+// // controller.parseAudioFile(oceanFile);
+// // controller.merge(file,oceanFile);
+// // controller.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
+// // controller.getAudioInsightAndMerge();
+// // controller.insertIntoVideoDialogue1();
+// // controller.copyFromMergeToDescription();
+// controller.downloadVideo('https://www.youtube.com/watch?v=OkBaZLq7gnU', 'OkBaZLq7gnU');
+

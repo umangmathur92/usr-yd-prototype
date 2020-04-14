@@ -22,8 +22,76 @@ let scene = require('../model/scene');
 let videoModel = require('../model/video.js');
 const request = require('request');
 let videoDialogue = require('../model/videoDialogue');
+let uploadVideoController = require('../controllers/UploadVideoController');
 
 
+async function downloadVideo(url, videoTitle){
+    let videoId = url.substr(url.indexOf('v=') + 2);
+    console.log({ videoTitle});
+
+
+    return new Promise((resolve, reject) => {
+          let jsonPath = path.join(__dirname, '../videos/');
+          console.log({ jsonPath });
+          console.log({ __dirname });
+          const video = youtubedl(url, ['--format=18']);
+
+          // Will be called when the download starts.
+          video.on('info', function (info) {
+            console.log('Download started')
+            console.log('filename: ' + info._filename)
+            console.log('size: ' + info.size)
+          })
+
+          let date_ob = new Date();
+          let year = date_ob.getFullYear();
+          let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+          let date = ("0" + date_ob.getDate()).slice(-2);
+          let currentDateTime = year + "-" + month + "-" + date + "_" + Math.floor(Date.now() / 1000);
+
+          let rootName = videoId + '_' + currentDateTime;
+          let fileName = videoId + '_' + currentDateTime + '.mp4';
+          let filePath = path.join(__dirname, '../videos/', fileName);
+          console.log({ fileName });
+          console.log({ filePath });
+
+          video.pipe(fs.createWriteStream(filePath));
+          video.on('complete', function complete(info) {
+            'use strict'
+            console.log('filename: ' + info._filename + ' already downloaded.')
+          })
+          let name = '';
+          video.on('end', function () {
+            console.log('Finished downloading!');
+            resolve('Video Downloaded successfully');
+          })
+
+          video.on('error', function error(err) {
+            console.log('error 2:', err);
+            reject(err);
+          })
+
+      })
+
+  }
+  
+
+
+
+
+router.get('/downloadVideo', function(req, res) {
+  let {videoUrl, title} = req.query;
+  console.log(req.query);
+
+    downloadVideo(videoUrl, title)
+      .then(()=>{
+        res.status(200).send('Video downloaded successfully');
+      })
+      .catch((e)=>{
+        res.status(400).send('Failed to download the video');
+        console.log(e);
+      })
+});
 
 router.get('/audioInsight', function(req, res, next) {
     console.log('req.query', req.query);
@@ -62,7 +130,7 @@ router.get('/audioInsight', function(req, res, next) {
             console.log({ videoInsight });
         
             //MERGE
-            let mergedList = merge(videoInsight, audioInsight);
+            let mergedList = uploadVideoController.merge(videoInsight, audioInsight);
             let result = scene.addMergeSceneTable(mergedList)
             result
               .then(data => {
@@ -141,10 +209,10 @@ router.get('/uploadVideo', function (req, res) {
 
 
   if (url) {
-    let jsonPath = path.join(__dirname, '../videos/');
-    console.log({ jsonPath });
-    console.log({ __dirname });
-    const video = youtubedl(url, ['--format=18'], jsonPath);
+    // let jsonPath = path.join(__dirname, '../videos/');
+    // console.log({ jsonPath });
+    // console.log({ __dirname });
+    const video = youtubedl(url, ['--format=18']);
 
     // Will be called when the download starts.
     video.on('info', function (info) {
@@ -165,7 +233,7 @@ router.get('/uploadVideo', function (req, res) {
     console.log({ fileName });
     console.log({ filePath });
 
-    video.pipe(fs.createWriteStream(fileName));
+    video.pipe(fs.createWriteStream(filePath));
     video.on('complete', function complete(info) {
       'use strict'
       console.log('filename: ' + info._filename + ' already downloaded.')
@@ -427,70 +495,64 @@ async function uploadVideo(file, accessToken, youtubeId, videoTitle) {
   return res.data;
 }
 
+// function merge(videoInsight, audioInsight){
+//   let videoIndex = 0;
+//   let mergedList = [];
+//   mergedList.push(videoInsight[videoIndex++]);
+//   let i = 0;
+//   while(i < audioInsight.length && videoIndex < videoInsight.length){
+//       let size = mergedList.length;
+//       let s1 = mergedList[size-1].start_time;
+//       let e1 = mergedList[size-1].end_time;
 
-function merge(videoInsight, audioInsight){
-  let videoIndex = 0;
-  let mergedList = [];
-  mergedList.push(videoInsight[videoIndex++]);
-  let i = 0;
-  while(i < audioInsight.length && videoIndex < videoInsight.length){
-      let size = mergedList.length;
-      let s1 = mergedList[size-1].start_time;
-      let e1 = mergedList[size-1].end_time;
-      let description = mergedList[size-1].original_description;
-      let ocr = mergedList[size-1].original_ocr;
+//       let s2 = audioInsight[i].start;
+//       let e2 = audioInsight[i].end;
 
-      let s2 = audioInsight[i].start;
-      let e2 = audioInsight[i].end;
-
-      if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
-          i++;
-          continue;
-      }
+//       if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
+//           i++;
+//           continue;
+//       }
       
-      if(Math.min(s2, e2) >= e1) {
-          mergedList.push(videoInsight[videoIndex++]);
-          continue;
-      }
+//       if(Math.min(s2, e2) >= e1) {
+//           mergedList.push(videoInsight[videoIndex++]);
+//           continue;
+//       }
       
-      //merge condition
-      if(s2 >= s1 && e2 > e1) {
-          let sceneObj = mergedList[mergedList.length-1];
-          let next = videoInsight[videoIndex++]; 
-          let min = Math.min(s1,  next.start_time);
-          let max = Math.max(e1, next.end_time);
-          sceneObj.start_time = min;
-          sceneObj.end_time = max;
-          sceneObj.original_description = description + next.original_description;
-          sceneObj.original_ocr = ocr + next.original_ocr;
-          // let arr = sceneObj.merged;
-          // arr.push(next.scene_id);
-          sceneObj.merged.push(next.scene_id);
-          mergedList.splice(mergedList.length-1);
-          mergedList.push(sceneObj);
-      }else if(s2 >= e1) {
-          mergedList.push(videoInsight[videoIndex++]);
-      }
+//       //merge condition
+//       if(s2 >= s1 && e2 > e1) {
+//           let sceneObj = mergedList[mergedList.length-1];
+//           let next = videoInsight[videoIndex++]; 
+//           let min = Math.min(s1,  next.start_time);
+//           let max = Math.max(e1, next.end_time);
+//           sceneObj.start_time = min;
+//           sceneObj.end_time = max;
+//           // let arr = sceneObj.merged;
+//           // arr.push(next.scene_id);
+//           sceneObj.merged.push(next.scene_id);
+//           mergedList.splice(mergedList.length-1);
+//           mergedList.push(sceneObj);
+//       }else if(s2 >= e1) {
+//           mergedList.push(videoInsight[videoIndex++]);
+//       }
 
-      i++;
-  }
+//       i++;
+//   }
 
-  for(let j = videoIndex; j<videoInsight.length; j++) {
-      mergedList.push(videoInsight[j]);
-  }
+//   for(let j = videoIndex; j<videoInsight.length; j++) {
+//       mergedList.push(videoInsight[j]);
+//   }
 
-  for(let k=0; k< mergedList.length; k++){
-      let scene_id = mergedList[k].scene_id;
-      let merged = mergedList[k].merged;
-      let start_time = mergedList[k].start_time;
-      let end_time = mergedList[k].end_time;
-      // console.log(scene_id ,'-' ,start_time, '-', end_time, ',', JSON.stringify(merged));
-  }
+//   for(let k=0; k< mergedList.length; k++){
+//       let scene_id = mergedList[k].scene_id;
+//       let merged = mergedList[k].merged;
+//       let start_time = mergedList[k].start_time;
+//       let end_time = mergedList[k].end_time;
+//       // console.log(scene_id ,'-' ,start_time, '-', end_time, ',', JSON.stringify(merged));
+//   }
   
-  // console.log({mergedList});
-  return mergedList;
-}
-
+//   // console.log({mergedList});
+//   return mergedList;
+// }
 
 
 
