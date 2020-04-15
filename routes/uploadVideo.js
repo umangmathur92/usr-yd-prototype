@@ -285,7 +285,7 @@ router.get('/uploadVideo', function (req, res) {
                                   videoController.addVideoDataToDb(jsonBody)
                                     .then(result => {
                                       console.log({ success: result });
-                                          fetchAudioInsight(audioId, videoId)
+                                      uploadVideoController.fetchAudioInsight(audioId, videoId)
                                             .then((result)=>{
                                               console.log(result);
                                             })
@@ -327,7 +327,7 @@ router.get('/uploadVideo', function (req, res) {
 });
 
 
-
+/*
 async function fetchAudioInsight(audioId, videoId){
     return new Promise((resolve, reject) => {
         let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
@@ -389,6 +389,8 @@ async function fetchAudioInsight(audioId, videoId){
     })
 
 }
+*/
+
 
 async function convertVideoToAudio(youtubeId, videoFilePath) {
   let index1 = videoFilePath.lastIndexOf('.mp4');
