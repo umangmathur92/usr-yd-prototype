@@ -13,7 +13,7 @@ const mergeScene = require('./mergeScene');
 const uploadVideoRoute  = require('./uploadVideo'); 
 const sentences = require('../backend/sentences.js');
 const pythiaCaption = require('../routes/pythiaCaption');
-
+const bleu = require('../npm_python/nodejs/bleu.js');
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
@@ -541,6 +541,16 @@ router.get('/getDescriptionData', function(req, res, next) {
     .catch((err) => {
       res.send(err);
     });
+});
+
+router.get('/getBleuScore', function(req, res, next){
+      let reference = req.query.reference;
+      let sentence = req.query.sentence;
+      console.log('ref: ',reference, '  and: ',sentence);
+      let task = bleu.generateBLEUScore(reference,sentence);
+  task.then(result => {
+    res.send({'result': result});
+  });
 });
 
 module.exports = router;
