@@ -15,13 +15,13 @@ var path = require('path');
 
 class UploadVideoController{
     
-    static async getAudioInsightAndMerge(){
+    static async getAudioInsightAndMerge(audioId, videoId){
         // let data = { 'NDAUMF20200408105803': 'OkBaZLq7gnU'};
         // data = { audioId: 'NZTJTD20200408120207', youtubeId: '7QZNpS0uos4' }
         // data = { audioId: 'POFZRY20200408120928', youtubeId: 'elpUGB9Ap1Y' }
         //{ audioId: 'EFUPVK20200408121751', youtubeId: '2wwC9c3iYK4' }
 
-        return  this.fetchAudioInsight('NUILEE20200411072029', '4d1OmRA6yyI')
+        return  this.fetchAudioInsight(audioId, videoId)
                     .then((result)=>{
                         console.log(result);
                     })
@@ -276,21 +276,23 @@ class UploadVideoController{
     }
 
 
-    static async copyFromMergeToDescription(){
-        let videoId = '6ZLCmVlQBLo';
-        let user = '464e02d0-7b90-11ea-bc55-0242ac130003';
+    async copyFromMergeToDescription(user, videoId){
+        // let videoId = 'vBkBS4O3yvY';
+        // let user = 'd32f61aa-7f67-11ea-bc55-0242ac130003';
 
-
+        console.log({videoId});
         try {
-            let data =  await db.query(`select * from merge_scene where video_id = $1 order by start_time`, [videoId]);
-            console.log({data});
+            let data =  await db.query('select * from merge_scene where video_id = $1 order by start_time', [videoId]);
+            // console.log(data);
+            console.log('here');
             let sql = '';
             for(let i=0; i<data.length; i++){
                 let {video_id, scene_id,scene_num ,start_time,end_time, original_description, original_ocr, merged} = data[i];
                 let descriptionId = user + '_' + video_id + '_ai_' +  scene_num;
                 original_description =  original_description.replace(/'/g, '');
                 original_ocr =  original_ocr.replace(/'/g, '');
-                // console.log({descriptionId});
+                console.log({scene_id});
+                console.log({descriptionId});
                 sql+= `INSERT INTO descriptions(desc_id, video_id, has_ai, volunteer_id, scene_id, scene_num, 
                                                 start_time, end_time, description, ocr, audioconflict_merge) 
                                 VALUES('${descriptionId}', '${video_id}', true,'${user}', '${scene_id}',
@@ -301,18 +303,16 @@ class UploadVideoController{
             console.log({sql});
             sql = 'Start transaction;' + sql + 'commit;';
 
-            await db.query(sql);
-            console.log('success');
-
+            return await db.query(sql);
+            // console.log('success');
+            // return;
 
 
         } catch(e) {
             console.log({'error': e});
+            return e;
            
         }
-
-
-
     }
 
 
@@ -365,12 +365,19 @@ module.exports = UploadVideoController;
 // let file = 'insight.json';
 // let oceanFile = 'audio_ocean8.json';
 // let controller = new UploadVideoController();
+// controller.copyFromMergeToDescription('d32f61aa-7f67-11ea-bc55-0242ac130003','vBkBS4O3yvY');
+// controller.copyFromMergeToDescription('d32f61aa-7f67-11ea-bc55-0242ac130003','4d1OmRA6yyI');
+//  controller.copyFromMergeToDescription('d32f61aa-7f67-11ea-bc55-0242ac130003', 'll8cTIg2rwM' );
+// controller.copyFromMergeToDescription('d32f61aa-7f67-11ea-bc55-0242ac130003', '6ZLCmVlQBLo' );
+
+
 // // controller.parseJson(file);
 // // controller.parseAudioFile(oceanFile);
 // // controller.merge(file,oceanFile);
 // // controller.convertVideoToAudio(__dirname, 'GXWpEjEFWkM_2020-03-31_1585712768');
 // // controller.getAudioInsightAndMerge();
 // // controller.insertIntoVideoDialogue1();
-// // controller.copyFromMergeToDescription();
+
+// UploadVideoController.getAudioInsightAndMerge(  'OMHPXC20200411053439', 'vBkBS4O3yvY')
 // controller.downloadVideo('https://www.youtube.com/watch?v=OkBaZLq7gnU', 'OkBaZLq7gnU');
 

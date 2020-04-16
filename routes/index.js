@@ -543,14 +543,14 @@ router.get('/getDescriptionData', function(req, res, next) {
     });
 });
 
-router.get('/getBleuScore', function(req, res, next){
-      let reference = req.query.reference;
-      let sentence = req.query.sentence;
-      console.log('ref: ',reference, '  and: ',sentence);
-      let task = bleu.generateBLEUScore(reference,sentence);
-  task.then(result => {
-    res.send({'result': result});
-  });
-});
+// router.get('/getBleuScore', function(req, res, next){
+//       let reference = req.query.reference;
+//       let sentence = req.query.sentence;
+//       console.log('ref: ',reference, '  and: ',sentence);
+//       let task = bleu.generateBLEUScore(reference,sentence);
+//   task.then(result => {
+//     res.send({'result': result});
+//   });
+// });
 
 module.exports = router;
