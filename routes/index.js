@@ -14,6 +14,7 @@ const uploadVideoRoute  = require('./uploadVideo');
 const sentences = require('../backend/sentences.js');
 const pythiaCaption = require('../routes/pythiaCaption');
 const bleu = require('../npm_python/nodejs/bleu.js');
+const audioDescription = require('../backend/audioDescriptions.js');
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
@@ -552,5 +553,30 @@ router.get('/getDescriptionData', function(req, res, next) {
 //     res.send({'result': result});
 //   });
 // });
+
+router.get('/generateAudioDescriptionMp3', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+// generateAudioDescriptionsInDbWithInfo
+router.post('/audioDescriptionByScene', function(req, res, next) {  
+  let inputJson = req.body;
+  let video_id = inputJson.vid_id;
+  let volunteer_id = inputJson.vol_id;
+  let scene_id = inputJson.scene_id;
+  let description = inputJson.desc;
+  let task = audioDescription.generateTimestampsforScene(video_id, volunteer_id, scene_id, description);
+  task.then(result => {
+    res.send(result);
+  });
+});
+
 
 module.exports = router;
