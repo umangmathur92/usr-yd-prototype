@@ -68,6 +68,11 @@ class Scene {
     }
 
 
+    static async getSceneDataFromMerge(videoId, callback){
+        return db.query(`Select * from merge_scene where video_id = '${videoId}' order by start_time`);
+    }
+
+
     static async addMergeSceneTable(sceneArr) {
         console.log('DB Operation: Inserting Scenes');
         try {
@@ -87,6 +92,24 @@ class Scene {
     }
 
 
+    static async insertDescriptionTable_blue(sceneArr, userId) {
+        console.log('DB Operation: Inserting Scenes in Description Table');
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    let descriptionId = userId + '_' + scene.video_id + '_ai_' + scene.scene_num;
+                    return t.one(`INSERT INTO descriptions(desc_id, scene_id, scene_num, start_time, end_time, description, ocr, video_id, volunteer_id, has_ai) 
+                                    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, true) RETURNING id`, 
+                                    [descriptionId, scene.scene_id, scene.scene_num, scene.start_time, scene.end_time, 
+                                    scene.description_bleu, scene.original_ocr,scene.video_id, userId], a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
     static async aggregateShotOcrIntoSceneOcr(video) {
         console.log('DB Operation: Updating Scene table with OCR data from Shot table');
         return db.any("UPDATE scene SET original_ocr = (SELECT array_to_string(array_agg(original_ocr ORDER BY shot_num ASC), E'\n') FROM shot, block, video WHERE scene.scene_id = shot.scene_id AND scene.block_id = block.block_id AND block.video_id = ${youtube_id}) RETURNING id", video, a => + a.id);
@@ -98,6 +121,34 @@ class Scene {
             return await db.tx(t => {
                 var queries = sceneArr.map(scene => {
                     return t.one("UPDATE scene SET original_description = ${original_description} WHERE scene_id = ${scene_id} RETURNING id", scene, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+    static async updateBleuDescription_Scene(sceneArr) {
+        console.log('DB Operation: Updating scene table with description data');
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    return t.one("UPDATE scene SET description_bleu = ${description_bleu} WHERE scene_id = ${scene_id} and video_id = ${video_id} RETURNING id", scene, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+    static async updateBleuDescription_MergeScene(sceneArr) {
+        console.log('DB Operation: Updating Merge scene table with description data');
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    return t.one("UPDATE merge_scene SET description_bleu = ${description_bleu} WHERE scene_id = ${scene_id} and video_id = ${video_id} RETURNING id", scene, a => + a.id);
                 });
                 return t.batch(queries);
             });
