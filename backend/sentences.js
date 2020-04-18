@@ -4,7 +4,8 @@ const util = require('util');
 const db = require('../db/database');
 const fse = require('fs-extra');
 const { getAudioDurationInSeconds } = require('get-audio-duration')
-
+    
+    /** Generates mp3 file based on text. Audio is stored in output.mp3 */
 async function generateMp3ForText(inputText) {
     try {
         const client = new textToSpeech.TextToSpeechClient();
@@ -42,7 +43,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         return false;
     }
 }
-
+/** Generates mp3 audio files for all the sentences  */
 async function generateMp3ForAllSentencesInDb() {
     try{
         let sentenceListArr = await db.any('SELECT * FROM descriptions_sentence order by scene_num, sentence_id');
@@ -83,7 +84,7 @@ async function generateMp3ForAllSentencesInDb() {
     }
 }
 
-
+/** Creates separate sentences of given descriptions in the db for all videos & users */
 async function generateSentencesForAllDescriptionsInDb() {
     try {
         let descriptionListArr = await db.any('SELECT * FROM descriptions order by id');
@@ -145,8 +146,6 @@ async function insertDescriptionSentencesTable(currDescriptionId,currVideoId,cur
     }
 
 
-
-
 async function updateSentencesDescriptionTable(duration, currVideoId, volunteerId, hasAi, sceneNum, relativePath, sentence_id) {
     try {
         await db.query(`UPDATE descriptions_sentence SET audio_length = ${duration}, audiopath = '${relativePath}' where video_id = '${currVideoId}' and volunteer_id = '${volunteerId}' and has_ai=${hasAi} and scene_num=${sceneNum} and sentence_id='${sentence_id}'`);
@@ -156,7 +155,7 @@ async function updateSentencesDescriptionTable(duration, currVideoId, volunteerI
         return false;
     }
 }
-
+    /** 3rd step: Insert audio descriptions inline/extended in the video for all videos*/
 async function generateTimestampsforSentencesInDb(){
     
     let sentences = await db.query(`SELECT * FROM descriptions_sentence ORDER BY scene_num, sentence_id`);
@@ -281,7 +280,7 @@ async function generateTimestampsforSentencesInDb(){
 
 }
 }
-
+    /** 3rd step: Insert audio descriptions inline/extended in the video for a particular user and video*/
 async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     
     let sentences = await db.query(`SELECT * FROM descriptions_sentence WHERE video_id='${dbVideoId}' and volunteer_id='${dbVolId}' ORDER BY scene_num, sentence_id`);
@@ -521,7 +520,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
 
 }
 }
-
+    /** Fetch scene num from a given timestamp, videoId */
 async function fetchSceneNum(timestamp, videoId, sentence_id){
     
     console.log('Scene timestamps: '+timestamp+'  and '+videoId+' and '+sentence_id);
