@@ -574,7 +574,7 @@ router.post('/audioDescriptionByScene', function(req, res, next) {
   let description = inputJson.desc;
   let task = audioDescription.generateTimestampsforScene(video_id, volunteer_id, scene_id, description);
   task.then(result => {
-    res.send(result);
+    res.send({"status":result});
   });
 });
 
