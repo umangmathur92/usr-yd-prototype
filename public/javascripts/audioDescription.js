@@ -41,6 +41,7 @@ let YT_FLAG_Dial = false;
 let YT_FLAG_EXT = false;
 let first_extend_flag = true;
 let desc_flag = false;
+let audio_flag = false;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
@@ -223,6 +224,7 @@ function fetchVideoInfo(youtubeId) {
                     flag = false    
                 }
                 }
+                audio_flag = true;
     });
         console.log('Times',allDialogArraySTartTimes);
 
@@ -503,10 +505,14 @@ function onYouTubeIframeAPIReady() {
 // }
 
 async function onPlayerReady(event) {
+    pauseVideo();
     player.setVolume(75);
     $('#total_time').text(formatTime(player.getDuration()));
     // timeupdater = setInterval(updateTime, 100);
-    await new Promise(r => setTimeout(r, 500));  
+    // while((!desc_flag && !audio_flag))
+    //     await new Promise(r => setTimeout(r, 100));
+    //     playVideo();
+    // await new Promise(r => setTimeout(r, 500));  
     updateTime();
     // console.log("player state");
 }
@@ -545,12 +551,13 @@ async function updateTime() {
                 if(YT_FLAG_EXT)
                 {YT_FLAG_EXT=false; continue;}
 
-                pauseVideo();
+                // pauseVideo();
                 YT.currentTime = STATE_TIME;
                 YT_FLAG = true;
                 console.log("Extended fault");
                 if(currAudio && currAudio!==null)
-                    currAudio.pause();
+                    // currAudio.pause();
+                currAudio.play();
                     console.log("Current Audio is paused: 0"+STATE_TIME);
                 STATE = 2;
             }
