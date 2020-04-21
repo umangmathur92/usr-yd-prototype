@@ -203,12 +203,13 @@ router.get('/videoState', function (req, res) {
 router.get('/uploadVideo', function (req, res) {
   console.log({ param: req.query });
   let url = req.query.video;
-  let videoId = url.substr(url.indexOf('v=') + 2);
   let  videoTitle = req.query.title;
-  console.log({ videoTitle});
 
+  if(!url || !videoTitle){
+    res.status(400).send('Missing request parameter');
+  }
+  let videoId = url.substr(url.indexOf('v=') + 2);
 
-  if (url) {
     // let jsonPath = path.join(__dirname, '../videos/');
     // console.log({ jsonPath });
     // console.log({ __dirname });
@@ -316,13 +317,8 @@ router.get('/uploadVideo', function (req, res) {
 
     video.on('error', function error(err) {
       console.log('error 2:', err);
-      res.send(err);
+      res.status(400).send(err);
     })
-
-  } else {
-    console.log('video url not provided');
-    res.send('video url not provided');
-  }
 
 });
 
