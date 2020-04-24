@@ -14,6 +14,42 @@ var path = require('path');
 
 
 class UploadVideoController{
+
+
+     static async insertAudioInsightIntoVideo_Dialogue(){
+        let videoId = 'vBkBS4O3yvY';
+        let audioId = 'OMHPXC20200411053439';
+        try{
+            let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
+            let response = await axios.get(url);
+            console.log(response.data);
+
+            let audioInsight =[];
+            let sentence = response.data.result.sentence;
+            for(let i=0; i< sentence.length; i++){
+                let start = sentence[i].startTime;
+                let end = sentence[i].endTime;
+                let desc  = sentence[i].sentence;
+                desc = desc.replace(/'/g, '');
+                if(!desc.toLowerCase().includes('noise')){
+                let data = {
+                    start,
+                    end,
+                    sentence: desc
+                }
+                audioInsight.push(data);
+                }
+            }
+            console.log({audioInsight});
+            let result = await videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId);
+            console.log({result});
+
+        }catch(e){
+            console.log(e);
+        }
+
+        
+    }
     
     static async getAudioInsightAndMerge(audioId, videoId){
         // let data = { 'NDAUMF20200408105803': 'OkBaZLq7gnU'};
@@ -380,4 +416,6 @@ module.exports = UploadVideoController;
 
 // UploadVideoController.getAudioInsightAndMerge(  'OMHPXC20200411053439', 'vBkBS4O3yvY')
 // controller.downloadVideo('https://www.youtube.com/watch?v=OkBaZLq7gnU', 'OkBaZLq7gnU');
+
+// UploadVideoController.insertAudioInsightIntoVideo_Dialogue();
 

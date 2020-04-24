@@ -199,6 +199,25 @@ router.get('/videoState', function (req, res) {
   }
 });
 
+router.get('/videoIndexedState', function(req,res){
+  let youtubeId = req.query.videoId;
+    videoModel.fetchVideoAudioTable({youtubeId})
+      .then((result)=>{
+        if(result.length == 0){
+          res.status(404).send('Video not found');
+        }else{
+          let videoState = result[0].video_state;
+          res.send({videoState});
+          console.log({result});
+        }
+       
+        
+      }).catch(error => {
+        res.status(400).send(error);
+        console.log(error);
+      })
+});
+
 
 router.get('/uploadVideo', function (req, res) {
   console.log({ param: req.query });
@@ -258,7 +277,8 @@ router.get('/uploadVideo', function (req, res) {
               let data = {
                 youtubeId: videoId,
                 video_id: videoData.id,
-                title: videoTitle
+                title: videoTitle,
+                videoState: 'Processing'
               }
               console.log({ videoAudioData: data });
 
@@ -298,6 +318,10 @@ router.get('/uploadVideo', function (req, res) {
                               })
                               .catch((error) => {
                                     clearInterval(timeId);
+                                    videoModel.updateVideoAudio_videoState(data)
+                                      .then(()=>{
+                                        console.log('video state updated in video_audio table')
+                                      })
                                     console.log(error);
                                   })
                               }, 10000);
@@ -307,6 +331,18 @@ router.get('/uploadVideo', function (req, res) {
                       console.log('SUCCESS: Video uploaded to Video Indexer');
                     })
                 })
+            })
+            .catch(uploadVideoError => {
+              let data = {
+                state: 'Failed',
+                youtubeId: videoId,
+              }
+              videoModel.updateVideoAudio_videoState(data)
+                .then(()=>{
+                  console.log('video state updated in video_audio table')
+                })
+
+               console.log(uploadVideoError) ;
             })
         })
         .catch(error => {
