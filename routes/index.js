@@ -385,6 +385,7 @@ router.post('/saveModifiedDescription', function(req, res, next) {
 
 router.post('/saveAiDescription', function(req, res, next) {
   let inputJson = req.body;
+  console.log({inputJson});
   console.log('SAVE AI DESCRiption');
   // console.log('TEST Save AI:', inputJson);
   let {qnaData, user_id, videoId} = inputJson;
