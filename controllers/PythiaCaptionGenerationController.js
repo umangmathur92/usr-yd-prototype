@@ -23,10 +23,10 @@ class PythiaCaptionGenerationController{
                 // console.log({captionArr});
             //    console.log({data});
 
-            // let response = await keyframeModel.updatePythiaCaption(captionArr);
+            let response = await keyframeModel.updatePythiaCaption(captionArr);
             // console.log(response);
 
-            // let pythiaCaptions = await keyframeModel.getKeyFramesByVideoId(videoId);
+            let pythiaCaptions = await keyframeModel.getKeyFramesByVideoId(videoId);
             // console.log({caption: pythiaCaptions.updatedPythiaCaption});
 
             let sceneMap = new Map();
@@ -53,7 +53,7 @@ class PythiaCaptionGenerationController{
             }
             // console.log({sceneCaptionArr});
 
-            // await sceneModel.updatePythiaCaptionForAllScenes(sceneCaptionArr);
+            await sceneModel.updatePythiaCaptionForAllScenes(sceneCaptionArr);
             console.log('Successfully updated pythia caption in scene table');
             
         }catch(e){
