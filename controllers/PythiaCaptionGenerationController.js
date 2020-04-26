@@ -23,10 +23,10 @@ class PythiaCaptionGenerationController{
                 // console.log({captionArr});
             //    console.log({data});
 
-            let response = await keyframeModel.updatePythiaCaption(captionArr);
+            // let response = await keyframeModel.updatePythiaCaption(captionArr);
             // console.log(response);
 
-            let pythiaCaptions = await keyframeModel.getKeyFramesByVideoId(videoId);
+            // let pythiaCaptions = await keyframeModel.getKeyFramesByVideoId(videoId);
             // console.log({caption: pythiaCaptions.updatedPythiaCaption});
 
             let sceneMap = new Map();
@@ -53,7 +53,7 @@ class PythiaCaptionGenerationController{
             }
             // console.log({sceneCaptionArr});
 
-            await sceneModel.updatePythiaCaptionForAllScenes(sceneCaptionArr);
+            // await sceneModel.updatePythiaCaptionForAllScenes(sceneCaptionArr);
             console.log('Successfully updated pythia caption in scene table');
             
         }catch(e){
@@ -63,16 +63,21 @@ class PythiaCaptionGenerationController{
     }
 
     static async fetchPythiaCaption(image_url){
-        let result =  await axios({
-                        method: 'post',
-                        url : 'http://ec2-34-221-19-208.us-west-2.compute.amazonaws.com:8080/api',
-                        data: qs.stringify({
-                            token : 'ZSDL6MXc6urYauWzVLXnUgE8yZcfCncCYgNyX4jRRnrGCTLmV4KUKrNDYSbfWAf2', 
-                            image_url
-                        }),
-                        headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-                    })
-        return result;
+        try{
+            let result =  await axios({
+                method: 'post',
+                url : 'http://ec2-34-221-19-208.us-west-2.compute.amazonaws.com:8080/api',
+                data: qs.stringify({
+                    token : 'ZSDL6MXc6urYauWzVLXnUgE8yZcfCncCYgNyX4jRRnrGCTLmV4KUKrNDYSbfWAf2', 
+                    image_url
+                }),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            })
+            return result;
+        }catch(error){
+            console.log(error);
+            throw error;
+        }
                     
     }
 
@@ -80,5 +85,4 @@ class PythiaCaptionGenerationController{
 
 module.exports = PythiaCaptionGenerationController;
 
-// let controller = new PythiaCaptionGenerationController();
-// controller.generatePythiaCaption('GXWpEjEFWkM');
+// PythiaCaptionGenerationController.generatePythiaCaption('GXWpEjEFWkM');
