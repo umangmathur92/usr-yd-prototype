@@ -71,7 +71,7 @@ async function fetchVideoData(videoId, userId) {
         let queryResult = await db.query(`select scene_id as sc_id, scene_num as sc_num, start_time, end_time, 
                                         original_ocr, original_description from scene where video_id= $1 ORDER BY scene_num`, [videoId]);
         queryResult.forEach(scene => {
-                scene.deletedScene = '';
+                scene.deletedScene = [];
             });
         
         let modifiedData = await db.query(`select scene_id as sc_id, scene_num as sc_num,

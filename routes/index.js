@@ -15,6 +15,7 @@ const sentences = require('../backend/sentences.js');
 const pythiaCaption = require('../routes/pythiaCaption');
 const bleu = require('../npm_python/nodejs/bleu.js');
 const audioDescription = require('../backend/audioDescriptions.js');
+const filterDescriptionBleuController = require('../controllers/FilterBaselineDescriptionController');
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
@@ -67,6 +68,25 @@ router.get('/getAllVideos', function(req, res, next) {
     res.send(result);  
   });
 });
+
+
+router.get('/filterDescriptionBleu', function(req, res, next) {
+  let videoId = req.query.videoId;
+  if(!videoId){
+    res.status(400).send('Missing parameter');
+  }else{
+    filterDescriptionBleuController.filter(videoId)
+      .then(result => {
+        res.status(200).send('SUCCESS: Data updated for the video in Scene table');  
+      })
+      .catch(e => {
+        console.log(e);
+        res.send(e);
+      })
+  }
+  
+});
+
 
 router.get('/getDialogTimeStamps', function(req, res, next) {
   //let query = video.fetchKeyFrames();

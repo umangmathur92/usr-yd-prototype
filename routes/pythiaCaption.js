@@ -6,20 +6,19 @@ const pythiaCaptionController = require('../controllers/PythiaCaptionGenerationC
 
 
 router.get('/generateCaption', function (req, res) {
-    // console.log({ param: req.query.userId });
     let videoId = req.query.videoId;
     if (videoId) {
         let queryResult = pythiaCaptionController.generatePythiaCaption(videoId);
         queryResult
         .then(result => {
-            res.send('Pythia captions successfully updated');
+            res.status(200).send('Pythia captions successfully updated');
             console.log(result);
         })
         .catch((err) => {
-            res.send(err);
+            res.status(400).send(err);
         });
     }else{
-        res.send('No video id received');
+        res.status(400).send('Missing request parameter');
     }
 });
 
