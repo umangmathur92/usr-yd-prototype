@@ -16,6 +16,7 @@ const pythiaCaption = require('../routes/pythiaCaption');
 const bleu = require('../npm_python/nodejs/bleu.js');
 const audioDescription = require('../backend/audioDescriptions.js');
 const filterDescriptionBleuController = require('../controllers/FilterBaselineDescriptionController');
+const bodyParser = require('body-parser');
 
 router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
@@ -24,6 +25,10 @@ router.use('/room', chatRoom);
 router.use('/merge', mergeScene);
 router.use('/vi', uploadVideoRoute);
 router.use('/pythia',pythiaCaption);
+
+// Put these statements before you define any routes.
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
 
 // console.log({sceneModification: sceneModification.addModifiedScene})
 
@@ -617,12 +622,10 @@ router.post('/audioDescriptionByScene', function(req, res, next) {
 //   extended: false
 // }));
 
-const bodyParser = require('body-parser');
 
 
-// Put these statements before you define any routes.
-router.use(bodyParser.urlencoded());
-router.use(bodyParser.json());
+
+
 
 router.post('/splitMp3', function(req, res, next) {  
   let inputJson = req.body;
