@@ -135,7 +135,10 @@ async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
             let descriptionText = currDescription.description;
             let ocrText = currDescription.ocr;
             let sceneNum = currDescription.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
+            let lastChar = descriptionText[descriptionText.length - 1];
+            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+                descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             sentences = finalText.replace(/([.?!])\s*(?=[A-Za-z])/g, "$1|").split("|")
@@ -204,7 +207,10 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
             let descriptionText = currSentence.description;
             let ocrText = currSentence.ocr;
             let sceneNum = currSentence.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
+            let lastChar = descriptionText[descriptionText.length - 1];
+            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+                descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             let sent = currSentence.sentence;

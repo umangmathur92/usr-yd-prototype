@@ -55,7 +55,10 @@ async function generateMp3ForAllDescriptionsInDb() {
             let descriptionText = currDescription.description;
             let ocrText = currDescription.ocr;
             let sceneNum = currDescription.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
+            let lastChar = descriptionText[descriptionText.length - 1];
+            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+                descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}.mp3`;
@@ -98,7 +101,7 @@ async function generateMp3DurationForText(inputText) {
 
         let duration = await getAudioDurationInSeconds(fileNamePath);
 
-        return {'success': true, 'duration': duration};
+        return {'success': true, 'duration': duration, 'file':response.audioContent};
     } catch (error) {
         console.log(error);
         return {'success': false, 'duration': 'None'};
