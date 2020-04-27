@@ -4,6 +4,59 @@ const util = require('util');
 const db = require('../db/database');
 const fse = require('fs-extra');
 const { getAudioDurationInSeconds } = require('get-audio-duration')
+let MediaSplit = require('media-split');
+// const detectCharacterEncoding = require('detect-character-encoding');
+
+
+async function mp3Split(file, midTime, callbackURL){
+
+    try{
+        // const fileBuffer = fs.readFileSync('file.txt');
+        // const charsetMatch = detectCharacterEncoding(file);
+
+        // console.log(charsetMatch);
+
+
+        const writeFile = util.promisify(fs.writeFile);
+        await writeFile('public/audio/output.mp3', file, 'binary');
+        console.log('Audio content written to file: output.mp3');
+        console.log("time: "+midTime);
+
+    let split = new MediaSplit({ input: "public/audio/output.mp3", sections: [`[00:00 - ${midTime}] output1`] });
+
+    split.parse().then((sections) => {
+        for (let section of sections) {
+          console.log(section.name);      // filename
+          console.log(section.start);     // section start
+          console.log(section.end);       // section end
+          console.log(section.trackName); // track name
+        }
+      });
+
+
+      split = new MediaSplit({ input: "public/audio/output.mp3", sections: [`[${midTime}] output2`] });
+
+      split.parse().then((sections) => {
+        for (let section of sections) {
+          console.log(section.name);      // filename
+          console.log(section.start);     // section start
+          console.log(section.end);       // section end
+          console.log(section.trackName); // track name
+        }
+      });
+    }
+    catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+async function refereshAudioData(vid_id, vol_id){
+
+    await db.any(`Delete from descriptions_sentence where video_id = '${vid_id}' AND volunteer_id = ${vol_id}`);
+    await db.any(`Delete from descriptions_new_sentence where video_id = '${vid_id}' AND volunteer_id = ${vol_id}`);
+
+}
     
     /** Generates mp3 file based on text. Audio is stored in output.mp3 */
 async function generateMp3ForText(inputText) {
@@ -61,7 +114,10 @@ async function generateMp3ForAllSentencesInDb() {
             let descriptionText = currSentence.description;
             let ocrText = currSentence.ocr;
             let sceneNum = currSentence.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
+            let lastChar = descriptionText[descriptionText.length - 1];
+            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+                descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             let sent = currSentence.sentence;
@@ -100,7 +156,10 @@ async function generateSentencesForAllDescriptionsInDb() {
             let descriptionText = currDescription.description;
             let ocrText = currDescription.ocr;
             let sceneNum = currDescription.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
+            let lastChar = descriptionText[descriptionText.length - 1];
+            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+                descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             // let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}.mp3`;
@@ -703,6 +762,8 @@ module.exports = {
     generateTimestampsforSentencesInDb: generateTimestampsforSentencesInDb,
     generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo,
     // generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb,
+    mp3Split: mp3Split,
     generateSentencesForAllDescriptionsInDb: generateSentencesForAllDescriptionsInDb,
-    mergeSentenceAudios: mergeSentenceAudios
+    mergeSentenceAudios: mergeSentenceAudios,
+    refereshAudioData: refereshAudioData
 }

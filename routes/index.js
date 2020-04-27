@@ -473,7 +473,7 @@ router.post('/descriptionDuration', function(req, res, next) {
   let inputText = inputJson.inputText;
   let task = textToSpeech.generateMp3DurationForText(inputText);
   task.then(result => {
-    res.send({success: result.success, duration: result.duration});
+    res.send({success: result.success, duration: result.duration, file:result.file});
   });
 });
 
@@ -555,6 +555,18 @@ router.get('/getDescriptionData', function(req, res, next) {
 //   });
 // });
 
+router.get('/refreshAudioData', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = sentences.refereshAudioData(videoId,volunteerId);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+
 router.get('/generateAudioDescriptionMp3', function(req, res, next){
   let videoId= req.query.videoId;
   let volunteerId = req.query.volunteerId;
@@ -574,6 +586,32 @@ router.post('/audioDescriptionByScene', function(req, res, next) {
   let scene_id = inputJson.scene_id;
   let description = inputJson.desc;
   let task = audioDescription.generateTimestampsforScene(video_id, volunteer_id, scene_id, description);
+  task.then(result => {
+    res.send({"status":result});
+  });
+});
+
+// router.use(bodyParser.urlencoded({ extended: false }));
+// router.use("/", expressStaticGzip("dist"));
+// router.onBeforeAction(Iron.router.bodyParser.urlencoded({
+//   extended: false
+// }));
+
+const bodyParser = require('body-parser');
+
+
+// Put these statements before you define any routes.
+router.use(bodyParser.urlencoded());
+router.use(bodyParser.json());
+
+router.post('/splitMp3', function(req, res, next) {  
+  let inputJson = req.body;
+  console.log(req.body);
+  console.log(req.headers['content-type']);
+  let file = inputJson.file;
+  let time = inputJson.time;
+  let callbackURL = inputJson.callbackURL;
+  let task = sentences.mp3Split(file, time, callbackURL);
   task.then(result => {
     res.send({"status":result});
   });
