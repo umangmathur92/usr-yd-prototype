@@ -498,8 +498,16 @@ router.post('/descriptionDuration', function(req, res, next) {
   let inputText = inputJson.inputText;
   let task = textToSpeech.generateMp3DurationForText(inputText);
   task.then(result => {
-    res.send({success: result.success, duration: result.duration, file:result.file});
+      //  res.send(result.file);
+    res.send({success: result.success, duration: result.duration, file:result.file, form:result.form});
   });
+});
+
+router.post('/descriptionMp3Audio', function(req, res, next) {  
+  let inputJson = req.body;
+  let inputText = inputJson.inputText;
+  let task = textToSpeech.getMp3ForDescription(inputText, res);
+  task.then(result => { console.log(result) });
 });
 
                   /*  For sentence generation starts*/
