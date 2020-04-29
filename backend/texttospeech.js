@@ -156,7 +156,7 @@ async function generateMp3DurationForText(inputText) {
         let readStream = fs.createReadStream('./'+fileNamePath);
             readStream.on('error', function (err) {
               console.log("RS err is: ",err);
-              reject(err);
+            //   reject(err);
             });
 
             readStream.on('data', function (chunk) {
