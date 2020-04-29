@@ -161,7 +161,7 @@ async function generateMp3DurationForText(inputText) {
 
             readStream.on('data', function (chunk) {
                 console.log("File opened");
-                reject(err)
+                // reject(err)
               });
 
             readStream.on('end', () => {
