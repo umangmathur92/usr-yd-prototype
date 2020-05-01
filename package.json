@@ -33,6 +33,7 @@
     "http-errors": "~1.6.2",
     "https": "^1.0.0",
     "json2csv": "^4.5.4",
+    "m3u8stream": "^0.7.0",
     "media-split": "^5.1.0",
     "morgan": "~1.9.0",
     "multer": "^1.4.1",
