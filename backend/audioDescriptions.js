@@ -355,7 +355,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     let dialog_video_id = dialog_timestamps.video_id;
     // let flag = true;
     // let index = dialog_start_time.length - 1;
-    let i = sentences.length - 1;
+    let i = 0;
     console.log('Debug: '+dialog_video_arr);
     // let prevVideo = sentence_video_id[sentence_video_id.length - 1];
     
@@ -363,7 +363,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
         i--;
     
 
-    while(i>=0){
+    while(i < sentences.length ){
         let currVideo = sentence_video_id[i];
         if(!dialog_video_set.has(currVideo))
         { i--; continue;}
@@ -378,7 +378,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
             currDialogEndTimes.push(currVideo_dialog[size]['end_time']);   
         }
 
-        let index = currDialogStartTimes.length - 1;
+        let index = 0;//currDialogStartTimes.length - 1;
         let video_end_time = sentence_video_end_times[i];
         let time_gap = video_end_time - Math.max(currDialogEndTimes[index],scene_start_time[i]);
         let time_start = video_end_time - sentence_duration[i]; // (to check sentence is within the same scene)

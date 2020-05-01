@@ -4,6 +4,9 @@ const util = require('util');
 const db = require('../db/database');
 const fse = require('fs-extra');
 const { getAudioDurationInSeconds } = require('get-audio-duration')
+const FormData = require('form-data');
+const request = require('request');
+const http = require('http');
 
 async function generateMp3ForText(inputText) {
     try {
@@ -85,6 +88,57 @@ async function updateDescriptionTable(duration, currVideoId, volunteerId, hasAi,
     }
 }
 
+async function getMp3ForDescription(inputText, res) {
+    try {
+        const client = new textToSpeech.TextToSpeechClient();
+        const request = {
+            input: {text: inputText},
+            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3'},
+        };
+        const [response] = await client.synthesizeSpeech(request);
+        const writeFile = util.promisify(fs.writeFile);
+        const fileNamePath = 'public/audio/output.mp3';
+        await writeFile(fileNamePath, response.audioContent, 'binary');
+        console.log('Audio content written to file: output.mp3');
+        
+        // let form = new FormData();
+
+        let readStream = fs.createReadStream('./'+fileNamePath);
+            readStream.on('error', function (err) {
+              console.log("RS err is: ",err);
+              reject(err);
+            });
+
+            res.set('content-type', 'audio/mp3');
+            res.set('accept-ranges', 'bytes');
+
+            readStream.on('data', function (chunk) {
+                console.log("File opened");
+                // reject(err)
+                res.write(chunk);
+              });
+
+            readStream.on('end', () => {
+                res.end();
+              });
+
+            console.log("RS err");
+            const formData = {
+              file: readStream,
+              callbackurl: '',
+            };        
+
+        let duration = await getAudioDurationInSeconds(fileNamePath);
+
+        // return {'success': true, 'duration': duration, 'file':response, 'form':formData};
+    } catch (error) {
+        console.log(error);
+        return {'success': false, 'duration': 'None'};
+    }
+}
+
+    // Added file in response
 async function generateMp3DurationForText(inputText) {
     try {
         const client = new textToSpeech.TextToSpeechClient();
@@ -99,9 +153,29 @@ async function generateMp3DurationForText(inputText) {
         await writeFile(fileNamePath, response.audioContent, 'binary');
         console.log('Audio content written to file: output.mp3');
 
+        let readStream = fs.createReadStream('./'+fileNamePath);
+            readStream.on('error', function (err) {
+              console.log("RS err is: ",err);
+            //   reject(err);
+            });
+
+            readStream.on('data', function (chunk) {
+                console.log("File opened");
+                // reject(err)
+              });
+
+            readStream.on('end', () => {
+              });
+
+            console.log("RS err");
+            const formData = {
+              file: readStream,
+              callbackurl: '',
+            };        
+
         let duration = await getAudioDurationInSeconds(fileNamePath);
 
-        return {'success': true, 'duration': duration, 'file':response.audioContent};
+        return {'success': true, 'duration': duration, 'file':response, 'form':formData};
     } catch (error) {
         console.log(error);
         return {'success': false, 'duration': 'None'};
@@ -109,6 +183,7 @@ async function generateMp3DurationForText(inputText) {
 }
 
 module.exports = {
+    getMp3ForDescription: getMp3ForDescription,
     generateMp3ForText: generateMp3ForText,
     generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb,
     generateMp3DurationForText: generateMp3DurationForText
