@@ -121,6 +121,16 @@ async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id) {
 
     /** Step 1: Creates separate sentences of given descriptions in the db for all videos & users */
 async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
+    
+    try{
+    
+        await db.any(`Delete from descriptions_sentence where video_id = '${vid_id}' and volunteer_id = '${vol_id}'`);
+    
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+
     try {
         let descriptionListArr = await db.any(`SELECT * FROM descriptions WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}'order by id`);
         for(let i=0; i<descriptionListArr.length; i++) {
@@ -193,6 +203,8 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
 
     try{
         let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by scene_num, sentence_id`);
+        
+        // rimraf.sync(`public/audio/${currVideoId}/${descType}/${volunteerId}`);
 
         for(let i=0; i<sentenceListArr.length; i++) {
 
@@ -217,7 +229,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
             let str = currSentence.sentence_id;
             let newstr = str.split('_');
             let sentNum = newstr[newstr.length - 1]; 
-            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
             let relativePath = fileNamePath.replace('public', '..');
 
             await generateMp3ForTextInFileystem(fileNamePath, sent);
@@ -322,6 +334,7 @@ async function generateTimestampsforScene(dbVideoId, dbVolId, sceneId, descripti
     /** Step 3: Insert audio descriptions inline/extended in the video for a particular user and video*/
 async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     try{
+        console.log("Video_id is: "+dbVideoId);
     let sentences = await db.query(`SELECT * FROM descriptions_sentence WHERE video_id='${dbVideoId}' and volunteer_id='${dbVolId}' ORDER BY scene_num, sentence_id`);
     let size = 0;
     let sentence_duration = [];
@@ -359,206 +372,84 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     console.log('Debug: '+dialog_video_arr);
     // let prevVideo = sentence_video_id[sentence_video_id.length - 1];
     
-    while(!dialog_video_set.has(sentence_video_id[i]))
-        i--;
-    
+    let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${dbVideoId}'`);
 
-    while(i < sentences.length ){
-        let currVideo = sentence_video_id[i];
-        if(!dialog_video_set.has(currVideo))
-        { i--; continue;}
+    let time_gaps_start_time = [];
+    let time_gaps_end_time = [];
+    let time_gaps_scene_num = [];
+    let time_gaps_is_overlap = [];
+
+    for(let item = 0; item < time_gaps_info.length; item++)
+    {
+        time_gaps_data = time_gaps_info[item];
+        time_gaps_start_time.push(time_gaps_data.start_time);
+        time_gaps_end_time.push(time_gaps_data.end_time);
+        time_gaps_scene_num.push(time_gaps_data.scene_num);
+        time_gaps_is_overlap.push(time_gaps_data.is_overlap);
+    }
+    let j =0;
+    let currScene = sentence_scene[0];
+
+    while(i < sentences.length && j < time_gaps_info.length){
         // Include prevScene as well to change the scene
-        let currVideo_dialog = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${currVideo}' ORDER BY start_time`);
-        let currDialogStartTimes = [];
-        let currDialogEndTimes = [];
-
-        for(let size=0; size < currVideo_dialog.length; size++)
-        {
-            currDialogStartTimes.push(currVideo_dialog[size]['start_time']);
-            currDialogEndTimes.push(currVideo_dialog[size]['end_time']);   
-        }
-
-        let index = 0;//currDialogStartTimes.length - 1;
-        let video_end_time = sentence_video_end_times[i];
-        let time_gap = video_end_time - Math.max(currDialogEndTimes[index],scene_start_time[i]);
-        let time_start = video_end_time - sentence_duration[i]; // (to check sentence is within the same scene)
-        let time_end = video_end_time;
-        let currSceneNum = sentence_scene[i];
-
-        while(index >= -1){
-        if(currVideo != sentence_video_id[i])
-            break;
-        let end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
-        let start_time_sceneNum = await fetchSceneNum(time_start, currVideo, sentence_id[i]);
-
-            // if time gap is between two different scenes, break the time gap into two parts for each scene
-        if(start_time_sceneNum != end_time_sceneNum || time_gap == 0 || end_time_sceneNum != currSceneNum)
-            {
+        // let currVideo_dialog = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${currVideo}' ORDER BY start_time`);
+        // let currDialogStartTimes = [];
+        // let currDialogEndTimes = [];
+                /** Extended */
+        if(time_gaps_scene_num[j] > sentence_scene[i]){
                 let presentSceneNum = sentence_scene[i];
                 
-                while(presentSceneNum == sentence_scene[i] && currVideo == sentence_video_id[i]){
-                    let sceneStartTime = scene_start_time[i];
-                    await updateSentenceStartTime(sentence_id[i], sceneStartTime, 'extended');
-                    i--;
-            }
+                while(presentSceneNum == sentence_scene[i] ){
+                    let sceneEndTime = sentence_video_end_times[i];
 
-            // index--;
-            // time_gap = currDialogStartTimes[index+1] - Math.max(currDialogEndTimes[index],scene_start_time[i]);
-            // time_start = currDialogStartTimes[index+1] - sentence_duration[i]; // (to check sentence is within the same scene)
-            // time_end = currDialogStartTimes[index+1];
-            // continue;
+                    await updateSentenceStartTime(sentence_id[i], sceneEndTime, 'extended');
+                    i++;
         }
-    
-        if(time_gap <= sentence_duration[i] && currSceneNum == sentence_scene[i])
-        {
-            curr_dialog_start_time = currDialogStartTimes[index];
-            present_scene_num  = await fetchSceneNum(curr_dialog_start_time, currVideo, sentence_id[i]);
-            if(present_scene_num < currSceneNum)
-                {time_gap = 0; continue;}
-
-            index--;
-            
-            let currDial_endTime = (index >= 0 ? currDialogEndTimes[index] : scene_start_time[i]); // deals with 1st scene edge case
-
-            time_gap = currDialogStartTimes[index+1] - Math.max(currDial_endTime,scene_start_time[i]);
-            time_start = currDialogStartTimes[index+1] - sentence_duration[i] - 0.1; // (to check sentence is within the same scene)
-            time_end = currDialogStartTimes[index+1] - 0.1;
-            /***************  Major bug in listen by code *******************/
-            if (time_gap == 0)
-                time_gap = 0.01;
-            /***************  *************************** *******************/
-            continue;
-        }
-
-        while(start_time_sceneNum == end_time_sceneNum  && time_gap > sentence_duration[i] && currVideo == sentence_video_id[i] && currSceneNum == sentence_scene[i]){
-            await updateSentenceStartTime(sentence_id[i], time_start, 'inline');
-            time_gap -= (sentence_duration[i] + 0.1);
-            time_end = time_start - 0.1;
-            // time_start -= (sentence_duration[i] + 0.1);
-            
-            end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
-            i--;
-            if(i<0){index = -2; continue;}
-            
-            time_start = time_end -  sentence_duration[i];
-            start_time_sceneNum = await fetchSceneNum(time_start, currVideo, sentence_id[i]);
-        }
-        
-        if(currSceneNum != sentence_scene[i] && currVideo == sentence_video_id[i]){
-            currSceneNum = sentence_scene[i];
-                // handles 6 edge cases
-            while(true){
-
-                    // no dialogs left
-                    if(index==-1)
-                    {
-                        time_gap = currDialogStartTimes[0];
-                        time_end = currDialogStartTimes[0] - 0.1;
-                        time_start = time_end - sentence_duration[i];
-                        break;
-                    }else if(index < -1)
-                        break;
-                    
-
-                let dialog_start_time_sceneNum = await fetchSceneNum(currDialogStartTimes[index], currVideo, sentence_id[i]);
-                let dialog_end_time_sceneNum = await fetchSceneNum(currDialogEndTimes[index], currVideo, sentence_id[i]);
-                
-                    // if dialog's starting time jumps to previous scene
-                if(dialog_start_time_sceneNum < sentence_scene[i]){
-
-                        //  if dialog's ending time also jumps to previous scene
-                    if(dialog_end_time_sceneNum < sentence_scene[i])
-                        {
-                            time_gap = scene_start_time[i+1] - scene_start_time[i];
-                            time_end = scene_start_time[i+1] - 0.1;
-                            time_start = time_end - sentence_duration[i]//scene_start_time[i+1];
-                            break;
-                        }
-                    
-                        //  if dialog's ending time is in current scene
-                    if(dialog_end_time_sceneNum == sentence_scene[i])
-                    {
-                        time_gap = scene_start_time[i+1] - currDialogEndTimes[index];
-                        time_end = scene_start_time[i+1] - 0.1;
-                        time_start = time_end - sentence_duration[i];
-                        break;
-                    }
-
-                        //  if dialog's ending time is in next scene
-                    if(dialog_end_time_sceneNum > sentence_scene[i])
-                    {
-                        time_gap = 0;
-                        time_end = scene_start_time[i+1] - 0.1;
-                        time_start = time_end - sentence_duration[i];
-                        break;
-                    }  
-                }
-
-                if(dialog_start_time_sceneNum == sentence_scene[i]){
-                        // Both dialog timestamps in the same scene
-                    if(dialog_end_time_sceneNum == sentence_scene[i]){
-                        time_gap = scene_start_time[i+1] - currDialogEndTimes[index];
-                        time_end = scene_start_time[i+1] - 0.1;
-                        time_start = time_end - sentence_duration[i];
-                        break;
-                    }
-                        // dialog end time is next scene (?)
-                    else{
-                        time_gap = currDialogStartTimes[index] - Math.max(currDialogEndTimes[index-1],scene_start_time[i]);
-                        time_end = currDialogStartTimes[index];
-                        time_start = time_end - sentence_duration[i];
-                        break;
-                    }
-                }
-            
-
-
-                index--;
-            }
-
-            // let time_gap = video_end_time - Math.max(currDialogEndTimes[index],scene_start_time[i]);
-            // let time_start = video_end_time - sentence_duration[i]; // (to check sentence is within the same scene)
-            // let time_end = video_end_time;
-            
-            continue;
-        }
-        else if(start_time_sceneNum != end_time_sceneNum){
-            continue;
-        }
-        if (index < 0)
-            break;
-        curr_dialog_start_time = currDialogStartTimes[index];
-        present_scene_num  = await fetchSceneNum(curr_dialog_start_time, currVideo, sentence_id[i]);
-
-        if(present_scene_num < currSceneNum)
-            {time_gap = 0; continue;}
-
-        index--;
-        
-        time_gap = currDialogStartTimes[index+1] - Math.max(currDialogEndTimes[index],scene_start_time[i]);
-        time_end = currDialogStartTimes[index];
-        time_start = time_end - sentence_duration[i];
-
-            // time_gap = video_end_time - Math.max(currDialogEndTimes[index],scene_start_time[i]);
-            // time_start = video_end_time - sentence_duration[i]; // (to check sentence is within the same scene)
-            // time_end = video_end_time;
-
     }
 
-            // if time gap is between two different scenes, break the time gap into two parts for each scene
-        if(index==0 && currVideo == sentence_video_id[i])
-            {
-                let presentSceneNum = sentence_scene[i];
-                
-                while(i>= 0 && presentSceneNum == sentence_scene[i]){
-                    let sceneStartTime = scene_start_time[i];
-                    await updateSentenceStartTime(sentence_id[i], sceneStartTime, 'extended');
-                    i--;
-            }
+        currScene = sentence_scene[i];
+
+        while( j < time_gaps_info.length && time_gaps_scene_num[j] < currScene)
+            j++;
+        
+        let time_start = time_gaps_start_time[j]; // May have to add error '0.01'
+        let time_end = time_gaps_end_time[j];
+        
+        if( j != 0 && time_gaps_is_overlap[j-1])
+            time_start = scene_start_time[i];
+
+        let time_gap = time_end - time_start;
+
+        // let end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
+        // let start_time_sceneNum = await fetchSceneNum(time_start, currVideo, sentence_id[i]);
+
+        while(i < sentences.length  && time_gap > sentence_duration[i] && currScene == sentence_scene[i]){
+
+            await updateSentenceStartTime(sentence_id[i], time_start, 'inline');
+            time_gap -= (sentence_duration[i] + 0.1);
+            // time_end = time_start - 0.1;
+            // time_start -= (sentence_duration[i] + 0.1);
+            
+            // end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
+            i++;
+            if(i >= sentences.length){break;}
+            
+            time_start += sentence_duration[i-1];
         }
 
+        j++;
+
 }
-    } catch (error) {
+
+    while(i < sentences.length){
+        let presentSceneNum = sentence_scene[i];
+                
+        let sceneEndTime = sentence_video_end_times[i];
+        await updateSentenceStartTime(sentence_id[i], sceneEndTime, 'extended');
+        i++;
+}
+
+} catch (error) {
         console.log(error);
         return false;
     }
@@ -747,5 +638,6 @@ async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneN
 module.exports = {
     generateMp3ForText: generateMp3ForText,
     generateAudioDescriptionsInDbWithInfo: generateAudioDescriptionsInDbWithInfo,
-    generateTimestampsforScene: generateTimestampsforScene
+    generateTimestampsforScene: generateTimestampsforScene,
+    generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo
 }

@@ -111,6 +111,7 @@ async function getMp3ForDescription(inputText, res) {
             });
 
             res.set('content-type', 'audio/mp3');
+            res.set('content-disposition', 'output.mp3');
             res.set('accept-ranges', 'bytes');
 
             readStream.on('data', function (chunk) {

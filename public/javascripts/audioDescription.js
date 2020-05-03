@@ -633,23 +633,23 @@ async function onProgress(currentTime) {
     currentTime = currentTime.toFixed(3);
     let currScene = getSceneFromTime(currentTime);
     let sceneId = currScene.sc_id;
-    // console.log("The scene id : " + sceneId);
+    console.log(allSceneArr);
     let sceneNum = currScene.sc_num;
     let sceneEndTime = currScene.finish_time;
     
     if(prevSceneNum == -1 && first_extend_flag)
     {first_extend_flag = false;}
 
-    else if(sceneNum != prevSceneNum) {   
-        if(scene_audio_extend_set.has(sceneNum)) {
+    else if((prevSceneNum != -1 && sceneNum != prevSceneNum) || (sceneNum == allSceneArr[allSceneArr.length - 1].sc_num && (sceneEndTime - 1.5 < player.getCurrentTime()))) {   
+        if(scene_audio_extend_set.has(prevSceneNum)) {
             STATE = 1;
             pauseVideo();
-            let totalAudios = sentenceAudioMap[sceneNum];
+            let totalAudios = sentenceAudioMap[prevSceneNum];
             let flag = true;
             let i=0;
             YT_FLAG = true;
                 if(flag && currAudio==null)
-                {currAudio = sentenceAudioMap[sceneNum][0];
+                {currAudio = sentenceAudioMap[prevSceneNum][0];
                     console.log("Will play now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 player.setVolume(15);
                 currAudio.play();
@@ -702,6 +702,9 @@ async function onProgress(currentTime) {
         }
         prevSceneNum = sceneNum;
     }
+
+    else if(prevSceneNum == -1)
+        prevSceneNum = sceneNum;
     
     else if(currAudio !== null && !isPlaying(currAudio))
         currAudio.play();
