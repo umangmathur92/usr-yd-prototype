@@ -624,6 +624,17 @@ router.post('/audioDescriptionByScene', function(req, res, next) {
   });
 });
 
+router.get('/generateTestAudio', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.generateTimestampsforSentencesInDbWithInfo(videoId,volunteerId);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
 // router.use(bodyParser.urlencoded({ extended: false }));
 // router.use("/", expressStaticGzip("dist"));
 // router.onBeforeAction(Iron.router.bodyParser.urlencoded({
