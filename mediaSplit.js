@@ -108,10 +108,10 @@ console.log(scenes);
         let is_overlap = false;
         let i = 0, len = video_dialogs.length;
         
-        if(len == 0){
-            await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
-                        start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${scene_startTime}, ${scene_endTime}, ${is_overlap})`);
-        }
+        // if(len == 0){
+        //     await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
+        //                 start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${scene_startTime}, ${scene_endTime}, ${is_overlap})`);
+        // }
 
         while(i <= len){
             let time_start = 0, time_end = 0;
@@ -212,7 +212,7 @@ async function testDB(vid_id, vol_id){
 let vol_id = 'b38bc436-7b90-11ea-bc55-0242ac130003';
 let vid_id = '4d1OmRA6yyI';
 
-generateTimeGaps("test_video", "test_user");
+generateTimeGaps("test_video2", "test_user");
 
 // generateTimeGapsOnlyMusic(vid_id, vol_id);
 // testDB(vid_id, vol_id);

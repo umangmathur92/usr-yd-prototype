@@ -520,10 +520,10 @@ for(let i=0; i<video_dialogs.length; i++) {
         let is_overlap = false;
         let i = 0, len = video_dialogs.length;
         
-        if(len == 0){
-            await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
-                        start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${scene_startTime}, ${scene_endTime}, ${is_overlap})`);
-        }
+        // if(len == 0){
+        //     await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
+        //                 start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${scene_startTime}, ${scene_endTime}, ${is_overlap})`);
+        // }
 
         while(i <= len){
             let time_start = 0, time_end = 0;
