@@ -241,19 +241,20 @@ router.get('/userStudy2/users/', function (req, res) {
 
 function addModifiedScene (data, callback) {
   console.log('inside modified scene:', data);
-  let { has_ai, video_id, scene_id, user, block_id, scene_num, start_time, end_time,  description, ocr, deletedScene=[]} = data;
+  let { has_ai, video_id, scene_id, user, block_id, scene_num, start_time, end_time,  description, ocr, deletedScene=[], note} = data;
   let descriptionId = user + '_' + video_id + '_ai_' + scene_num;
   console.log({INSIDEpSOT: data});
   console.log({descriptionId});
   let mergedSceneArr = JSON.stringify(deletedScene);
   description = description.replace(/'/g, '');
   ocr = ocr.replace(/'/g, '');
+  note = note.replace(/'/g, '');
   console.log('MERGED SCENE ARR:', mergedSceneArr);
   const sql = `
   START TRANSACTION;
-  INSERT INTO descriptions(desc_id, video_id, has_ai, volunteer_id, scene_id, scene_num, start_time, end_time, description, ocr, merged_scene) 
-  VALUES('${descriptionId}', '${video_id}', '${has_ai}','${user}', '${scene_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}', '${mergedSceneArr}') 
-  ON CONFLICT(scene_id, volunteer_id) DO UPDATE SET description ='${description}' , merged_scene = '${mergedSceneArr}', end_time= ${end_time}, start_time=${start_time}, ocr='${ocr}' ;
+  INSERT INTO descriptions(desc_id, video_id, has_ai, volunteer_id, scene_id, scene_num, start_time, end_time, description, ocr, merged_scene, note) 
+  VALUES('${descriptionId}', '${video_id}', '${has_ai}','${user}', '${scene_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}', '${mergedSceneArr}', '${note}') 
+  ON CONFLICT(scene_id, volunteer_id) DO UPDATE SET description ='${description}' , merged_scene = '${mergedSceneArr}', end_time= ${end_time}, start_time=${start_time}, ocr='${ocr}', note= '${note}';
   COMMIT;`;
 
   // console.log({sql});
@@ -432,7 +433,7 @@ router.post('/saveAiDescription', function(req, res, next) {
    
       let currScene = inputJson.scene_arr[key];
       console.log({currScene});
-      let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene} = currScene;
+      let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene, note} = currScene;
       if(deletedScene){
         deletedSceneArr = [...deletedSceneArr, ...deletedScene]; 
       }
@@ -448,7 +449,8 @@ router.post('/saveAiDescription', function(req, res, next) {
         start_time,
         end_time,
         has_ai,
-        deletedScene
+        deletedScene,
+        note
       })];
   }
   

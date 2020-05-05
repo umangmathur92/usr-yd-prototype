@@ -72,16 +72,17 @@ async function fetchVideoData(videoId, userId) {
                                         original_ocr, original_description from scene where video_id= $1 ORDER BY scene_num`, [videoId]);
         queryResult.forEach(scene => {
                 scene.deletedScene = [];
+                scene.note = '';
             });
         
         let modifiedData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
                                         start_time, end_time, ocr as original_ocr,
-                                        description as original_description, merged_scene as "deletedScene"
+                                        description as original_description, merged_scene as "deletedScene", note
                                         from descriptions where volunteer_id = $1 and
                                         has_ai=true and 
                                         video_id= $2 ORDER BY scene_num` 
                                         , [userId , videoId])
-        // console.log('over data', JSON.stringify(overrideData));
+        // console.log('over data', JSON.stringify(modifiedData));
         vidQueryResult.originalData = queryResult;
         vidQueryResult.modifiedData = modifiedData;
         console.log({vidQueryResult});
