@@ -605,7 +605,7 @@ router.get('/generateAudioDescriptionMp3', function(req, res, next){
   let volunteerId = req.query.volunteerId;
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
-let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId);
+let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId, res);
 task.then(result => {
 res.send({'result': result});
 });
