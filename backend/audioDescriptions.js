@@ -101,7 +101,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
     }
 }
 
-async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id) {
+async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, res) {
         
             /** Create sentences from the scene description */
         let res1 = await generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id);
@@ -111,9 +111,11 @@ async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id) {
 
             /** Insert inline/extended audio descriptions in the video */
         let res3 = await generateTimestampsforSentencesInDbWithInfo(vid_id, vol_id);
+
+        await getResponse(vid_id, vol_id, res);
             
             /** Merge sentences and audio clips of the sentences based on conitnuity */
-        let res4 = await mergeSentenceAudios(vid_id, vol_id);
+        // let res4 = await mergeSentenceAudios(vid_id, vol_id);
 
         return res1 && res2 && res3 && res4;
 }
@@ -354,23 +356,9 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
         sentence_scene.push(currSentence.scene_num);
         size++;
     }
-// Select unique video ids from video_dialogs_timestamps and create an object (set) from it
-    let dialog_video_res  = await db.query(`SELECT DISTINCT video_id FROM video_dialogs`);
-    let dialog_video_arr = [];
-    size = 0;
-    for(size =0; size<dialog_video_res.length; size++)
-        dialog_video_arr.push(dialog_video_res[size].video_id);
-    
-    let dialog_video_set = new Set(dialog_video_arr);
-    let dialog_timestamps = await db.query(`SELECT * FROM video_dialogs ORDER BY video_id, start_time`);
-    let dialog_start_time = dialog_timestamps.start_time;
-    let dialog_end_time = dialog_timestamps.end_time;
-    let dialog_video_id = dialog_timestamps.video_id;
-    // let flag = true;
-    // let index = dialog_start_time.length - 1;
-    let i = 0;
-    console.log('Debug: '+dialog_video_arr);
-    // let prevVideo = sentence_video_id[sentence_video_id.length - 1];
+
+    // Call fn for generating time gaps
+    await generateTimeGaps(dbVideoId);
     
     let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${dbVideoId}'`);
 
@@ -387,14 +375,11 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
         time_gaps_scene_num.push(time_gaps_data.scene_num);
         time_gaps_is_overlap.push(time_gaps_data.is_overlap);
     }
-    let j =0;
+    let i = 0, j = 0;
     let currScene = sentence_scene[0];
 
     while(i < sentences.length && j < time_gaps_info.length){
-        // Include prevScene as well to change the scene
-        // let currVideo_dialog = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${currVideo}' ORDER BY start_time`);
-        // let currDialogStartTimes = [];
-        // let currDialogEndTimes = [];
+
                 /** Extended */
         if(time_gaps_scene_num[j] > sentence_scene[i]){
                 let presentSceneNum = sentence_scene[i];
@@ -423,18 +408,15 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
         // let end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
         // let start_time_sceneNum = await fetchSceneNum(time_start, currVideo, sentence_id[i]);
 
-        while(i < sentences.length  && time_gap > sentence_duration[i] && currScene == sentence_scene[i]){
+        while(i < sentences.length  && time_gap > sentence_duration[i] && currScene == sentence_scene[i] && time_gaps_scene_num[j] == sentence_scene[i]){
 
             await updateSentenceStartTime(sentence_id[i], time_start, 'inline');
             time_gap -= (sentence_duration[i] + 0.1);
-            // time_end = time_start - 0.1;
-            // time_start -= (sentence_duration[i] + 0.1);
-            
-            // end_time_sceneNum = await fetchSceneNum(time_end, currVideo, sentence_id[i]);
             i++;
+
             if(i >= sentences.length){break;}
             
-            time_start += sentence_duration[i-1];
+            time_start += sentence_duration[i-1] + 0.1;
         }
 
         j++;
@@ -455,6 +437,116 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     }
 
 }
+
+async function generateTimeGaps(vid_id,vol_id){
+
+try{
+
+    let res = await db.any(`Select * FROM video_time_gaps where video_id = '${vid_id}'`);
+    if(res.length > 0)
+        return true;
+
+} catch (error) {
+    console.log(error);
+    return false;
+}
+
+let descriptionListArr = await db.any(`SELECT * FROM descriptions WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}'order by scene_num`);
+
+let scenes = {};
+
+for(let i=0; i<descriptionListArr.length; i++) {
+    let currDescription = descriptionListArr[i];
+    times = {};
+    times["start_time"] = currDescription.start_time;
+    times["end_time"] = currDescription.end_time;
+    times["video_dialogs"] = [];
+
+    scenes[currDescription.scene_num] = times;    
+}
+
+let video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
+
+for(let i=0; i<video_dialogs.length; i++) {
+    let currDialog = video_dialogs[i];
+
+    let cd_startTime = currDialog.start_time;
+    let cd_endTime = currDialog.end_time;
+    let begin = await fetchSceneNum(cd_startTime, vid_id, vol_id);
+    let end = await fetchSceneNum(cd_endTime, vid_id, vol_id);
+
+    if(begin == end){
+        let vdObj = {};
+        vdObj["start_time"] = cd_startTime;
+        vdObj["end_time"] = cd_endTime;
+
+        scenes[begin]["video_dialogs"].push(vdObj);
+    }
+    else{
+        let i = begin;
+        
+        while(i <= end){
+            let begin_time = 0, end_time = 0;
+            let vdObj = {};
+
+            if(!(scenes.hasOwnProperty(i)))
+                {i++; continue;}
+            
+            if(i == begin)
+                begin_time = cd_startTime;
+            else
+
+                begin_time = scenes[i]["start_time"];
+
+            if(i == end)
+                end_time = cd_endTime;
+            else
+                end_time = scenes[i]["end_time"];
+
+            vdObj["start_time"] = begin_time;
+            vdObj["end_time"] = end_time;    
+            scenes[i]["video_dialogs"].push(vdObj);
+            i++;
+        }
+    }
+}
+
+    for(scene of Object.keys(scenes)){
+
+        let video_dialogs = scenes[scene]["video_dialogs"]
+        let scene_num = scene;
+        let scene_startTime = scenes[scene]["start_time"];
+        let scene_endTime = scenes[scene]["end_time"];
+        let is_overlap = false;
+        let i = 0, len = video_dialogs.length;
+        
+        if(len == 0){
+            await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
+                        start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${scene_startTime}, ${scene_endTime}, ${is_overlap})`);
+        }
+
+        while(i <= len){
+            let time_start = 0, time_end = 0;
+
+            if(i == 0)
+                time_start = scene_startTime;
+            else
+                time_start = video_dialogs[i-1]["end_time"];
+            
+            if(i == len)
+                time_end = scene_endTime;
+            else
+                time_end = video_dialogs[i]["start_time"];
+
+            if(time_start !== time_end)
+                await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
+                            start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${time_start}, ${time_end}, ${is_overlap})`);
+            i++;
+        }
+    }
+}
+
+
     /** Fetch scene num from a given timestamp, videoId */
 async function fetchSceneNum(timestamp, videoId, sentence_id){
     
@@ -575,6 +667,78 @@ async function mergeSentenceAudios(video_id, vol_id){
     console.log(error);
     return false;
 }
+}
+
+async function getResponse(vid_id, vol_id, res){
+
+        let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by scene_num, sentence_id`);
+        
+        let result = {};
+
+        let sceneMap = {};
+
+        for(let i=0; i<sentenceListArr.length; i++) {
+
+            let currSentence = sentenceListArr[i];
+            let currSentenceId = currSentence.sentence_id;
+            let currDescriptionId = currSentence.desc_id;
+            let currVideoId = currSentence.video_id;
+            let currSceneId = currSentence.scene_id;
+            let currScene_start_time = currSentence.start_time;
+            let currScene_end_time = currSentence.end_time;
+            let volunteerId = currSentence.volunteer_id;
+            let hasAi = currSentence.has_ai;
+            let descriptionText = currSentence.description;
+            let ocrText = currSentence.ocr;
+            let sceneNum = currSentence.scene_num;
+            let currAudioPath = currSentence.audiopath;
+            let currAudioType = currSentence.audio_type;
+            let currAudioStartTime = currSentence.audio_start_time;
+            let currAudioLength = currSentence.audio_length;
+            let currSent = currSentence.sentence;
+
+            if(!(result.hasOwnProperty(currSceneId))){
+                result[currSceneId] = {};
+                result[currSceneId]["description"] = descriptionText + ocrText; 
+                result[currSceneId]["sentences"] = [];
+                result[currSceneId]["empty gaps"] = [];
+                sceneMap[sceneNum] = currSceneId;
+            }
+
+            let sentenceObj = {};
+            sentenceObj["sentence id"] = currSentenceId;
+            sentenceObj["sentence"] = currSent;
+            sentenceObj["audio type"] = currAudioType;
+            sentenceObj["audio start time"] = currAudioStartTime;
+            sentenceObj["audio duration"] = currAudioLength;
+            sentenceObj["url"] = "http://18.221.192.73:5001" + currAudioPath.substring(2,currAudioPath.length);
+
+            result[currSceneId]["sentences"].push(sentenceObj);
+        }
+
+          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}'`);
+
+    for(let item = 0; item < time_gaps_info.length; item++)
+    {
+        time_gaps_data = time_gaps_info[item];
+        let time_gaps_start_time = time_gaps_data.start_time;
+        let time_gaps_end_time = time_gaps_data.end_time;
+        let time_gaps_scene_num = time_gaps_data.scene_num;
+        let time_gaps_is_overlap = time_gaps_data.is_overlap;
+
+
+        gapObj = {};
+        gapObj["start time"] = time_gaps_start_time;
+        gapObj["end time"] = time_gaps_end_time;
+        let scene_id = sceneMap[time_gaps_scene_num];
+
+        result[scene_id]["empty gaps"].push(gapObj);
+
+    }
+
+    res.send(result);
+
+    
 }
 
 async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneNum, currSceneStartTime, currSceneEndTime, currSceneDesc, currAudioType, audioStartTime, totalAudioDur, currAudioPath, sentence, path_val){
