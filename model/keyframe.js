@@ -66,6 +66,41 @@ class Keyframe {
         }
     }
 
+    static async updatePythiaCaption(keyframeArr) {
+        console.log('DB Operation: Updating Keyframe table with pythia caption');
+        try {
+            let sql = '';
+            keyframeArr.forEach((data) => {
+                    sql += `UPDATE keyframe SET pythia_caption = '${data.caption}'
+                            WHERE keyframe_id = '${data.keyframe_id}';`;
+                    
+                });
+            sql = 'START TRANSACTION;' + sql + 'COMMIT;'
+            console.log({sql});
+
+            return await db.query(sql);
+        } catch(e) {
+            throw e;
+        }
+    }
+
+
+    static async getKeyFramesByVideoId(videoId) {
+        console.log('get KeyFrames by video Id:', videoId);
+        try {
+            let sql = `select k.keyframe_id , s2.scene_id, k.shot_id,  k.keyframe_num, k.start_time, k.end_time, k.thumbnail_id,
+                        k.thumbnail_url, k.caption,k.caption_confidence, k.pythia_caption
+                        from keyframe k , shot s, scene s2
+                        where k.shot_id = s.shot_id and s.scene_id = s2.scene_id
+                        and s2.video_id = $1 order by k.start_time`;
+
+            return await db.query(sql, [videoId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
 }
 
 module.exports = Keyframe;

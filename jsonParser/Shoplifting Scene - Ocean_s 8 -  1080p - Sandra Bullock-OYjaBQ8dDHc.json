@@ -1,0 +1,145 @@
+{
+	"code": 0,
+	"msg": "",
+	"status": "success",
+	"result": {
+		"text": "",
+		"sentence": [{
+			"sentence": " And any children.",
+			"confidence": "0.6400",
+			"startTime": 6.23,
+			"endTime": 10.57
+		}, {
+			"sentence": " Come on,",
+			"confidence": "0.6600",
+			"startTime": 10.75,
+			"endTime": 11.58
+		}, {
+			"sentence": " uh,",
+			"confidence": "0.5000",
+			"startTime": 12.95,
+			"endTime": 13.9
+		}, {
+			"sentence": " um,",
+			"confidence": "0.4700",
+			"startTime": 13.92,
+			"endTime": 14.71
+		}, {
+			"sentence": " um,",
+			"confidence": "0.4900",
+			"startTime": 15.57,
+			"endTime": 17.82
+		}, {
+			"sentence": " um,",
+			"confidence": "0.4900",
+			"startTime": 18.24,
+			"endTime": 19.18
+		}, {
+			"sentence": " bye.",
+			"confidence": "0.1900",
+			"startTime": 20.22,
+			"endTime": 21.18
+		}, {
+			"sentence": " Thank you.",
+			"confidence": "0.6700",
+			"startTime": 21.19,
+			"endTime": 26.37
+		}, {
+			"sentence": " Um,",
+			"confidence": "0.4100",
+			"startTime": 27.09,
+			"endTime": 28.27
+		}, {
+			"sentence": " hi like to return these, of course to be received. No, but there unopened a untouched. I really need to receipt.",
+			"confidence": "0.7300",
+			"startTime": 30.18,
+			"endTime": 37.99
+		}, {
+			"sentence": " They are sealed their brand new. Do you have the credit card that you use? This is ridiculous. I bought these last week. Maybe you can try. Client service is on the sixth floor.",
+			"confidence": "0.8300",
+			"startTime": 38.2,
+			"endTime": 47.48
+		}, {
+			"sentence": " Never mind.",
+			"confidence": "0.6700",
+			"startTime": 47.5,
+			"endTime": 48.46
+		}, {
+			"sentence": " Just keep them",
+			"confidence": "1.0000",
+			"startTime": 48.48,
+			"endTime": 49.42
+		}, {
+			"sentence": " jesus",
+			"confidence": "1.0000",
+			"startTime": 49.44,
+			"endTime": 50.43
+		}, {
+			"sentence": " can at least get a bag. Sure.",
+			"confidence": "0.7800",
+			"startTime": 51.0,
+			"endTime": 53.23
+		}, {
+			"sentence": " Ah, chicken and twenty fourteen. Gary randall, did you have a pleasant stay? Terrific.",
+			"confidence": "0.6000",
+			"startTime": 68.09,
+			"endTime": 73.31
+		}, {
+			"sentence": " Okay, my name is monica. There anything else I can do for you?",
+			"confidence": "0.7900",
+			"startTime": 74.6,
+			"endTime": 77.14
+		}, {
+			"sentence": " Arrange transportation. The girl said,",
+			"confidence": "0.7100",
+			"startTime": 77.16,
+			"endTime": 79.66
+		}, {
+			"sentence": " hi, this is this is randall. We just checked out of room twenty eight fourteen. May I speak with monica place? Is she? Hi, monica. Hi. Hi. Uh, we just found out our flight was cancelled. Know I know",
+			"confidence": "0.7600",
+			"startTime": 80.64,
+			"endTime": 93.28
+		}, {
+			"sentence": " instead of saying some horrible airport hotel, we were hoping that maybe we could get our original room back. Yeah, we can give you that same them back.",
+			"confidence": "0.8600",
+			"startTime": 93.3,
+			"endTime": 101.51
+		}, {
+			"sentence": " That would be amazing. Thank you so much.",
+			"confidence": "0.8000",
+			"startTime": 101.52,
+			"endTime": 104.21
+		}, {
+			"sentence": " Um, we're just gonna go grab a bite. Uh, would it be possible to get the maid in there now?",
+			"confidence": "0.7800",
+			"startTime": 104.23,
+			"endTime": 108.83
+		}, {
+			"sentence": " Yes, absolutely",
+			"confidence": "0.6700",
+			"startTime": 108.84,
+			"endTime": 110.24
+		}, {
+			"sentence": " perfect. We really appreciate IT. IT's not a problem. Thank you so much. We'll see you soon.",
+			"confidence": "0.7700",
+			"startTime": 110.26,
+			"endTime": 114.98
+		}, {
+			"sentence": " Hi,",
+			"confidence": "0.5000",
+			"startTime": 126.37,
+			"endTime": 127.48
+		}, {
+			"sentence": " so sorry, can you finish up later? I just have to get off my feet. Of course, thank you so much. Have a great day. Who",
+			"confidence": "0.8000",
+			"startTime": 127.49,
+			"endTime": 133.54
+		}, {
+			"sentence": " bye. Bye.",
+			"confidence": "0.5000",
+			"startTime": 133.56,
+			"endTime": 134.42
+		}],
+		"word": []
+	}
+}

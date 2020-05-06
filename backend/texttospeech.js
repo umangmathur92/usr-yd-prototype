@@ -4,6 +4,9 @@ const util = require('util');
 const db = require('../db/database');
 const fse = require('fs-extra');
 const { getAudioDurationInSeconds } = require('get-audio-duration')
+const FormData = require('form-data');
+const request = require('request');
+const http = require('http');
 
 async function generateMp3ForText(inputText) {
     try {
@@ -55,7 +58,10 @@ async function generateMp3ForAllDescriptionsInDb() {
             let descriptionText = currDescription.description;
             let ocrText = currDescription.ocr;
             let sceneNum = currDescription.scene_num;
-            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen is : " + ocrText : "";
+            ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
+            let lastChar = descriptionText[descriptionText.length - 1];
+            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+                descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
             let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}.mp3`;
@@ -82,7 +88,104 @@ async function updateDescriptionTable(duration, currVideoId, volunteerId, hasAi,
     }
 }
 
+async function getMp3ForDescription(inputText, res) {
+    try {
+        const client = new textToSpeech.TextToSpeechClient();
+        const request = {
+            input: {text: inputText},
+            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3'},
+        };
+        const [response] = await client.synthesizeSpeech(request);
+        const writeFile = util.promisify(fs.writeFile);
+        const fileNamePath = 'public/audio/output.mp3';
+        await writeFile(fileNamePath, response.audioContent, 'binary');
+        console.log('Audio content written to file: output.mp3');
+        
+        // let form = new FormData();
+
+        let readStream = fs.createReadStream('./'+fileNamePath);
+            readStream.on('error', function (err) {
+              console.log("RS err is: ",err);
+              reject(err);
+            });
+
+            res.set('content-type', 'audio/mp3');
+            res.set('content-disposition', 'output.mp3');
+            res.set('accept-ranges', 'bytes');
+
+            readStream.on('data', function (chunk) {
+                console.log("File opened");
+                // reject(err)
+                res.write(chunk);
+              });
+
+            readStream.on('end', () => {
+                res.end();
+              });
+
+            console.log("RS err");
+            const formData = {
+              file: readStream,
+              callbackurl: '',
+            };        
+
+        let duration = await getAudioDurationInSeconds(fileNamePath);
+
+        // return {'success': true, 'duration': duration, 'file':response, 'form':formData};
+    } catch (error) {
+        console.log(error);
+        return {'success': false, 'duration': 'None'};
+    }
+}
+
+    // Added file in response
+async function generateMp3DurationForText(inputText) {
+    try {
+        const client = new textToSpeech.TextToSpeechClient();
+        const request = {
+            input: {text: inputText},
+            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3'},
+        };
+        const [response] = await client.synthesizeSpeech(request);
+        const writeFile = util.promisify(fs.writeFile);
+        const fileNamePath = 'public/audio/output.mp3';
+        await writeFile(fileNamePath, response.audioContent, 'binary');
+        console.log('Audio content written to file: output.mp3');
+
+        let readStream = fs.createReadStream('./'+fileNamePath);
+            readStream.on('error', function (err) {
+              console.log("RS err is: ",err);
+            //   reject(err);
+            });
+
+            readStream.on('data', function (chunk) {
+                console.log("File opened");
+                // reject(err)
+              });
+
+            readStream.on('end', () => {
+              });
+
+            console.log("RS err");
+            const formData = {
+              file: readStream,
+              callbackurl: '',
+            };        
+
+        let duration = await getAudioDurationInSeconds(fileNamePath);
+
+        return {'success': true, 'duration': duration, 'file':response, 'form':formData};
+    } catch (error) {
+        console.log(error);
+        return {'success': false, 'duration': 'None'};
+    }
+}
+
 module.exports = {
+    getMp3ForDescription: getMp3ForDescription,
     generateMp3ForText: generateMp3ForText,
-    generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb
+    generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb,
+    generateMp3DurationForText: generateMp3DurationForText
 }

@@ -16,9 +16,10 @@ class Block {
         this.original_description = desc;
     }
     
-    static parseBlockJson(blockJsonObj, youtube_id) {
+    static parseBlockJson(blockJsonObj, youtube_id, num) {
         let video_id = youtube_id;
-        let block_num = blockJsonObj.id;
+        let block_num = num;
+        // let block_num = blockJsonObj.id;
         let start_time = Utils.parseSecondsFromString(blockJsonObj.instances[0].start);
         let end_time = Utils.parseSecondsFromString(blockJsonObj.instances[0].end);
         let original_description = '';
@@ -30,7 +31,7 @@ class Block {
         let blocksArr = [];
         for (let i = 0; i < blockJsonArr.length; i++) {
             let blockJsonObj = blockJsonArr[i];
-            let newBlock = Block.parseBlockJson(blockJsonObj, vidId);
+            let newBlock = Block.parseBlockJson(blockJsonObj, vidId, i);
             blocksArr.push(newBlock);
         }
         return blocksArr;

@@ -1,17 +1,37 @@
 var express = require('express');
 var router = express.Router();
 const video = require('../backend/video');
-const userStudy = require('../model/userStudy');
 const textToSpeech = require('../backend/texttospeech.js');
 const userStudy2 = require('../model/userStudy2');
 const questionAnswer = require('./question_answer');
 const db = require('../db/database');
 const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
+const userStudy = require('./userStudy');
+const chatRoom = require('./chatRoom');
+const mergeScene = require('./mergeScene');
+const uploadVideoRoute  = require('./uploadVideo'); 
+const sentences = require('../backend/sentences.js');
+const pythiaCaption = require('../routes/pythiaCaption');
+const bleu = require('../npm_python/nodejs/bleu.js');
+const audioDescription = require('../backend/audioDescriptions.js');
+const filterDescriptionBleuController = require('../controllers/FilterBaselineDescriptionController');
+const bodyParser = require('body-parser');
 
+router.use('/userStudy',userStudy);
 router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
-console.log({sceneModification: sceneModification.addModifiedScene})
+router.use('/room', chatRoom);
+router.use('/merge', mergeScene);
+router.use('/vi', uploadVideoRoute);
+router.use('/pythia',pythiaCaption);
+
+// Put these statements before you define any routes.
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
+
+// console.log({sceneModification: sceneModification.addModifiedScene})
+
 
 router.get('/', function(req, res, next) {
   //res.render('homeUserStudy', { title: 'Express' });
@@ -19,9 +39,25 @@ router.get('/', function(req, res, next) {
   res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
+
+router.get('/notify', function(req, res, next) {
+  console.log('Notification received');
+  res.send('Notification received');
+});
+
 router.get('/addvideo', function(req, res, next) {
   res.render('addvideo', { title: 'Add Video' });
 });
+
+router.get('/audioDescription/:youtubeId', function(req, res, next) {
+    res.render('audioDescription', { title: 'AudioD escription' });
+});
+
+
+router.get('/uploadVideo', function(req, res, next) {
+  res.render('uploadVideo', { title: 'Upload Video' });
+});
+
 
 router.post('/addvideo', function(req, res, next) {
   let requestBody = req.body;
@@ -38,6 +74,7 @@ router.get('/getAllVideos', function(req, res, next) {
   });
 });
 
+
 router.get('/getKeyFrames', function(req, res, next) {
   //let query = video.fetchKeyFrames();
 
@@ -46,15 +83,58 @@ router.get('/getKeyFrames', function(req, res, next) {
   let queryResult = video.fetchKeyFrames(sceneId, videoTime);
   queryResult.then(result => {
     console.log("The vals are: "+sceneId+"  "+videoTime);
+
+
+router.get('/filterDescriptionBleu', function(req, res, next) {
+  let videoId = req.query.videoId;
+  if(!videoId){
+    res.status(400).send('Missing parameter');
+  }else{
+    filterDescriptionBleuController.filter(videoId)
+      .then(result => {
+        res.status(200).send('SUCCESS: Data updated for the video in Scene table');  
+      })
+      .catch(e => {
+        console.log(e);
+        res.send(e);
+      })
+  }
+  
+});
+
+
+router.get('/getDialogTimeStamps', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+  console.log('Dialog TS:',req);
+  let {videoId} = req.query;
+  console.log("The vals are: "+videoId);
+  let queryResult = video.fetchDialogTimeStamps(videoId);
+  queryResult.then(result => {
+    console.log("The vals are: "+videoId);
        res.send(result);
     });
 });
+
+router.get('/getSentences', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+  console.log('Sentences ',req);
+  let {videoId, userId} = req.query;
+  console.log("The vals are: "+videoId+' and '+userId);
+  let queryResult = video.fetchSentences(videoId,userId);
+  queryResult.then(result => {
+    console.log("The vals are: "+videoId);
+
+       res.send(result);
+    });
+});
+
 
 router.get('/playvideo/:youtubeId', function(req, res, next) {
   let isAiEnabled = req.query.ai === 'yes';
   if(isAiEnabled) {
     res.render('withai', { title: 'Express' });
   } else {
+    res.set('Access-Control-Allow-Origin', '*');
     res.render('withoutai', { title: 'Express' });
   }
 });
@@ -64,8 +144,29 @@ router.get('/fetchVideoData', function(req, res, next) {
   let {videoid, userId} = req.query;
   console.log('Video id and user id are: ' + videoid + "  "+userId);
   let queryResult = video.fetchVideoDataFromDb(videoid, userId);
+  let data= {'videoId': videoid, 
+              'userId':  userId
+            };
+
   queryResult.then(result => {
-    quesAns.getQuestionAnswerByUserId(userId).then( qnaList =>{
+    quesAns.getQuestionAnswerByUserId(data).then( qnaList =>{
+      console.log({ resdata: qnaList});
+      result.qnaList = qnaList;
+      res.send(result);
+    });
+  });
+});
+
+router.get('/videoData', function(req, res, next) {
+  console.log('req.query', req.query)
+  let {videoid, userId} = req.query;
+  let queryResult = video.fetchVideoData(videoid, userId);
+  let data= {'videoId': videoid, 
+              'userId':  userId
+            };
+
+  queryResult.then(result => {
+    quesAns.getQuestionAnswerByUserId(data).then( qnaList =>{
       console.log({ resdata: qnaList});
       result.qnaList = qnaList;
       res.send(result);
@@ -127,159 +228,70 @@ router.post('/updateBlockAndScene', function(req, res, next) {
     res.send({success: result});  
   });
 })
-//vaishali
-router.get('/userStudy', function (req, res) {
-  res.render('homeUserStudy', { title: 'User Study' });
-});
 
 //poorva
 router.get('/userStudy2', function (req, res) {
   res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
-//list of video for a user
-router.get('/userStudy/video', function (req, res) {
-  res.render('videoUserStudy', { title: 'User Study Video' });
-});
+//list of users study 2
+router.get('/userStudy2/users/', function (req, res) {
+  // let userId = req.query.userId;
+  // if(userId){
+     //let queryResult = userStudy2.getVideoByUserId(userId);
+     let queryResult = db.query(`SELECT * from us_user_blind order by id`);
+     queryResult
+     .then(result => {
+       res.send(result);
+     })
+     .catch((err) => {
+       res.send(err);
+     });
+  // }
+ });
 
-//list of video for visually impaired users
-router.get('/userStudy/videoHelper', function (req, res) {
-  res.render('videoHelper', { title: 'User Study Video Helper' });
-});
-
-
-//list of visually impaired users
-router.get('/userStudy/helper/video', function (req, res) {
-  // console.log({ param: req.query.userId });
-  let userId = req.query.userId;
-  if (userId) {
-    let queryResult = userStudy.getHelperVideo(userId);
-    queryResult
-      .then(result => {
-        res.send(result);
-      })
-      .catch((err) => {
-        res.send(err);
-      });
-  }
-});
 
 function addModifiedScene (data, callback) {
   console.log('inside modified scene:', data);
-  const { scene_id, user, block_id, scene_num,start_time, end_time,  description, ocr, videoId } = data;
+  let { has_ai, video_id, scene_id, user, block_id, scene_num, start_time, end_time,  description, ocr, deletedScene=[], note} = data;
+  let descriptionId = user + '_' + video_id + '_ai_' + scene_num;
+  console.log({INSIDEpSOT: data});
+  console.log({descriptionId});
+  let mergedSceneArr = JSON.stringify(deletedScene);
+  description = description.replace(/'/g, '');
+  ocr = ocr.replace(/'/g, '');
+  note = note.replace(/'/g, '');
+  console.log('MERGED SCENE ARR:', mergedSceneArr);
   const sql = `
-  INSERT INTO us3_description_modified(video_id, user_id, scene_id, block_id, scene_num, start_time, end_time, description, ocr) 
-  VALUES('${videoId}', '${user}', '${scene_id}', '${block_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}')
-  ON CONFLICT(scene_id, user_id, video_id) DO UPDATE SET description ='${description}'; `;
-  console.log({sql});
+  START TRANSACTION;
+  INSERT INTO descriptions(desc_id, video_id, has_ai, volunteer_id, scene_id, scene_num, start_time, end_time, description, ocr, merged_scene, note) 
+  VALUES('${descriptionId}', '${video_id}', '${has_ai}','${user}', '${scene_id}', ${scene_num}, ${start_time}, ${end_time}, '${description}', '${ocr}', '${mergedSceneArr}', '${note}') 
+  ON CONFLICT(scene_id, volunteer_id) DO UPDATE SET description ='${description}' , merged_scene = '${mergedSceneArr}', end_time= ${end_time}, start_time=${start_time}, ocr='${ocr}', note= '${note}';
+  COMMIT;`;
+
+  // console.log({sql});
   return db.query(sql, callback);
 }
 
-//list of users
-//list of users study 1
-router.get('/userStudy/users/', function (req, res) {
-  console.log({param: req.query.userId});
-  let userId = req.query.userId;
-  if(userId){
-    //let queryResult = userStudy.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.ai_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1 ORDER by u.id`,[userId]);
-    queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-  }else{
-    let queryResult = userStudy.getAllUsers();
-    console.log({ queryResult });
-    queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
+
+async function deleteMergedScenes(sceneArr, videoId, user_id) { 
+   let sql = '';
+   for(let i=0; i< sceneArr.length; i++){
+    sql +=   `DELETE from descriptions where scene_id = '${sceneArr[i]}' and video_id='${videoId}' and volunteer_id='${user_id}';`;
+   }
+    console.log({'INSIDE DELETE': sql})
+    return  db.query(sql, sceneArr); 
+}
+
+async function updateDeletedScenes(sceneArr, videoId, user_id) { 
+  let sql = '';
+  for(let i=0; i< sceneArr.length; i++){
+   sql +=   `Update descriptions set isdeleted = true where scene_id = '${sceneArr[i]}' and video_id='${videoId}' and volunteer_id='${user_id}';`;
   }
-});
+   console.log({'INSIDE updateDeletedScenes': sql})
+   return  db.query(sql, sceneArr); 
+}
 
-router.get('/userStudy/helperStatus', function (req, res) {
-  let userId= req.query.userId;
-  console.log({ userId});
-  
-  if (userId) {
-    let queryResult = db.query(`SELECT * from us_helper_video where vi_user_id = '${userId}' and rating IS NOT NULL`);
-    queryResult
-      .then(result => {
-        res.json(result);
-      })
-      .catch((err) => {
-        res.send({err});
-      });
-  }
-});
-
-router.get('/userStudy/getUserHelper', function (req, res) {
-  let userId = req.query.userId;
-  let queryResult = userStudy.getAllUser_VI(userId);
-  queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-});
-
-
-router.put('/userStudy/updateStatus', function (req, res, next) {
-  let task = userStudy.updateStatus_VIUser(req.body);
-  task.then(result => {
-    res.status(200).json({ 'message': 'Thank you for you participation' });
-  })
-    .catch((err) => {
-      console.log(err)
-      res.send({ success: false });
-    });;
-});
-
-router.put('/userStudy/updateUserInfo', function (req, res, next) {
-  let task = userStudy.updateVIUserInfo(req.body);
-  task.then(result => {
-    res.status(200).json({ 'success': 'true' });
-  })
-    .catch((err) => {
-      console.log(err)
-      res.send({ success: false });
-    });;
-});
-
-//list of users study 2
-router.get('/userStudy2/users/', function (req, res) {
- // let userId = req.query.userId;
- // if(userId){
-    //let queryResult = userStudy2.getVideoByUserId(userId);
-    let queryResult = db.query(`SELECT * from us_user_blind order by id`);
-    queryResult
-    .then(result => {
-      res.send(result);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
- // }
-});
-
-router.post('/saveNonAiDescription', function(req, res, next) {
-  let inputJson = req.body;
-  console.log(inputJson);
-  let queryResult = db.query(`INSERT INTO temp_table(temp_column) VALUES($1)`,[inputJson]);
-  queryResult.then(result => {
-    res.send({success: true});  
-  }).catch((err) => {
-    res.send({success: false});
-  });
-});
 
 
 router.post('/updatefeedback', function(req, res, next) {
@@ -300,55 +312,32 @@ router.post('/updatefeedback', function(req, res, next) {
   });
 });
 
-router.post('/saveAiDescription', function(req, res, next) {
+
+router.post('/saveNonAiDescription', function(req, res, next) {
   let inputJson = req.body;
-  console.log("video id =====>", req.body.videoId)
-  console.log('Save AI:', inputJson);
-  console.log('Save AI user:', inputJson.user_id);
-  console.log('qna data', inputJson.qnaData);
-  let {qnaData, user_id} = inputJson;
-
-  // let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
-  // queryResult.then(result => {
-  //   res.send({success: true});  
-  // }).catch((err) => {
-  //   res.send({success: false});
-  // });
-
-  //saving Q&A for user study phase 3
+  console.log({'INSIDE NON AI':inputJson});
+  let {user_id} = inputJson;
   let resArr = [];
-  for (let key in qnaData) {
-    if (qnaData.hasOwnProperty(key)) {
-        console.log("KEY:", key);
-        for(let i= 0; i< qnaData[key].length; i++){
-          console.log("value" ," -> " , qnaData[key][i].question);
+  for(let key in inputJson.scenes) {
+   let currScene = inputJson.scenes[key];
+   let {videoId, scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene=[]} = currScene;
+   console.log({currScene});
+   resArr = [...resArr, addModifiedScene({
+    scene_id,
+    user: user_id,
+    scene_num: key,
+    video_id: videoId,
+    description: modified_description,
+    ocr:  modified_ocr,
+    start_time,
+    end_time,
+    has_ai,
+    deletedScene
+  })];
+ }
 
-          resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
-        }
-    }
-
-  }
-
-  for(let key in inputJson.scene_arr) {
-    console.log({key})
-    let currScene = inputJson.scene_arr[key];
-    let {scene_id, modified_description, modified_ocr } = currScene;
-    console.log({currScene})
-    resArr = [...resArr, addModifiedScene({
-      scene_id,
-      user: user_id,
-      scene_num: key,
-      videoId: req.body.videoId,
-      description: modified_description,
-      ocr:  modified_ocr,
-      block_id: 'ff',
-      start_time:12,
-      end_time:18,
-    })];
-  }
-
-  Promise.all(resArr).then(() => {
-    let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+ Promise.all(resArr).then(() => {
+    let queryResult = db.query(`INSERT INTO temp_table(temp_column) VALUES($1)`,[inputJson]);
     console.log({inputJson})
 
     queryResult.then(result => {
@@ -357,14 +346,149 @@ router.post('/saveAiDescription', function(req, res, next) {
       console.log(err)
       res.send({success: false});
     });
-    // res.send({success: true});
-  
-  }).catch(() => {
+  }).catch((e) => {
+    console.log(e);
     res.send({success: false});
   })
 
 });
 
+router.post('/saveModifiedDescription', function(req, res, next) {
+  let inputJson = req.body;
+  // console.log('inside saveModifiedDescription');
+  console.log('inside saveModifiedDescription:', inputJson);
+  
+  let {qnaData, user_id, videoId} = inputJson;
+  //saving Q&A for user study phase 3
+  let resArr = [];
+  for (let key in qnaData) {
+    if (qnaData.hasOwnProperty(key)) {
+        // console.log("KEY:", key);
+        for(let i= 0; i< qnaData[key].length; i++){
+          // console.log("value" ," -> " , qnaData[key][i].question);
+          resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
+        }
+    }
+
+  }
+
+  let deletedSceneArr = [];
+  for(let key in inputJson.scene_arr) {
+   
+      let currScene = inputJson.scene_arr[key];
+      console.log({currScene});
+      let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene} = currScene;
+      if(deletedScene){
+        deletedSceneArr = [...deletedSceneArr, ...deletedScene]; 
+      }
+      
+      console.log({deletedSceneArr});
+      resArr = [...resArr, addModifiedScene({
+        scene_id,
+        user: user_id,
+        scene_num: key,
+        video_id: req.body.videoId,
+        description: modified_description,
+        ocr:  modified_ocr,
+        start_time,
+        end_time,
+        has_ai,
+        deletedScene
+      })];
+  }
+  
+  console.log({deletedSceneArr});
+
+
+  Promise.all(resArr)
+  .then(() => {
+      if(deletedSceneArr.length > 0){
+        updateDeletedScenes(deletedSceneArr, videoId, user_id)
+        .then((response)=>{
+            let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+            console.log({inputJson})
+            queryResult.then(result => {
+              res.send({success: true});  
+            })
+        })
+      }else{
+        res.status(200).send('Data saved succefully');  
+      }
+  })
+  .catch((e) => {
+    console.log(e);
+    res.status(400).send(e);
+  })
+});
+
+router.post('/saveAiDescription', function(req, res, next) {
+  let inputJson = req.body;
+  console.log({inputJson});
+  console.log('SAVE AI DESCRiption');
+  // console.log('TEST Save AI:', inputJson);
+  let {qnaData, user_id, videoId} = inputJson;
+  //saving Q&A for user study phase 3
+  let resArr = [];
+  for (let key in qnaData) {
+    if (qnaData.hasOwnProperty(key)) {
+        // console.log("KEY:", key);
+        for(let i= 0; i< qnaData[key].length; i++){
+          // console.log("value" ," -> " , qnaData[key][i].question);
+          resArr = [...resArr, quesAns.addQuestionAnswer({...qnaData[key][i], user: user_id, sceneId: key})]
+        }
+    }
+
+  }
+
+  let deletedSceneArr = [];
+  for(let key in inputJson.scene_arr) {
+   
+      let currScene = inputJson.scene_arr[key];
+      console.log({currScene});
+      let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene, note} = currScene;
+      if(deletedScene){
+        deletedSceneArr = [...deletedSceneArr, ...deletedScene]; 
+      }
+      
+      console.log({deletedSceneArr});
+      resArr = [...resArr, addModifiedScene({
+        scene_id,
+        user: user_id,
+        scene_num: key,
+        video_id: req.body.videoId,
+        description: modified_description,
+        ocr:  modified_ocr,
+        start_time,
+        end_time,
+        has_ai,
+        deletedScene,
+        note
+      })];
+  }
+  
+  console.log({deletedSceneArr});
+
+
+  Promise.all(resArr)
+  .then(() => {
+      if(deletedSceneArr.length > 0){
+        deleteMergedScenes(deletedSceneArr, videoId, user_id)
+        .then((response)=>{
+            let queryResult = db.query(`INSERT INTO temp_table_ai(temp_column) VALUES($1)`,[inputJson]);
+            console.log({inputJson})
+            queryResult.then(result => {
+              res.send({success: true});  
+            })
+        })
+      }else{
+        res.send({success: true});  
+      }
+  })
+  .catch((e) => {
+    console.log(e);
+    res.send({success: false});
+  })
+});
 
 router.post('/texttospeech', function(req, res, next) {
   let inputJson = req.body;
@@ -382,6 +506,69 @@ router.get('/generateMp3FromDescriptions', function(req, res, next) {
     res.send({success: result});
   });
 });
+          // texttospeech -> duration
+router.post('/descriptionDuration', function(req, res, next) {  
+  let inputJson = req.body;
+  let inputText = inputJson.inputText;
+  let task = textToSpeech.generateMp3DurationForText(inputText);
+  task.then(result => {
+      //  res.send(result.file);
+    res.send({success: result.success, duration: result.duration, file:result.file, form:result.form});
+  });
+});
+
+router.post('/descriptionMp3Audio', function(req, res, next) {  
+  let inputJson = req.body;
+  let inputText = inputJson.inputText;
+  let task = textToSpeech.getMp3ForDescription(inputText, res);
+  task.then(result => { console.log(result) });
+});
+
+                  /*  For sentence generation starts*/
+router.get('/generateSentencesFromDescriptions', function(req, res, next) {
+  let task = sentences.generateSentencesForAllDescriptionsInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateMp3ForAllSentences', function(req, res, next) {
+  let task = sentences.generateMp3ForAllSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateTimestampsforSentences', function(req, res, next) {
+  let task = sentences.generateTimestampsforSentencesInDb();
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/generateTimestampsforSentencesInDbWithInfo', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id,vol_id} = inputJson;
+  console.log('GET params: ',vid_id,' and: ',vol_id);
+  let task = sentences.generateTimestampsforSentencesInDbWithInfo(vid_id,vol_id);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/mergeSentencesInDb', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id, vol_id} = inputJson;
+  console.log('GET params: ',vid_id);
+  let task = sentences.mergeSentenceAudios(vid_id, vol_id);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+              /*  For sentence generation ends  */
 
 router.get('/playVideoAudio/:youtubeId', function(req, res, next) {
   res.render('videoaudio');
@@ -404,5 +591,87 @@ router.get('/getDescriptionData', function(req, res, next) {
       res.send(err);
     });
 });
+
+// router.get('/getBleuScore', function(req, res, next){
+//       let reference = req.query.reference;
+//       let sentence = req.query.sentence;
+//       console.log('ref: ',reference, '  and: ',sentence);
+//       let task = bleu.generateBLEUScore(reference,sentence);
+//   task.then(result => {
+//     res.send({'result': result});
+//   });
+// });
+
+router.get('/refreshAudioData', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = sentences.refereshAudioData(videoId,volunteerId);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+
+router.get('/generateAudioDescriptionMp3', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId, res);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+// generateAudioDescriptionsInDbWithInfo
+router.post('/audioDescriptionByScene', function(req, res, next) {  
+  let inputJson = req.body;
+  let video_id = inputJson.vid_id;
+  let volunteer_id = inputJson.vol_id;
+  let scene_id = inputJson.scene_id;
+  let description = inputJson.desc;
+  let task = audioDescription.generateTimestampsforScene(video_id, volunteer_id, scene_id, description);
+  task.then(result => {
+    res.send({"status":result});
+  });
+});
+
+router.get('/generateTestAudio', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.generateTimestampsforSentencesInDbWithInfo(videoId,volunteerId);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+// router.use(bodyParser.urlencoded({ extended: false }));
+// router.use("/", expressStaticGzip("dist"));
+// router.onBeforeAction(Iron.router.bodyParser.urlencoded({
+//   extended: false
+// }));
+
+
+
+
+
+
+router.post('/splitMp3', function(req, res, next) {  
+  let inputJson = req.body;
+  console.log(req.body);
+  console.log(req.headers['content-type']);
+  let file = inputJson.file;
+  let time = inputJson.time;
+  let callbackURL = inputJson.callbackURL;
+  let task = sentences.mp3Split(file, time, callbackURL);
+  task.then(result => {
+    res.send({"status":result});
+  });
+});
+
 
 module.exports = router;

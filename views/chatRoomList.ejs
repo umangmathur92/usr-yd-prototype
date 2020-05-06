@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<head>
+  <title>Chat App</title>
+  <script type="text/javascript"  src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="stylesheets/chat.css">
+</head>
+<body>
+  <div id="room-container">
+      <h4> Prep Session </h4>
+      <!-- <div> 
+          <a href = "room/prepSession?name=prepSession1&user=Participant1&type=participant&videoId=q_3Kv9JmsC8">PrepSession1: Participant 1 </a>
+      </div>
+      <div> 
+          <a href = "room/prepSession?name=prepSession1&user=Admin1&type=admin&videoId=q_3Kv9JmsC8"> PrepSession1: ADMIN </a>
+      </div> -->
+    
+      <div> 
+          <a href = "room/prepSession?name=prepSession2&user=Participant2&type=participant&videoId=OYjaBQ8dDHc"> PrepSession2: Participant 2 </a>
+      </div>
+      <div> 
+          <a href = "room/prepSession?name=prepSession2&user=Admin2&type=admin&videoId=OYjaBQ8dDHc"> PrepSession2: ADMIN 2 </a>
+      </div>
+      <h4> Session 3 </h4>
+      <div> 
+        <a href = "room/session3?name=session3&user=Participant2&type=participant&videoId=OYjaBQ8dDHc"> Session3: Participant 2 </a>
+      </div>
+      <div> 
+        <a href = "room/session3?name=session3&user=Admin2&type=admin&videoId=OYjaBQ8dDHc&participantId=Participant2"> Session3: ADMIN 2 </a>
+      </div>
+  </div> 
+  <script>
+    $(document).ready(function() {
+        // fetchRooms();
+    });    
+
+    function fetchRooms(){
+      let roomList = ['room1', 'room2'];
+      let userList = ['user1', '']
+      let rows = '';
+      roomList.forEach(room=>{
+        rows += `<div> 
+                <a href = "room?name=${room}"> ${room} </a>
+                </div>`
+      })
+      document.getElementById('room-container').innerHTML = rows;
+    }
+
+</script>
+</body>
+
+</html>

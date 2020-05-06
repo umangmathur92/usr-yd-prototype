@@ -23,15 +23,15 @@ router.get('/', function (req, res) {
 
 
 //addQuestionAnswer with scene id and user id 
-router.post('/', function(req, res, next) {
-  console.log('hello');
-  let queryResult = sceneModification.addModifiedScene(req.body);
-  queryResult.then(result => {
-    res.send('Scene inserted/updated successfully');  
-  }).catch((err) => {
-    res.send(err);
-    console.log(err)
-  });
-});
+// router.post('/', function(req, res, next) {
+//   console.log('hello');
+//   let queryResult = sceneModification.addModifiedScene(req.body);
+//   queryResult.then(result => {
+//     res.send('Scene inserted/updated successfully');  
+//   }).catch((err) => {
+//     res.send(err);
+//     console.log(err)
+//   });
+// });
 
 module.exports = router;

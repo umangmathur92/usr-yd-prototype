@@ -62,6 +62,31 @@ $(document).ready(function() {
     setInterval(incrementSeconds, 1000);
     $('#btnSubmit').click(async function() {
         let sceneDataJson = fetchDataFromAllFields();
+        let startArr = [];
+        for(let i=1; i< sceneDataJson.scenes.length; i++) {
+            let current = sceneDataJson.scenes[i];
+            startArr.push(current.scene_time);
+
+        }
+        console.log(startArr);
+
+        let i = 0;
+        for(let key in sceneDataJson.scenes) {
+            let currScene = sceneDataJson.scenes[key];
+            currScene.start_time = convertToSeconds(currScene.scene_time);
+            if(i === sceneDataJson.scenes.length-1){
+                currScene.end_time = player.getDuration();
+            }else{
+                currScene.end_time = convertToSeconds(startArr[i++]);
+            }
+            currScene.modified_description = currScene.scene_desc;
+            currScene.modified_ocr = '';
+            currScene.has_ai = false;
+            currScene.deletedScene = [];
+            currScene.videoId = youtubeId;
+            console.log(sceneDataJson.scenes[key]);
+        }
+
         $.post( '/saveNonAiDescription', sceneDataJson, function(response) {
             if(response.success) {
                 alert('Submitted Successfully\nYou will be redirected to the Video List Page');
@@ -72,6 +97,12 @@ $(document).ready(function() {
         });
     });
 });
+
+function convertToSeconds(time){
+    var a = time.split(':'); 
+    var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]); 
+    return seconds;
+}
 
 function fetchDataFromAllFields() {
     let listItems = $("#ul-scene-list li");
@@ -280,21 +311,20 @@ function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
-        console.log('i was called: playing state');
         $("#btn-play-pause").html('<img src = "/images/pause.png" style="height: 25px; width: 25px;">');
         break;
         case YT.PlayerState.PAUSED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
-        console.log(timeAtWhichLastPaused);
-        console.log('i was called: paused state');
+        // console.log(timeAtWhichLastPaused);
+        // console.log('i was called: paused state');
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
         case YT.PlayerState.CUED:
         timeAtWhichLastPaused = player.getCurrentTime();
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
-        console.log('i was called: cued state')
+        // console.log('i was called: cued state')
         break;
     }
 }
@@ -451,7 +481,7 @@ function auto_grow(element) {
 }
 
 function formatTime(time) {
-    console.log(time);
+    // console.log(time);
     var minutes = Math.floor(time / 60);
     var seconds = time - minutes * 60;
     seconds = seconds < 10 ? '0' + seconds : seconds;

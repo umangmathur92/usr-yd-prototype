@@ -64,7 +64,7 @@ router.post('/generate', async function(req, res) {
   let result = [];
   let gotResponse = 0;  
   for(let i=0; i < rows.length; i++){
-    axios.post('http://localhost:5000/generate', {sentence: rows[i]}).then((response) => {
+    axios.post('http://localhost:5300/generate', {sentence: rows[i]}).then((response) => {
       // console.log("success", response.data)
       gotResponse++;
       result.push({response: response.data})
