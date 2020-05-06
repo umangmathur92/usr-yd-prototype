@@ -83,7 +83,9 @@ router.get('/getKeyFrames', function(req, res, next) {
   let queryResult = video.fetchKeyFrames(sceneId, videoTime);
   queryResult.then(result => {
     console.log("The vals are: "+sceneId+"  "+videoTime);
-
+       res.send(result);
+    });
+});
 
 router.get('/filterDescriptionBleu', function(req, res, next) {
   let videoId = req.query.videoId;
@@ -620,6 +622,17 @@ router.get('/generateAudioDescriptionMp3', function(req, res, next){
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
 let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId, res);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+router.get('/mergeAudioDescriptionMp3', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.mergeSentenceAudios(videoId,volunteerId, res);
 task.then(result => {
 res.send({'result': result});
 });

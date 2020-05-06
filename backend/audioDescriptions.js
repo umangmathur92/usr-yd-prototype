@@ -4,6 +4,7 @@ const util = require('util');
 const db = require('../db/database');
 const fse = require('fs-extra');
 const { getAudioDurationInSeconds } = require('get-audio-duration')
+const rimraf = require("rimraf");
 
 async function getMp3DurationForText(inputText) {
     try {
@@ -206,7 +207,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
     try{
         let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by scene_num, sentence_id`);
         
-        // rimraf.sync(`public/audio/${currVideoId}/${descType}/${volunteerId}`);
+        rimraf.sync(`public/audio/${vid_id}/ai/${vol_id}`);
 
         for(let i=0; i<sentenceListArr.length; i++) {
 
@@ -223,7 +224,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
             let sceneNum = currSentence.scene_num;
             ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
             let lastChar = descriptionText[descriptionText.length - 1];
-            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+            if(lastChar != null && lastChar != '.' && lastChar != '!' && lastChar != '?')
                 descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
@@ -358,7 +359,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     }
 
     // Call fn for generating time gaps
-    await generateTimeGaps(dbVideoId);
+    await generateTimeGaps(dbVideoId,dbVolId);
     
     let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${dbVideoId}'`);
 
@@ -472,7 +473,7 @@ for(let i=0; i<video_dialogs.length; i++) {
 
     let cd_startTime = currDialog.start_time;
     let cd_endTime = currDialog.end_time;
-    let begin = await fetchSceneNum(cd_startTime, vid_id, vol_id);
+    let begin = await fetchSceneNum(cd_startTime, vid_id, vol_id + "_parse");
     let end = await fetchSceneNum(cd_endTime, vid_id, vol_id);
 
     if(begin == end){
@@ -803,5 +804,6 @@ module.exports = {
     generateMp3ForText: generateMp3ForText,
     generateAudioDescriptionsInDbWithInfo: generateAudioDescriptionsInDbWithInfo,
     generateTimestampsforScene: generateTimestampsforScene,
-    generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo
+    generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo,
+    mergeSentenceAudios: mergeSentenceAudios 
 }

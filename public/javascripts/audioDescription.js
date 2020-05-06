@@ -92,6 +92,7 @@ function incrementSeconds() {
 
 
 function fetchVideoInfo(youtubeId) {
+    WebSocketTest();
     console.log(userId);
     // let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     let targetUrl = `/fetchVideoData?videoid=${youtubeId}&userId=${userId}`
