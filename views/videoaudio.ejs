@@ -18,6 +18,7 @@
             <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a>
         </div>
         <img id="btn-timer" src="/images/pause_white.png" style="height: 20px; width:20px; color: white; margin-right: 10px;visibility: hidden;">
+        <img id = "id1" src="./images/belgium-wallpaper.jpg" alt="Smiley face" width="42" height="42">
         <b><span style="color: white; visibility: hidden;">Time Elapsed:&nbsp;</span>
             <span style="color: white; visibility: hidden;" id="txt-timeElaspsed">00:00</span></b>
         </nav>
@@ -42,6 +43,11 @@
                                         <span class="slider round"></span>
                                     </label>
                                 </span>    
+                                <button ondblclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Double Tap to ask a Question </button>
+                                <input id="question" type="text" style="visibility: visible;" placeholder="Start typing question here ..." autocomplete="off">
+                                <audio id="myAudio" style="visibility: hidden;" controls autoplay>
+                                    Your browser doesnot support Audio.
+                                </audio>
                             </div>
                         </div>
                     </div>
@@ -60,9 +66,23 @@
                     <button style="visibility: hidden;" class="btn btn-danger btn-l" id="btnSubmit">Save &amp; Close Window</button>
                 </div>
             </div>
+            
         </div>
+        <!-- <script src="/javascripts/database.js"></script> -->
         <script src="/javascripts/videoaudio.js"></script>
         <script src="http://www.youtube.com/iframe_api" async></script>
+        <!-- <script src="../db/database.js"></script> -->
+        <script src="/javascripts/visdial.js"> </script>
+
+<script>
+
+// contains the logic of visdial model, websockets, API calling
+
+function myFunction() {
+    alert("Double click");
+}
+</script>
+
     </body>
     </html>
     
