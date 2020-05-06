@@ -1,8 +1,6 @@
-// My own code
+// Aditya
 
 //{/* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> */}
-
-//   const db = require('../../db/database');
 
   var image = [];
   var image_url = "";
@@ -17,11 +15,15 @@
   var scrollHeightOnClearHistory = 60;
   var audio_clip = document.getElementById("myAudio");
   var KeyFramesArr;
+  let count = 0;
+  let all_pred_captions = "";
+  let all_answers = "";
   var audio_clip = document.getElementById("myAudio");
   $("#question").keypress(function(e) {
       var key = e.which;
       if (key == 13) // the enter key code
       {
+          count = totalFrames;
           for(let i=0;i<totalFrames;i++)
                 submitQuestion(i);
         $("#question").val('');
@@ -56,6 +58,7 @@ async function fetchKeyFrames() {
                 KeyFramesArr = response;
                 console.log("visdial fetch key frames api response is: ",KeyFramesArr[0]+"  and the type is: "+typeof(KeyFramesArr[0]));
                 totalFrames = KeyFramesArr.length;
+                count = totalFrames;
                 path = KeyFramesArr[0].thumbnail_url;
                 console.log("The url is: "+path);           
                 // debugger;    
@@ -152,7 +155,7 @@ function WebSocketTest() {
            // Let us open a web socket
           //  var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/lobby/");
               //  ws = new WebSocket("ws://13.59.252.226:8001/users/");
-              ws = new WebSocket("ws://13.59.252.226:8001/chat/");
+              ws = new WebSocket("ws://18.224.33.110:8001/chat/");
               ws.onopen = function() {
                 //   ws.send(ws_id);
                 console.log("Websocket opened");
@@ -174,24 +177,43 @@ function WebSocketTest() {
                 console.log("The pred caption is: "+ pred_caption);
                 // prev_history[map[socket_id]].push(pred_caption);
                 prev_history[map[socket_id]] = pred_caption;
-
+                count--;
                 var url_api = "http://api.voicerss.org/?key=8289e9c078474c0abab3604aba18df45&hl=en-us&src=";
-	            var url_final = url_api.concat(pred_caption);
+                // debugger;
+                if(all_pred_captions.length == 0)
+                    all_pred_captions = pred_caption;
+                else if(pred_caption != all_pred_captions)
+                    all_pred_captions += ( ". " + pred_caption);
+                console.log(all_pred_captions);
+	            var url_final = url_api.concat(all_pred_captions);
 	            fetch(url_final)
 	            .then(function(response){
-	                audio_clip.src = response['url'];
+                    if(!count){
+                        audio_clip.src = response['url'];
+                        all_pred_captions = "";
+                    }
 	                })
             }
 
-            if("answer" in data){
+            else if("answer" in data){
                 var answer = data.answer;
               console.log("The answer is: "+ answer);
+              console.log("The var is: "+ all_answers);
+            //   debugger;
+                count --;
 
               var url_api = "http://api.voicerss.org/?key=8289e9c078474c0abab3604aba18df45&hl=en-us&src=";
-            var url_final = url_api.concat(answer);
+              if(all_answers.length == 0)
+              all_answers = answer;
+          else if(answer != all_answers)
+              all_answers += ( ". " + answer);
+            var url_final = url_api.concat(all_answers);
                 fetch(url_final)
                 .then(function(response){
-                    audio_clip.src = response['url'];
+                    if(!count){
+                        audio_clip.src = response['url'];
+                        all_answers = "";
+                    }
 	                })
              
           }
@@ -219,7 +241,8 @@ function readURL(input, ws_id, frameNo) {
           var formData = new FormData();
           formData.append('file', input.files[0]);
    //       formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-         var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.252.226:8001/upload/";
+//    "https://cors-anywhere.herokuapp.com/http://3.23.102.127:8001/upload/"
+         var URL1 = "http://18.224.33.110:8001/upload/";
           formData.append('socketid', ws_id);
           console.log('DSocket id in pOST is: '+ws_id);
           $.ajax({
@@ -329,7 +352,7 @@ if (question.length >= 3) {
         formData.append('socketid', ws_id[i]);
         formData.append('question', question);
         formData.append('job_id', job_id[i]);
-        var URL = "https://cors-anywhere.herokuapp.com/http://13.59.252.226:8001/";
+        var URL = "http://18.224.33.110:8001/";
 
         $.ajax({
                 type: 'POST',
