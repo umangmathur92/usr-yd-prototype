@@ -87,7 +87,7 @@ async function fetchVideoData(videoId, userId) {
         // console.log('over data', JSON.stringify(modifiedData));
         vidQueryResult.originalData = queryResult;
         vidQueryResult.modifiedData = modifiedData;
-        vidQueryResult.mergeScene = mergeSceneResult;
+        vidQueryResult.mergeSceneRecommendation = mergeSceneResult;
         console.log({vidQueryResult});
         // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
         return vidQueryResult;
