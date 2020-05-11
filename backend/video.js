@@ -74,6 +74,8 @@ async function fetchVideoData(videoId, userId) {
                 scene.deletedScene = [];
                 scene.note = '';
             });
+
+        let mergeSceneResult = await db.query('SELECT scene_id as sc_id, merged FROM merge_scene WHERE video_id = $1 order by scene_num', [videoId]);
         
         let modifiedData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
                                         start_time, end_time, ocr as original_ocr,
@@ -85,6 +87,7 @@ async function fetchVideoData(videoId, userId) {
         // console.log('over data', JSON.stringify(modifiedData));
         vidQueryResult.originalData = queryResult;
         vidQueryResult.modifiedData = modifiedData;
+        vidQueryResult.mergeScene = mergeSceneResult;
         console.log({vidQueryResult});
         // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
         return vidQueryResult;
