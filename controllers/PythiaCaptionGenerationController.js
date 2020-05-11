@@ -11,18 +11,18 @@ class PythiaCaptionGenerationController{
             let data = await keyframeModel.getKeyFramesByVideoId(videoId);
             // console.log({data});
             let captionArr = [];
+            console.log('Fetching Pythia captions for keyframes.....');
             for(let i=0; i< data.length; i++){
                 let thumbnail_url = data[i].thumbnail_url;
                 let keyframe_id = data[i].keyframe_id;
                 // console.log({thumbnail_url});
                 let captionResponse = await this.fetchPythiaCaption(thumbnail_url);
-                // console.log({'caption':response.data})
+                // console.log({Pycaption: captionResponse.data});
                 data[i].updatedPythiaCaption =  captionResponse.data;
                 captionArr.push({keyframe_id, thumbnail_url, caption: captionResponse.data });
             }
                 // console.log({captionArr});
-            //    console.log({data});
-
+            //  console.log({data});
             let response = await keyframeModel.updatePythiaCaption(captionArr);
             // console.log(response);
 
@@ -37,7 +37,7 @@ class PythiaCaptionGenerationController{
                 let value = sceneMap.get(sceneId);
                 if(value){
                     if(!value.includes(caption)){
-                        caption = value + '.'  + caption;
+                        caption = value + '\n'  + caption;
                         sceneMap.set(sceneId, caption);
                     }
                 }else{
