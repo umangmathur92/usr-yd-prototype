@@ -57,6 +57,12 @@ async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
 }
 
+async function fetchKeyFrames(sceneId,videoTime) {
+    console.log("Ent: testking");
+    return await db.any("SELECT thumbnail_url from keyframe where start_time < "+ videoTime +"  and shot_id IN (SELECT shot_id FROM shot where scene_id = '" + sceneId +"')" );
+    // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
+}
+
 async function fetchDialogTimeStamps(videoId) {
     console.log("Ent: testking");
     return await db.any(`SELECT start_time, end_time FROM video_dialogs_timestamps WHERE video_id = '${videoId}' ORDER BY start_time`);
@@ -609,6 +615,7 @@ module.exports = {
     fetchSentences: fetchSentences,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,
+    fetchKeyFrames: fetchKeyFrames,
     updateBlockDescription: updateBlockDescription,
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,

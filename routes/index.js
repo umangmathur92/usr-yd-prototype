@@ -53,6 +53,9 @@ router.get('/audioDescription/:youtubeId', function(req, res, next) {
     res.render('audioDescription', { title: 'AudioD escription' });
 });
 
+router.get('/onDemand/:youtubeId', function(req, res, next) {
+  res.render('onDemand', { title: 'On Demand' });
+});
 
 router.get('/uploadVideo', function(req, res, next) {
   res.render('uploadVideo', { title: 'Upload Video' });
@@ -74,6 +77,17 @@ router.get('/getAllVideos', function(req, res, next) {
   });
 });
 
+router.get('/getKeyFrames', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+
+  let {sceneId, videoTime} = req.query;
+  console.log("The vals are: "+sceneId+"  "+videoTime);
+  let queryResult = video.fetchKeyFrames(sceneId, videoTime);
+  queryResult.then(result => {
+    console.log("The vals are: "+sceneId+"  "+videoTime);
+       res.send(result);
+    });
+});
 
 router.get('/filterDescriptionBleu', function(req, res, next) {
   let videoId = req.query.videoId;
@@ -608,6 +622,17 @@ router.get('/generateAudioDescriptionMp3', function(req, res, next){
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
 let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId, res);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+router.get('/mergeAudioDescriptionMp3', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.mergeSentenceAudios(videoId,volunteerId, res);
 task.then(result => {
 res.send({'result': result});
 });
