@@ -43,16 +43,20 @@
                     <span class="slider round"></span>
                   </label>
                 </span>   
-                <button ondblclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Double Tap to ask a Question </button>
-                                <input id="question" type="text" style="visibility: visible;" placeholder="Start typing question here ..." autocomplete="off">
-                                <audio id="myAudio" style="visibility: hidden;" controls autoplay>
+                <button ondblclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Double Tap to start on-demand chatbot </button>
+                <div style="text-align:center;">
+                  <div><p></p>
+                  </div>
+                  <input id="question" type="text" style="visibility: visible;height: 40px;width: 70%;text-align: center;" placeholder="Start typing question here ..." autocomplete="off"></div>
+                      <audio id="myAudio" style="visibility: hidden;" controls autoplay>
                                     Your browser doesnot support Audio.
                                 </audio> 
               </div>
             </div>
           </div>
           <div>
-            <button onclick="startRecording()"> Record </button>
+            <!-- <button onclick="startRecording()"> Record </button> -->
+            <div id= "record"><button id="record-button" class="btn btn-primary" style= "margin:5px" >Ask Question</button></div>
           </div>
           <div>
             <button class="btn btn-danger" id="btnScroll" style="visibility: hidden;">Temp button to reset scene/block_modification table for this user</button>
