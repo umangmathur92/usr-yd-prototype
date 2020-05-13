@@ -45,6 +45,7 @@ var totalFrames = 0;
 var map = {};
 async function fetchKeyFrames() {
     // const db = require('../../db/database');
+    pauseVideo();
     currScene = getSceneFromTime(videotime, allSceneArr);
 
     // console.log("db from data", db);
@@ -151,7 +152,7 @@ return v.toString(16);
 function WebSocketTest() {
     console.log('Generate uuid: '+uuidv4());
         if ("WebSocket" in window) {
-           alert("WebSocket is supported by your Browser!");
+        //    alert("WebSocket is supported by your Browser!");
            
            // Let us open a web socket
           //  var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/lobby/");
@@ -187,13 +188,15 @@ function WebSocketTest() {
                     all_pred_captions += ( ". " + pred_caption);
                 console.log(all_pred_captions);
 	            var url_final = url_api.concat(all_pred_captions);
-	            fetch(url_final)
-	            .then(function(response){
-                    if(!count){
+                if(!count){
+                    console.log("Final: ",all_pred_captions);
+                fetch(url_final)
+	            .then(function(response){   
                         audio_clip.src = response['url'];
                         all_pred_captions = "";
-                    }
-	                })
+                    })
+                }
+                    
             }
 
             else if("answer" in data){
@@ -209,13 +212,16 @@ function WebSocketTest() {
           else if(answer != all_answers)
               all_answers += ( ". " + answer);
             var url_final = url_api.concat(all_answers);
-                fetch(url_final)
+            if(!count){
+                console.log("Final: "+ all_answers);
+            fetch(url_final)
                 .then(function(response){
-                    if(!count){
+                    
                         audio_clip.src = response['url'];
                         all_answers = "";
-                    }
-	                })
+                    
+                    })
+                }
              
           }
 

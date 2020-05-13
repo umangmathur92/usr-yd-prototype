@@ -53,6 +53,9 @@ router.get('/audioDescription/:youtubeId', function(req, res, next) {
     res.render('audioDescription', { title: 'AudioD escription' });
 });
 
+router.get('/onDemand/:youtubeId', function(req, res, next) {
+  res.render('onDemand', { title: 'On Demand' });
+});
 
 router.get('/uploadVideo', function(req, res, next) {
   res.render('uploadVideo', { title: 'Upload Video' });
