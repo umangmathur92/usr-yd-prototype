@@ -18,7 +18,8 @@ var KeyFramesArr;
 let count = 0;
 let all_pred_captions = "";
 let all_answers = "";
-var audio_clip = document.getElementById("myAudio");
+let response_set = new Set();
+
 $("#question").keypress(function(e) {
     var key = e.which;
     if (key == 13) // the enter key code
@@ -152,12 +153,12 @@ return v.toString(16);
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-      //    alert("WebSocket is supported by your Browser!");
+        //  alert("WebSocket is supported by your Browser!");
          
          // Let us open a web socket
         //  var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/lobby/");
             //  ws = new WebSocket("ws://13.59.252.226:8001/users/");
-            ws = new WebSocket("ws://3.15.225.221:8001/chat/");
+            ws = new WebSocket("ws://3.15.198.15:8001/chat/");
             ws.onopen = function() {
               //   ws.send(ws_id);
               console.log("Websocket opened");
@@ -180,20 +181,30 @@ function WebSocketTest() {
               // prev_history[map[socket_id]].push(pred_caption);
               prev_history[map[socket_id]] = pred_caption;
               count--;
-              var url_api = "http://api.voicerss.org/?key=8289e9c078474c0abab3604aba18df45&hl=en-us&src=";
+              var url_api = "http://api.voicerss.org/?key=ff91e773474146079653fbb513f71d76&hl=en-us&src=";
+              let url_tts = "http://18.221.192.73:5001/texttospeech";
               // debugger;
               if(all_pred_captions.length == 0)
                   all_pred_captions = pred_caption;
-              else if(pred_caption != all_pred_captions)
-                  all_pred_captions += ( ". " + pred_caption);
+              else if(pred_caption != all_pred_captions && !response_set.has(pred_caption))
+                  { all_pred_captions += ( ". " + pred_caption); response_set.add(pred_caption);}
               console.log(all_pred_captions);
               var url_final = url_api.concat(all_pred_captions);
               if(!count){
-                  console.log("Final: ",all_pred_captions);
+                  const body = {
+                      method: "POST", 
+                    body: JSON.stringify({ inputText : all_pred_captions}),
+                    headers: { 
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            };
+        
               fetch(url_final)
               .then(function(response){   
                       audio_clip.src = response['url'];
+                      console.log("Final: ",response);
                       all_pred_captions = "";
+                      response_set.clear();
                   })
               }
                   
@@ -206,19 +217,29 @@ function WebSocketTest() {
           //   debugger;
               count --;
 
-            var url_api = "http://api.voicerss.org/?key=8289e9c078474c0abab3604aba18df45&hl=en-us&src=";
+            var url_api = "http://api.voicerss.org/?key=ff91e773474146079653fbb513f71d76&hl=en-us&src=";
+            let url_tts = "http://18.221.192.73:5001/texttospeech";
             if(all_answers.length == 0)
             all_answers = answer;
-        else if(answer != all_answers)
-            all_answers += ( ". " + answer);
+        else if(answer != all_answers && !response_set.has(pred_caption))
+            {all_answers += ( ". " + answer); response_set.add(answer);}
           var url_final = url_api.concat(all_answers);
           if(!count){
               console.log("Final: "+ all_answers);
+              const body = {
+                method: "POST", 
+              body: JSON.stringify({ inputText : all_answers}),
+              headers: { 
+              "Content-type": "application/json; charset=UTF-8"
+          }};
+
           fetch(url_final)
               .then(function(response){
                   
                       audio_clip.src = response['url'];
+                    // audio_clip.src = 'http://18.221.192.73:5001/audio/output.mp3';
                       all_answers = "";
+                      response_set.clear();
                   
                   })
               }
@@ -249,7 +270,7 @@ function readURL(input, ws_id, frameNo) {
         formData.append('file', input.files[0]);
  //       formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 //    "https://cors-anywhere.herokuapp.com/http://3.23.102.127:8001/upload/"
-       var URL1 = "http://3.15.225.221:8001/upload/";
+       var URL1 = "http://3.15.198.15:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -359,7 +380,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.15.225.221:8001/";
+      var URL = "http://3.15.198.15:8001/";
 
       $.ajax({
               type: 'POST',

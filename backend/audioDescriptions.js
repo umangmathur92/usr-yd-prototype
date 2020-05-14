@@ -102,7 +102,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
     }
 }
 
-async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, res) {
+async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, merge=false, res) {
         
             /** Create sentences from the scene description */
         let res1 = await generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id);
@@ -112,14 +112,15 @@ async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, res) {
 
             /** Insert inline/extended audio descriptions in the video */
         let res3 = await generateTimestampsforSentencesInDbWithInfo(vid_id, vol_id);
-
+        if(!merge){
         await getResponse(vid_id, vol_id, res);
-            
+        }
+        else{
             /** Merge sentences and audio clips of the sentences based on conitnuity */
-        // let res4 = await mergeSentenceAudios(vid_id, vol_id);
+        let res4 = await mergeSentenceAudios(vid_id, vol_id);
 
         return res1 && res2 && res3 && res4;
-        // res.send({result: res1 && res2 && res3 && res4})
+        }
 }
 
 
@@ -233,7 +234,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
             let str = currSentence.sentence_id;
             let newstr = str.split('_');
             let sentNum = newstr[newstr.length - 1]; 
-            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
+            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
             let relativePath = fileNamePath.replace('public', '..');
 
             await generateMp3ForTextInFileystem(fileNamePath, sent);

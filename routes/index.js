@@ -619,9 +619,12 @@ res.send({'result': result});
 router.get('/generateAudioDescriptionMp3', function(req, res, next){
   let videoId= req.query.videoId;
   let volunteerId = req.query.volunteerId;
+  let merge = false;
+  if(req.query.merge == true)
+      merge = true;
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
-let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId, res);
+let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId,merge, res);
 task.then(result => {
 res.send({'result': result});
 });
