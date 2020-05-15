@@ -432,8 +432,11 @@ router.post('/saveAiDescription', function(req, res, next) {
   for(let key in inputJson.scene_arr) {
    
       let currScene = inputJson.scene_arr[key];
-      console.log({currScene});
+      // console.log({currScene});
       let {scene_id, modified_description, modified_ocr, start_time, end_time, has_ai, deletedScene, note} = currScene;
+      if(!note){
+        note = '';
+      }
       if(deletedScene){
         deletedSceneArr = [...deletedSceneArr, ...deletedScene]; 
       }
@@ -454,7 +457,7 @@ router.post('/saveAiDescription', function(req, res, next) {
       })];
   }
   
-  console.log({deletedSceneArr});
+  // console.log({deletedSceneArr});
 
 
   Promise.all(resArr)
