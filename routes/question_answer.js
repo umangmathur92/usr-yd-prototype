@@ -49,9 +49,9 @@ router.post('/addQuestion', function(req, res, next) {
 router.delete('/deleteQuestion', function(req, res, next) {
     let queryResult = questionAnswer.deleteQuestionById(req.body);
     queryResult.then(result => {
-      res.send('Question deleted successfully');  
+      res.status(200).send('Question deleted successfully');  
     }).catch((err) => {
-      res.send(err);
+      res.status(400).send(err);
       console.log(err)
     });
   });
