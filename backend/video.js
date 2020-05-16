@@ -57,6 +57,10 @@ async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
 }
 
+async function fetchScene(videoId) {
+    return await db.query('SELECT * FROM scene where video_id=$1', [videoId]);
+}
+
 async function fetchKeyFrames(sceneId,videoTime) {
     console.log("Ent: testking");
     return await db.any("SELECT thumbnail_url from keyframe where start_time < "+ videoTime +"  and shot_id IN (SELECT shot_id FROM shot where scene_id = '" + sceneId +"')" );
@@ -117,7 +121,7 @@ async function fetchVideoDataFromDb(videoId, userId) {
           'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 
          'baseline_des', original_description, 'child_scenes',
           jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num',
-           s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description,
+           s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.pythia_caption,
             'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON
              s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
              GROUP BY start_time, end_time, block_id, original_description, block_num,
@@ -622,5 +626,6 @@ module.exports = {
     replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
     updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser,
     updateBlockAndScene: updateBlockAndScene,
-    fetchVideoData: fetchVideoData
+    fetchVideoData: fetchVideoData,
+    fetchScene: fetchScene
 }

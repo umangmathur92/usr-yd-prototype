@@ -142,6 +142,21 @@ router.get('/playvideo/:youtubeId', function(req, res, next) {
   }
 });
 
+
+router.get('/videoSceneData', function(req, res, next) {
+  console.log('req.query', req.query)
+  let {videoid} = req.query;
+  video.fetchScene(videoid)
+  .then((data)=>{
+    res.status(200).send(data);
+  })
+  .catch(e=>{
+    console.log(e);
+    res.status(400).send(e);
+  })
+
+});
+
 router.get('/fetchVideoData', function(req, res, next) {
   console.log('req.query', req.query)
   let {videoid, userId} = req.query;

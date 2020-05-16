@@ -22,7 +22,7 @@ let scene = require('../model/scene');
 let videoModel = require('../model/video.js');
 const request = require('request');
 let videoDialogue = require('../model/videoDialogue');
-let uploadVideoController = require('../controllers/UploadVideoController');
+let uploadVideoController = require('../controllers/VideoControllerUpload');
 
 
 async function downloadVideo(url, videoTitle){
@@ -308,7 +308,15 @@ router.get('/uploadVideo', function (req, res) {
                                       console.log({ success: result });
                                       uploadVideoController.fetchAudioInsight(audioId, videoId)
                                             .then((result)=>{
-                                              console.log(result);
+                                                console.log(result);
+                                                let data = {
+                                                  state: 'Processed',
+                                                  youtubeId: videoId,
+                                                }
+                                                videoModel.updateVideoAudio_videoState(data)
+                                                .then(()=>{
+                                                  console.log('video state updated in video_audio table')
+                                                })
                                             })
                                         })
                                     .catch((e)=>{
@@ -318,6 +326,10 @@ router.get('/uploadVideo', function (req, res) {
                               })
                               .catch((error) => {
                                     clearInterval(timeId);
+                                    let data = {
+                                      state: 'Failed',
+                                      youtubeId: videoId,
+                                    }
                                     videoModel.updateVideoAudio_videoState(data)
                                       .then(()=>{
                                         console.log('video state updated in video_audio table')
