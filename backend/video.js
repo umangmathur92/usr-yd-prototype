@@ -58,7 +58,7 @@ async function fetchAllVideos() {
 }
 
 async function fetchScene(videoId) {
-    return await db.query('SELECT * FROM scene where video_id=$1', [videoId]);
+    return await db.query('SELECT * FROM scene where video_id=$1 order by scene_num', [videoId]);
 }
 
 async function fetchKeyFrames(sceneId,videoTime) {
