@@ -221,6 +221,19 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
     }
 }
 
+
+function filterOCR(ocrArr, duration, confidenceScore, topLimit){
+    for (const ocrObj of ocrArr) {
+        let diff = ocrObj.end_time - ocrObj.start_time;
+        if(diff >= duration && ocrObj.confidence >= confidenceScore && ocrObj.top >= topLimit){
+            
+        }else{
+            ocrObj.text = '';
+        }
+    }
+    return ocrArr;
+}
+
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
     // console.log({addVideoDataToDb: inputJson});
@@ -280,6 +293,11 @@ async function addVideoDataToDb(inputJson) {
             ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
             ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
             ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
+        //---------
+            filter_OCRArr = filterOCR(ocrArr, 1, 0.56, 50);
+            let concatFilterOcrArr = concatOcrWithinSameShot(filter_OCRArr);
+            await Ocr.updateShotTableWithFilteredOcr(concatFilterOcrArr);
+        //-----
             let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
             await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
             //Aggregate OCR data from the Shot table and insert it into the scene table
@@ -287,12 +305,19 @@ async function addVideoDataToDb(inputJson) {
                 try {
                     let currScene = sceneArr[i];
                     let currSceneId = currScene.scene_id;
-                    let shotsOcrJsonArr = await db.any('SELECT original_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
+                    let shotsOcrJsonArr = await db.any('SELECT original_ocr, filtered_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
                     let ocrArrForScene = [];
+                    let filteredOCRArr = [];
                     for(let j=0; j<shotsOcrJsonArr.length; j++) {
                         ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
+                        if(shotsOcrJsonArr[j].filtered_ocr){
+                            // console.log('FILTERSCENE:', shotsOcrJsonArr[j].filtered_ocr);
+                            filteredOCRArr.push(shotsOcrJsonArr[j].filtered_ocr.trim());
+                        }
                     }
                     ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
+                    filteredOCRArr = Utils.removeDuplicatesFromStringArr(filteredOCRArr);
+                    
                     let finalSceneOcr = '';
                     for (let j=0; j<ocrArrForScene.length; j++) {
                         if(ocrArrForScene[j] != '' || ocrArrForScene[j] != undefined || ocrArrForScene[j] != ' ' || ocrArrForScene[j] != '\n') {
@@ -300,7 +325,18 @@ async function addVideoDataToDb(inputJson) {
                         }
                     }
                     finalSceneOcr = finalSceneOcr.trim();
-                    await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
+
+                    let finalFilteredSceneOcr = '';
+                    for (let j=0; j<filteredOCRArr.length; j++) {
+                        if(filteredOCRArr[j] != '' || filteredOCRArr[j] != undefined || filteredOCRArr[j] != ' ' || filteredOCRArr[j] != '\n') {
+                            finalFilteredSceneOcr = finalFilteredSceneOcr + '\n' + filteredOCRArr[j];
+                        }
+                    }
+                    finalFilteredSceneOcr = finalFilteredSceneOcr.trim();
+
+                    // await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
+                    await db.one("UPDATE scene SET original_ocr = $1, filtered_ocr = $2  WHERE scene_id = $3 RETURNING id", [finalSceneOcr, finalFilteredSceneOcr, currSceneId], a => + a.id);
+
                 }catch(e) {
                     console.log(e);
                 }
