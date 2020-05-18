@@ -108,7 +108,7 @@ async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, merge=false
         let res1 = await generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id);
             
             /** Calculate audio durations for the sentences */
-        let res2 = await generateMp3ForSentencesInDbWithInfo(vid_id, vol_id);
+        let res2 = await generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge);
 
             /** Insert inline/extended audio descriptions in the video */
         let res3 = await generateTimestampsforSentencesInDbWithInfo(vid_id, vol_id);
@@ -204,7 +204,7 @@ async function updateSentencesDescriptionTable(duration, currVideoId, volunteerI
 }
 
 /** Step 2: Generates mp3 audio files for all the sentences  */
-async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
+async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge = false) {
 
     try{
         let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by scene_num, sentence_id`);
@@ -234,7 +234,12 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
             let str = currSentence.sentence_id;
             let newstr = str.split('_');
             let sentNum = newstr[newstr.length - 1]; 
-            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+            let fileNamePath = '';
+            if(merge)
+                fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+            else
+                fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
+
             let relativePath = fileNamePath.replace('public', '..');
 
             await generateMp3ForTextInFileystem(fileNamePath, sent);
