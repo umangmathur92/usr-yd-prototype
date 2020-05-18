@@ -6,8 +6,6 @@ const sceneModel = require('../model/scene');
 
 class FilterBaselineDescriptionController{
 
-    // userId= 09172c90-805c-11ea-bc55-0242ac130003 ORIGINAL
-    //userID = d87ad780-805b-11ea-bc55-0242ac130003 BLEU
     static async filter(videoId){
         try{
             let sceneData = await sceneModel.getSceneData(videoId);
@@ -22,16 +20,34 @@ class FilterBaselineDescriptionController{
             let res = await sceneModel.updateBleuDescription_Scene(sceneData);
             console.log({res});
             return res;
-
-            // let userId = 'd87ad780-805b-11ea-bc55-0242ac130003'
-            // let response = await sceneModel.insertDescriptionTable_blue(sceneData, userId);
-            // console.log({response});
         }catch(e){
             console.log(e);
             throw e;
         }
        
     }
+
+
+    //Filter Pythia caption 
+    static async filterPythiaCaption(videoId){
+        try{
+            let sceneData = await sceneModel.getSceneData(videoId);
+            for(let i=0; i < sceneData.length; i++){
+                let scene = sceneData[i];
+               let desc = await this.calculate(scene.pythia_caption);
+               scene.pythia_caption_bleu = desc;
+               console.log({scene});
+            }
+            //  update Bleu description in scene table
+            let res = await sceneModel.updateBleuPythiaCaption_Scene(sceneData);
+            console.log({res});
+            return res;
+        }catch(e){
+            console.log(e);
+            throw e;
+        }
+    }
+
     
     //MERGE_SCENE 
     static async filter_MergeSceneTable(){
@@ -68,8 +84,7 @@ class FilterBaselineDescriptionController{
         let rejected = [];
         let queue = description.split('\n');
         if(queue.length == 1){
-            result.push(queue[0]);
-            return result;
+            return queue[0];
         }
         
         while(queue.length > 1){

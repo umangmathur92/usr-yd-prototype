@@ -11,6 +11,8 @@ const scene = require('../model/scene');
 const videoDialogue = require('../model/videoDialogue');
 const uploadVideoRoute = require('../routes/uploadVideo');
 var path = require('path');
+let filterDescController = require('../controllers/FilterBaselineDescriptionController');
+let pythiaCaptionController = require('../controllers/PythiaCaptionGenerationController');
 
 
 class UploadVideoController{
@@ -67,6 +69,19 @@ class UploadVideoController{
     }
 
 
+    static async fetchAndFilterPythiaCaption(videoId){
+        try{
+            let captionRes = await pythiaCaptionController.generatePythiaCaption(videoId)
+            console.log('PythiaCaption:', captionRes);
+            await filterDescController.filterPythiaCaption(videoId);
+            let res = filterDescController.filter(videoId); 
+            return res;
+        }catch(e){
+            console.log(e);
+            throw e;
+        }
+    }
+
     static async fetchAudioInsight(audioId, videoId){
         return new Promise((resolve, reject) => {
             let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
@@ -79,15 +94,17 @@ class UploadVideoController{
                 }
                 //VIDEO
                 let videoInsight = [];
+                console.log({videoId});
                 scene.getSceneData(videoId)
                   .then((data) => {
-                        console.log(data);
+                        console.log({sceneData: data});
                         for (let i = 0; i < data.length; i++) {
                         data[i].merged = [];
                         videoInsight.push(data[i]);
                         }
                         console.log({ videoInsight });
-        
+                       
+                      
                         //AUDIO
                         let sentence = response.data.result.sentence;
                         let audioInsight =[];
@@ -106,8 +123,13 @@ class UploadVideoController{
                             }
                         }
                         console.log({audioInsight});
-                
+                        
                         //MERGE
+                        if(videoInsight.length == 0){
+                          console.log('Scene data empty for the video');
+                          reject();
+                        }
+
                         let mergedList = this.merge(videoInsight, audioInsight);
                         scene.addMergeSceneTable(mergedList)
                             .then(data => {

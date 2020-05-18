@@ -143,6 +143,22 @@ class Scene {
         }
     }
 
+    static async updateBleuPythiaCaption_Scene(sceneArr) {
+        console.log('DB Operation: Updating scene table with filterd pythia data based on BLEU score');
+        try {
+            return await db.tx(t => {
+                var queries = sceneArr.map(scene => {
+                    return t.one("UPDATE scene SET pythia_caption_bleu = ${pythia_caption_bleu} WHERE scene_id = ${scene_id} and video_id = ${video_id} RETURNING id", scene, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+
+
     static async updateBleuDescription_MergeScene(sceneArr) {
         console.log('DB Operation: Updating Merge scene table with description data');
         try {

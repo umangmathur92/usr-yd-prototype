@@ -181,10 +181,31 @@ router.get('/videoState', function (req, res) {
               youtubeId,
               'inputJson': response.data
             };
+            //---
             videoController.addVideoDataToDb(jsonBody)
               .then(result => {
-                res.send({ success: result });
-              });
+                console.log({ success: result });
+                uploadVideoController.fetchAudioInsight(audioId, youtubeId)
+                      .then((audioResult)=>{
+                        uploadVideoController.fetchAndFilterPythiaCaption(youtubeId)
+                          .then(()=>{
+                            console.log(result);
+                            let data = {
+                              state: 'Processed',
+                              youtubeId,
+                            }
+                            videoModel.updateVideoAudio_videoState(data)
+                            .then(()=>{
+                              console.log('Video is processed and state updated in video_audio table');
+                              res.status(200).send('Video successfully processed');
+                            })
+                          })
+                      })
+                  })
+              .catch((e)=>{
+                console.log(e);
+              })
+            //------
           })
           .catch((error) => {
             res.status(400).send(error);
@@ -249,7 +270,7 @@ router.get('/uploadVideo', function (req, res) {
 
     let rootName = videoId + '_' + currentDateTime;
     let fileName = videoId + '_' + currentDateTime + '.mp4';
-    let filePath = path.join(__dirname, '../', fileName);
+    let filePath = path.join(__dirname, '../videos/', fileName);
     console.log({ fileName });
     console.log({ filePath });
 
@@ -307,15 +328,18 @@ router.get('/uploadVideo', function (req, res) {
                                     .then(result => {
                                       console.log({ success: result });
                                       uploadVideoController.fetchAudioInsight(audioId, videoId)
-                                            .then((result)=>{
-                                                console.log(result);
-                                                let data = {
-                                                  state: 'Processed',
-                                                  youtubeId: videoId,
-                                                }
-                                                videoModel.updateVideoAudio_videoState(data)
+                                            .then((audioResult)=>{
+                                              uploadVideoController.fetchAndFilterPythiaCaption(videoId)
                                                 .then(()=>{
-                                                  console.log('video state updated in video_audio table')
+                                                  console.log(result);
+                                                  let data = {
+                                                    state: 'Processed',
+                                                    youtubeId: videoId,
+                                                  }
+                                                  videoModel.updateVideoAudio_videoState(data)
+                                                  .then(()=>{
+                                                    console.log('Video is processed and state updated in video_audio table')
+                                                  })
                                                 })
                                             })
                                         })
@@ -369,71 +393,6 @@ router.get('/uploadVideo', function (req, res) {
     })
 
 });
-
-
-/*
-async function fetchAudioInsight(audioId, videoId){
-    return new Promise((resolve, reject) => {
-        let url = 'http://18.221.192.73:8081/v1/audioclips/getspeechtotextresult?orderid=' + audioId;
-        axios.get(url)
-        .then((response) => {
-            console.log(response.data);
-            let status = response.data.status
-            if(status !== 'success'){
-              reject(`Audio not processed for audioId=${audioId}, videoId= ${videoId}`);
-            }
-            //VIDEO
-            let videoInsight = [];
-            scene.getSceneData(videoId)
-              .then((data) => {
-                console.log(data);
-                for (let i = 0; i < data.length; i++) {
-                  data[i].merged = [];
-                  videoInsight.push(data[i]);
-                }
-                console.log({ videoInsight });
-
-            //AUDIO
-            let sentence = response.data.result.sentence;
-            let audioInsight =[];
-            for(let i=0; i< sentence.length; i++){
-                let start = sentence[i].startTime;
-                let end = sentence[i].endTime;
-                let desc  = sentence[i].sentence;
-                desc = desc.replace(/'/g, '');
-                if(!desc.toLowerCase().includes('noise')){
-                  let data = {
-                    start,
-                    end,
-                    sentence: desc
-                  }
-                  audioInsight.push(data);
-                }
-            }
-            console.log({audioInsight});
-          
-            //MERGE
-            let mergedList = merge(videoInsight, audioInsight);
-            let result = scene.addMergeSceneTable(mergedList)
-            result
-              .then(data => {
-                console.log({ success: data });
-                videoDialogue.insertDataIntoVideoDialogue(audioInsight, videoId, audioId)
-                  .then(res=>{
-                    console.log(res);
-                    resolve('Success: Scene Merged');
-                  })
-              })
-            })
-        .catch((error) => {
-              console.log(error);
-              reject(error);
-            })
-        });
-    })
-
-}
-*/
 
 
 async function convertVideoToAudio(youtubeId, videoFilePath) {
@@ -540,65 +499,6 @@ async function uploadVideo(file, accessToken, youtubeId, videoTitle) {
 
   return res.data;
 }
-
-// function merge(videoInsight, audioInsight){
-//   let videoIndex = 0;
-//   let mergedList = [];
-//   mergedList.push(videoInsight[videoIndex++]);
-//   let i = 0;
-//   while(i < audioInsight.length && videoIndex < videoInsight.length){
-//       let size = mergedList.length;
-//       let s1 = mergedList[size-1].start_time;
-//       let e1 = mergedList[size-1].end_time;
-
-//       let s2 = audioInsight[i].start;
-//       let e2 = audioInsight[i].end;
-
-//       if((s2 >= s1 && s2 <= e1) && (e2 >= s1 && e2 <= e1)) {
-//           i++;
-//           continue;
-//       }
-      
-//       if(Math.min(s2, e2) >= e1) {
-//           mergedList.push(videoInsight[videoIndex++]);
-//           continue;
-//       }
-      
-//       //merge condition
-//       if(s2 >= s1 && e2 > e1) {
-//           let sceneObj = mergedList[mergedList.length-1];
-//           let next = videoInsight[videoIndex++]; 
-//           let min = Math.min(s1,  next.start_time);
-//           let max = Math.max(e1, next.end_time);
-//           sceneObj.start_time = min;
-//           sceneObj.end_time = max;
-//           // let arr = sceneObj.merged;
-//           // arr.push(next.scene_id);
-//           sceneObj.merged.push(next.scene_id);
-//           mergedList.splice(mergedList.length-1);
-//           mergedList.push(sceneObj);
-//       }else if(s2 >= e1) {
-//           mergedList.push(videoInsight[videoIndex++]);
-//       }
-
-//       i++;
-//   }
-
-//   for(let j = videoIndex; j<videoInsight.length; j++) {
-//       mergedList.push(videoInsight[j]);
-//   }
-
-//   for(let k=0; k< mergedList.length; k++){
-//       let scene_id = mergedList[k].scene_id;
-//       let merged = mergedList[k].merged;
-//       let start_time = mergedList[k].start_time;
-//       let end_time = mergedList[k].end_time;
-//       // console.log(scene_id ,'-' ,start_time, '-', end_time, ',', JSON.stringify(merged));
-//   }
-  
-//   // console.log({mergedList});
-//   return mergedList;
-// }
 
 
 
