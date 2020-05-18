@@ -32,6 +32,8 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
+videos/
+
 # Dependency directories
 node_modules/
 jspm_packages/
@@ -84,3 +86,5 @@ videodata/
 *.DS_Store
 
 *.mp3
+
+
