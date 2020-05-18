@@ -724,7 +724,7 @@ async function getResponse(vid_id, vol_id, res){
             result[currSceneId]["sentences"].push(sentenceObj);
         }
 
-          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}'`);
+          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}' ORDER BY scene_num, start_time`);
 
     for(let item = 0; item < time_gaps_info.length; item++)
     {
@@ -741,6 +741,22 @@ async function getResponse(vid_id, vol_id, res){
         let scene_id = sceneMap[time_gaps_scene_num];
 
         result[scene_id]["empty gaps"].push(gapObj);
+
+    }
+    result["dialog timestamps"] = [];
+    let dialog_ts_info = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' ORDER BY start_time`);
+
+    for(let item = 0; item < dialog_ts_info.length; item++)
+    {
+        dialog_ts_data = dialog_ts_info[item];
+        let dialog_ts_start_time = dialog_ts_data.start_time;
+        let dialog_ts_end_time = dialog_ts_data.end_time;
+
+        dialogObj = {};
+        dialogObj["start time"] = dialog_ts_start_time;
+        dialogObj["end time"] = dialog_ts_end_time;
+
+        result["dialog timestamps"].push(dialogObj);
 
     }
 
