@@ -79,7 +79,7 @@ async function fetchVideoData(videoId, userId) {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
 
         let queryResult = await db.query(`select scene_id as sc_id, scene_num as sc_num, start_time, end_time, 
-                                        original_ocr, original_description from scene where video_id= $1 ORDER BY scene_num`, [videoId]);
+                                        original_ocr, pythia_caption_bleu as original_description from scene where video_id= $1 ORDER BY scene_num`, [videoId]);
         queryResult.forEach(scene => {
                 scene.deletedScene = [];
                 scene.note = '';
