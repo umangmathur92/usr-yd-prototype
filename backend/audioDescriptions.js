@@ -108,7 +108,7 @@ async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, merge=false
         let res1 = await generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id);
             
             /** Calculate audio durations for the sentences */
-        let res2 = await generateMp3ForSentencesInDbWithInfo(vid_id, vol_id);
+        let res2 = await generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge);
 
             /** Insert inline/extended audio descriptions in the video */
         let res3 = await generateTimestampsforSentencesInDbWithInfo(vid_id, vol_id);
@@ -204,7 +204,7 @@ async function updateSentencesDescriptionTable(duration, currVideoId, volunteerI
 }
 
 /** Step 2: Generates mp3 audio files for all the sentences  */
-async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
+async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge = false) {
 
     try{
         let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by scene_num, sentence_id`);
@@ -234,7 +234,12 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id) {
             let str = currSentence.sentence_id;
             let newstr = str.split('_');
             let sentNum = newstr[newstr.length - 1]; 
-            let fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+            let fileNamePath = '';
+            if(merge)
+                fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+            else
+                fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
+
             let relativePath = fileNamePath.replace('public', '..');
 
             await generateMp3ForTextInFileystem(fileNamePath, sent);
@@ -719,7 +724,7 @@ async function getResponse(vid_id, vol_id, res){
             result[currSceneId]["sentences"].push(sentenceObj);
         }
 
-          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}'`);
+          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}' ORDER BY scene_num, start_time`);
 
     for(let item = 0; item < time_gaps_info.length; item++)
     {
@@ -736,6 +741,22 @@ async function getResponse(vid_id, vol_id, res){
         let scene_id = sceneMap[time_gaps_scene_num];
 
         result[scene_id]["empty gaps"].push(gapObj);
+
+    }
+    result["dialog timestamps"] = [];
+    let dialog_ts_info = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' ORDER BY start_time`);
+
+    for(let item = 0; item < dialog_ts_info.length; item++)
+    {
+        dialog_ts_data = dialog_ts_info[item];
+        let dialog_ts_start_time = dialog_ts_data.start_time;
+        let dialog_ts_end_time = dialog_ts_data.end_time;
+
+        dialogObj = {};
+        dialogObj["start time"] = dialog_ts_start_time;
+        dialogObj["end time"] = dialog_ts_end_time;
+
+        result["dialog timestamps"].push(dialogObj);
 
     }
 

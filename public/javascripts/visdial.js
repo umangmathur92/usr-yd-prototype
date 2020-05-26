@@ -191,21 +191,24 @@ function WebSocketTest() {
               console.log(all_pred_captions);
               var url_final = url_api.concat(all_pred_captions);
               if(!count){
-                  const body = {
-                      method: "POST", 
-                    body: JSON.stringify({ inputText : all_pred_captions}),
-                    headers: { 
-                    "Content-type": "application/json; charset=UTF-8"
-                }
-            };
-        
-              fetch(url_final)
-              .then(function(response){   
-                      audio_clip.src = response['url'];
-                      console.log("Final: ",response);
-                      all_pred_captions = "";
+                console.log("Final: ",all_pred_captions);
+                        all_pred_captions = "";
                       response_set.clear();
-                  })
+            //       const body = {
+            //           method: "POST", 
+            //         body: JSON.stringify({ inputText : all_pred_captions}),
+            //         headers: { 
+            //         "Content-type": "application/json; charset=UTF-8"
+            //     }
+            // };
+        
+              // fetch(url_final)
+              // .then(function(response){   
+              //         audio_clip.src = response['url'];
+              //         console.log("Final: ",response);
+              //         all_pred_captions = "";
+              //         response_set.clear();
+              //     })
               }
                   
           }
@@ -226,22 +229,24 @@ function WebSocketTest() {
           var url_final = url_api.concat(all_answers);
           if(!count){
               console.log("Final: "+ all_answers);
-              const body = {
-                method: "POST", 
-              body: JSON.stringify({ inputText : all_answers}),
-              headers: { 
-              "Content-type": "application/json; charset=UTF-8"
-          }};
-
-          fetch(url_final)
-              .then(function(response){
-                  
-                      audio_clip.src = response['url'];
-                    // audio_clip.src = 'http://18.221.192.73:5001/audio/output.mp3';
-                      all_answers = "";
+              all_answers = "";
                       response_set.clear();
+          //     const body = {
+          //       method: "POST", 
+          //     body: JSON.stringify({ inputText : all_answers}),
+          //     headers: { 
+          //     "Content-type": "application/json; charset=UTF-8"
+          // }};
+
+          // fetch(url_final)
+          //     .then(function(response){
                   
-                  })
+          //             audio_clip.src = response['url'];
+          //           // audio_clip.src = 'http://18.221.192.73:5001/audio/output.mp3';
+          //             all_answers = "";
+          //             response_set.clear();
+                  
+          //         })
               }
            
         }
