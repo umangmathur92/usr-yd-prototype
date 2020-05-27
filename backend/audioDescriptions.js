@@ -152,11 +152,11 @@ async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
             let sceneNum = currDescription.scene_num;
             ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
             let lastChar = descriptionText[descriptionText.length - 1];
-            if(lastChar != '.' && lastChar != '!' && lastChar != '?')
+            if(descriptionText.length > 0 && lastChar != '.' && lastChar != '!' && lastChar != '?' && lastChar != '\n')
                 descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
-            sentences = finalText.replace(/([.?!])\s*(?=[A-Za-z])/g, "$1|").split("|")
+            sentences = finalText.replace(/([.?!\n])\s*(?=[A-Za-z])/g, "$1|").split("|")
             let sentence_id_key = 0;
 
             for(s of sentences)
@@ -257,7 +257,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge = false
     /** API for generating timestamps for audio descriptions for a scene */
 async function generateTimestampsforScene(dbVideoId, dbVolId, sceneId, description){
 
-        let sentences = description.replace(/([.?!])\s*(?=[A-Za-z])/g, "$1|").split("|");
+        let sentences = description.replace(/([.?!\n])\s*(?=[A-Za-z])/g, "$1|").split("|");
         let sentence_duration = []
 
         for(let s of sentences){
