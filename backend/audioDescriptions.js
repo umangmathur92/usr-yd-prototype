@@ -236,7 +236,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge = false
             let sentNum = newstr[newstr.length - 1]; 
             let fileNamePath = '';
             if(merge)
-                fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}/.mp3`;
+                fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
             else
                 fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
 
@@ -368,7 +368,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     // Call fn for generating time gaps
     await generateTimeGaps(dbVideoId,dbVolId);
     
-    let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${dbVideoId}'`);
+    let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${dbVideoId}' and volunteer_id = '${dbVolId}'`);
 
     let time_gaps_start_time = [];
     let time_gaps_end_time = [];
@@ -448,16 +448,26 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
 
 async function generateTimeGaps(vid_id,vol_id){
 
-try{
+    try{
 
-    let res = await db.any(`Select * FROM video_time_gaps where video_id = '${vid_id}'`);
-    if(res.length > 0)
-        return true;
+        await db.any(`Delete from video_time_gaps where video_id = '${vid_id}' and volunteer_id = '${vol_id}'`);
+    
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
 
-} catch (error) {
-    console.log(error);
-    return false;
-}
+
+// try{
+
+//     let res = await db.any(`Select * FROM video_time_gaps where video_id = '${vid_id}'`);
+//     if(res.length > 0)
+//         return true;
+
+// } catch (error) {
+//     console.log(error);
+//     return false;
+// }
 
 let descriptionListArr = await db.any(`SELECT * FROM descriptions WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}'order by scene_num`);
 
@@ -547,8 +557,8 @@ for(let i=0; i<video_dialogs.length; i++) {
                 time_end = video_dialogs[i]["start_time"];
 
             if(time_start !== time_end)
-                await db.query(`INSERT INTO video_time_gaps(video_id, scene_num,
-                            start_time, end_time, is_diff_scene) VALUES ('${vid_id}', ${scene_num}, ${time_start}, ${time_end}, ${is_overlap})`);
+                await db.query(`INSERT INTO video_time_gaps(video_id, volunteer_id, scene_num,
+                            start_time, end_time, is_diff_scene) VALUES ('${vid_id}', '${vol_id}', ${scene_num}, ${time_start}, ${time_end}, ${is_overlap})`);
             i++;
         }
     }
@@ -589,6 +599,15 @@ async function updateSentenceStartTime(sentence_id, audioStartTime, audioType){
 }
 /** Step 4: Merge all continuous audio clips  */
 async function mergeSentenceAudios(video_id, vol_id){
+
+    try{
+
+        await db.any(`Delete from descriptions_new_sentence where video_id = '${video_id}' and volunteer_id = '${vol_id}'`);
+    
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
     
     try{
     let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${video_id}' AND volunteer_id = '${vol_id}' ORDER BY scene_num, sentence_id`);
@@ -724,7 +743,7 @@ async function getResponse(vid_id, vol_id, res){
             result[currSceneId]["sentences"].push(sentenceObj);
         }
 
-          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}' ORDER BY scene_num, start_time`);
+          let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}' and volunteer_id = '${vol_id}' ORDER BY scene_num, start_time`);
 
     for(let item = 0; item < time_gaps_info.length; item++)
     {
@@ -775,12 +794,12 @@ async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneN
     let audio_path = '';
     let file_path = 'public/';
 
-    for(let i=0; i<str.length-2; i++)
+    for(let i=0; i<str.length-1; i++)
         audio_path += (str[i] + '/');
-    for(let i=1; i<str.length-2; i++)
+    for(let i=1; i<str.length-1; i++)
         file_path += (str[i] + '/');
 
-    audio_path = audio_path + 'new/' + currAudioType + '.mp3';
+    // audio_path = audio_path + 'new/' + currAudioType + '.mp3';
     if(path_val ==0)
         {file_path = file_path + 'new/' + currAudioType + '.mp3';
         audio_path = audio_path + 'new/' + currAudioType + '.mp3';}
