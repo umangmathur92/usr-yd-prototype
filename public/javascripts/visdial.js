@@ -52,6 +52,7 @@ async function fetchKeyFrames() {
   // console.log("db from data", db);
   let scene_id = currScene.sc_id;
   let startTime = currScene.start_time;
+  console.log("video time for keyframes: ", videotime, " and scene_id is: ", scene_id);
   var path;
   try {
           let targetUrl = '/getKeyFrames' + '?sceneId=' + scene_id + '&videoTime=' + videotime;
@@ -63,7 +64,8 @@ async function fetchKeyFrames() {
               totalFrames = KeyFramesArr.length;
               count = totalFrames;
               path = KeyFramesArr[0].thumbnail_url;
-              console.log("The url is: "+path);           
+              for(let i=0; i< KeyFramesArr.length; i++)
+                  console.log("The url is: "+ KeyFramesArr[i].thumbnail_url);           
               // debugger;    
           })
           .done(function(){
