@@ -158,13 +158,19 @@ async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
             let descType = hasAi ? 'ai' : 'non_ai';
             sentences = finalText.replace(/([.?!\n])\s*(?=[A-Za-z])/g, "$1|").split("|")
             let sentence_id_key = 0;
+            let ocr_flag = true;
+            is_ocr = false;
 
             for(s of sentences)
             {
+                if(ocr_flag && s.length > 18 && s.substring(0,17) == "Text on screen : "){
+                    is_ocr = true;
+                    ocr_flag = false;
+                }
                 let sentence_id = currDescriptionId + '_' + sentence_id_key;
                 await insertDescriptionSentencesTable(currDescriptionId,currVideoId,currSceneId,
                                                         currScene_start_time,currScene_end_time,volunteerId,hasAi,descriptionText,ocrText,
-                                                        sceneNum,finalText,sentence_id,s);
+                                                        sceneNum,finalText,sentence_id,s, is_ocr);
                 sentence_id_key += 1;
             }
         }
@@ -177,13 +183,13 @@ async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
 
 async function insertDescriptionSentencesTable(currDescriptionId,currVideoId,currSceneId,
     currScene_start_time,currScene_end_time,volunteerId,hasAi,descriptionText,ocrText,
-    sceneNum,finalText,sentence_id,s){
+    sceneNum,finalText,sentence_id,s, is_ocr){
         try {
             await db.query(`INSERT INTO descriptions_sentence(desc_id,video_id,scene_id,
                 start_time,end_time,volunteer_id,has_ai,description,ocr,
-                scene_num,sentence_id,sentence) VALUES('${currDescriptionId}','${currVideoId}','${currSceneId}',
+                scene_num,sentence_id,sentence, is_ocr) VALUES('${currDescriptionId}','${currVideoId}','${currSceneId}',
                     ${currScene_start_time},${currScene_end_time},'${volunteerId}',${hasAi},'${descriptionText}','${ocrText}',
-                    ${sceneNum},'${sentence_id}','${s}');`);
+                    ${sceneNum},'${sentence_id}','${s}', ${is_ocr});`);
 
             return true;
         } catch(e) {
@@ -578,12 +584,30 @@ async function fetchSceneNum(timestamp, videoId, sentence_id){
     if(timestamp < 0)
         return -1;
     
-    for(let i=0; i<sceneNumArr.length; i++){
-        if(sceneStartTimesArr[i]['start_time'] > timestamp)
-            return sceneNumArr[i-1]['scene_num'];
-    }
+    // for(let i=0; i<sceneNumArr.length; i++){
+    //     if(sceneStartTimesArr[i]['start_time'] > timestamp)
+    //         return sceneNumArr[i-1]['scene_num'];
+    // }
 
-    return sceneNumArr[sceneNumArr.length - 1]['scene_num'];
+    // return sceneNumArr[sceneNumArr.length - 1]['scene_num'];
+    
+    let start = 0;
+    let end = sceneNumArr.length - 1;
+    let index = -1;
+    while(start <= end) {
+        let mid = Math.floor((start + end)/2);
+        if(sceneStartTimesArr[mid]['start_time'] == timestamp) {
+            index = mid;
+            break;
+        } else if(sceneStartTimesArr[mid]['start_time'] < timestamp) {
+            index = mid;
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    // return index;
+    return sceneNumArr[index]['scene_num'];
 }
 
 async function updateSentenceStartTime(sentence_id, audioStartTime, audioType){
@@ -717,6 +741,7 @@ async function getResponse(vid_id, vol_id, res){
             let hasAi = currSentence.has_ai;
             let descriptionText = currSentence.description;
             let ocrText = currSentence.ocr;
+            let is_ocr = currSentence.is_ocr;
             let sceneNum = currSentence.scene_num;
             let currAudioPath = currSentence.audiopath;
             let currAudioType = currSentence.audio_type;
@@ -726,8 +751,10 @@ async function getResponse(vid_id, vol_id, res){
 
             if(!(result.hasOwnProperty(currSceneId))){
                 result[currSceneId] = {};
-                result[currSceneId]["description"] = descriptionText + ocrText; 
+                result[currSceneId]["description"] = descriptionText; 
+                result[currSceneId]["ocr"] = ocrText; 
                 result[currSceneId]["sentences"] = [];
+                result[currSceneId]["ocr sentences"] = [];
                 result[currSceneId]["empty gaps"] = [];
                 sceneMap[sceneNum] = currSceneId;
             }
@@ -739,8 +766,11 @@ async function getResponse(vid_id, vol_id, res){
             sentenceObj["audio start time"] = currAudioStartTime;
             sentenceObj["audio duration"] = currAudioLength;
             sentenceObj["url"] = "http://18.221.192.73:5001" + currAudioPath.substring(2,currAudioPath.length);
-
-            result[currSceneId]["sentences"].push(sentenceObj);
+            
+            if(!is_ocr)
+                result[currSceneId]["sentences"].push(sentenceObj);
+            else
+                result[currSceneId]["ocr sentences"].push(sentenceObj);
         }
 
           let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${vid_id}' and volunteer_id = '${vol_id}' ORDER BY scene_num, start_time`);
