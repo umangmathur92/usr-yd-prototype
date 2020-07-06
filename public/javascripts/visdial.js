@@ -52,6 +52,7 @@ async function fetchKeyFrames() {
   // console.log("db from data", db);
   let scene_id = currScene.sc_id;
   let startTime = currScene.start_time;
+  console.log("video time for keyframes: ", videotime, " and scene_id is: ", scene_id);
   var path;
   try {
           let targetUrl = '/getKeyFrames' + '?sceneId=' + scene_id + '&videoTime=' + videotime;
@@ -63,7 +64,8 @@ async function fetchKeyFrames() {
               totalFrames = KeyFramesArr.length;
               count = totalFrames;
               path = KeyFramesArr[0].thumbnail_url;
-              console.log("The url is: "+path);           
+              for(let i=0; i< KeyFramesArr.length; i++)
+                  console.log("The url is: "+ KeyFramesArr[i].thumbnail_url);           
               // debugger;    
           })
           .done(function(){
@@ -158,7 +160,7 @@ function WebSocketTest() {
          // Let us open a web socket
         //  var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/lobby/");
             //  ws = new WebSocket("ws://13.59.252.226:8001/users/");
-            ws = new WebSocket("ws://3.15.198.15:8001/chat/");
+            ws = new WebSocket("ws://3.15.186.136:8001/chat/");
             ws.onopen = function() {
               //   ws.send(ws_id);
               console.log("Websocket opened");
@@ -202,13 +204,13 @@ function WebSocketTest() {
             //     }
             // };
         
-              // fetch(url_final)
-              // .then(function(response){   
-              //         audio_clip.src = response['url'];
-              //         console.log("Final: ",response);
-              //         all_pred_captions = "";
-              //         response_set.clear();
-              //     })
+              fetch(url_final)
+              .then(function(response){   
+                      audio_clip.src = response['url'];
+                      console.log("Final: ",response);
+                      all_pred_captions = "";
+                      response_set.clear();
+                  })
               }
                   
           }
@@ -238,15 +240,15 @@ function WebSocketTest() {
           //     "Content-type": "application/json; charset=UTF-8"
           // }};
 
-          // fetch(url_final)
-          //     .then(function(response){
+          fetch(url_final)
+              .then(function(response){
                   
-          //             audio_clip.src = response['url'];
-          //           // audio_clip.src = 'http://18.221.192.73:5001/audio/output.mp3';
-          //             all_answers = "";
-          //             response_set.clear();
+                      audio_clip.src = response['url'];
+                    // audio_clip.src = 'http://18.221.192.73:5001/audio/output.mp3';
+                      all_answers = "";
+                      response_set.clear();
                   
-          //         })
+                  })
               }
            
         }
@@ -275,7 +277,7 @@ function readURL(input, ws_id, frameNo) {
         formData.append('file', input.files[0]);
  //       formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 //    "https://cors-anywhere.herokuapp.com/http://3.23.102.127:8001/upload/"
-       var URL1 = "http://3.15.198.15:8001/upload/";
+       var URL1 = "http://3.15.186.136:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -385,7 +387,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.15.198.15:8001/";
+      var URL = "http://3.15.186.136:8001/";
 
       $.ajax({
               type: 'POST',

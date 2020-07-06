@@ -15,6 +15,7 @@ const sentences = require('../backend/sentences.js');
 const pythiaCaption = require('../routes/pythiaCaption');
 const bleu = require('../npm_python/nodejs/bleu.js');
 const audioDescription = require('../backend/audioDescriptions.js');
+const audioDesc = require('../backend/audioDesc.js');
 const filterDescriptionBleuController = require('../controllers/FilterBaselineDescriptionController');
 const bodyParser = require('body-parser');
 
@@ -75,6 +76,17 @@ router.get('/getAllVideos', function(req, res, next) {
   query.then(result => {
     res.send(result);  
   });
+});
+
+router.get('/getAllKeyFrames', function(req, res, next) {
+
+  let {videoId } = req.query;
+  // console.log("The vals are: "+sceneId+"  "+videoTime);
+  let queryResult = video.fetchAllKeyFrames(videoId);
+  queryResult.then(result => {
+    // console.log("The vals are: "+sceneId+"  "+videoTime);
+       res.send(result);
+    });
 });
 
 router.get('/getKeyFrames', function(req, res, next) {
@@ -643,6 +655,21 @@ router.get('/generateAudioDescriptionMp3', function(req, res, next){
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
 let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId,merge, res);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
+router.get('/generateAudioDescriptionMp3ForScene', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+  let sceneId = req.query.sceneId;
+  let merge = false;
+  if(req.query.merge != null)
+      merge = true;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDesc.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId,sceneId, res);
 task.then(result => {
 res.send({'result': result});
 });

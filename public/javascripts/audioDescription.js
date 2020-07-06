@@ -551,13 +551,13 @@ async function updateTime() {
                 if(YT_FLAG_EXT)
                 {YT_FLAG_EXT=false; continue;}
 
-                // pauseVideo();
+                pauseVideo();
                 YT.currentTime = STATE_TIME;
                 YT_FLAG = true;
                 console.log("Extended fault");
                 if(currAudio && currAudio!==null)
-                    // currAudio.pause();
-                currAudio.play();
+                    currAudio.pause();
+                // currAudio.play();
                     console.log("Current Audio is paused: 0"+STATE_TIME);
                 STATE = 2;
             }
@@ -636,11 +636,13 @@ async function onProgress(currentTime) {
     console.log(allSceneArr);
     let sceneNum = currScene.sc_num;
     let sceneEndTime = currScene.finish_time;
-    
+    // if(sceneNum == allSceneArr[allSceneArr.length - 1].sc_num && (sceneEndTime - 1.5 < player.getCurrentTime()))
+    //     sceneNum += 1;
+
     if(prevSceneNum == -1 && first_extend_flag)
     {first_extend_flag = false;}
 
-    else if((prevSceneNum != -1 && sceneNum != prevSceneNum) || (sceneNum == allSceneArr[allSceneArr.length - 1].sc_num && (sceneEndTime - 1.5 < player.getCurrentTime()))) {   
+    else if((prevSceneNum != -1 && sceneNum != prevSceneNum)) {   
         if(scene_audio_extend_set.has(prevSceneNum)) {
             STATE = 1;
             pauseVideo();
@@ -838,6 +840,29 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
+            if(scene_audio_extend_set.has(sceneNum)) {
+                // STATE = 1;
+                // pauseVideo();
+                // let totalAudios = sentenceAudioMap[prevSceneNum];
+                let flag = true;
+                // let i=0;
+                // YT_FLAG = true;
+                    if(flag && currAudio==null)
+                    {currAudio = sentenceAudioMap[sceneNum][0];
+                        console.log("Will play now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    player.setVolume(15);
+                    currAudio.play();
+                    currAudio.onended = function() {
+                                console.log('player state is: ' + player.getPlayerState());
+                        // if(player.getPlayerState() == YT.PlayerState.PAUSED) {
+                        //     console.log('I was called');
+                        //     // STATE = 0;
+                        //     // STATE_TIME = -1;
+                        //     currAudio = null;
+                        //     player.setVolume(75);
+                        //     // playVideo();
+                        // }
+                    }}}
         case YT.PlayerState.CUED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
