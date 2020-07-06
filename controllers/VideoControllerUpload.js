@@ -73,8 +73,8 @@ class UploadVideoController{
         try{
             let captionRes = await pythiaCaptionController.generatePythiaCaption(videoId)
             console.log('PythiaCaption:', captionRes);
-            await filterDescController.filterPythiaCaption(videoId);
-            let res = filterDescController.filter(videoId); 
+            await filterDescController.filter(videoId); // filter original description
+            let res =  filterDescController.filterPythiaCaption(videoId);
             return res;
         }catch(e){
             console.log(e);

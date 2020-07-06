@@ -6,6 +6,7 @@ const sceneModel = require('../model/scene');
 
 class FilterBaselineDescriptionController{
 
+    //filter original description from Video Insight
     static async filter(videoId){
         try{
             let sceneData = await sceneModel.getSceneData(videoId);
