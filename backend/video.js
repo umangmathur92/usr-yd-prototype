@@ -61,6 +61,16 @@ async function fetchScene(videoId) {
     return await db.query('SELECT * FROM scene where video_id=$1 order by scene_num', [videoId]);
 }
 
+async function fetchAllKeyFrames(videoId) {
+
+    let match = videoId; //sceneId.split('_')[0];
+    console.log('match: ',match);
+    match += '%';
+    console.log('match: ',match);
+    result = await db.any(`SELECT thumbnail_url, caption, pythia_caption from keyframe where keyframe_id::text LIKE '${match}'`);
+    return result;
+}
+
 async function fetchKeyFrames(sceneId,videoTime,volunteerId = '5117b1e0-4c45-11ea-b77f-2e728ce88125') {
     return await fetchKeyFrames2(sceneId,videoTime);
     console.log("Ent: testking");
@@ -692,6 +702,7 @@ module.exports = {
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,
     fetchKeyFrames: fetchKeyFrames,
+    fetchAllKeyFrames: fetchAllKeyFrames,
     updateBlockDescription: updateBlockDescription,
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,

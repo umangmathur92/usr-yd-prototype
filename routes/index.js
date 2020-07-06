@@ -78,6 +78,17 @@ router.get('/getAllVideos', function(req, res, next) {
   });
 });
 
+router.get('/getAllKeyFrames', function(req, res, next) {
+
+  let {videoId } = req.query;
+  // console.log("The vals are: "+sceneId+"  "+videoTime);
+  let queryResult = video.fetchAllKeyFrames(videoId);
+  queryResult.then(result => {
+    // console.log("The vals are: "+sceneId+"  "+videoTime);
+       res.send(result);
+    });
+});
+
 router.get('/getKeyFrames', function(req, res, next) {
   //let query = video.fetchKeyFrames();
 
