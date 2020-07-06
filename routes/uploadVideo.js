@@ -469,7 +469,8 @@ async function uploadVideo(file, accessToken, youtubeId, videoTitle) {
   console.log('inside upload video');
   console.log({ file });
   let name = youtubeId;
-  let callbackUrl = `http://18.221.192.73:5001/vi/videoState?youtubeId=${youtubeId}`;
+  // let callbackUrl = `http://18.221.192.73:5001/vi/videoState?youtubeId=${youtubeId}`;
+  let callbackUrl = '';
   let url = `https://api.videoindexer.ai/trial/Accounts/${accountId}/Videos?name=${videoTitle}&privacy=Public&callbackUrl=${callbackUrl}&indexingPreset=Default&streamingPreset=Default&sendSuccessEmail=False&accessToken=${accessToken}`;
   let formdata = new FormData();
 
@@ -493,7 +494,7 @@ async function uploadVideo(file, accessToken, youtubeId, videoTitle) {
     res = await axios(config);
     console.log(res.data);
   }catch(e){
-    console.log(e);
+    console.log('Video Indexer error: ', e);
     throw e;
   }
 
