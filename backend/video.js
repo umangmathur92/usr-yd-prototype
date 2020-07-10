@@ -340,12 +340,13 @@ async function addVideoDataToDb(inputJson) {
             ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
             ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
         //---------
-            filter_OCRArr = filterOCR(ocrArr, 1, 0.56, 50);
-            let concatFilterOcrArr = concatOcrWithinSameShot(filter_OCRArr);
-            await Ocr.updateShotTableWithFilteredOcr(concatFilterOcrArr);
+            // filter_OCRArr = filterOCR(ocrArr, 1, 0.56, 50);
+            // let concatFilterOcrArr = concatOcrWithinSameShot(filter_OCRArr);
+            // await Ocr.updateShotTableWithFilteredOcr(concatFilterOcrArr);
         //-----
             let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
             await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
+            console.log({concatenatedOcrTextArr});
             //Aggregate OCR data from the Shot table and insert it into the scene table
             for(let i=0; i<sceneArr.length; i++) {
                 try {
@@ -356,13 +357,13 @@ async function addVideoDataToDb(inputJson) {
                     let filteredOCRArr = [];
                     for(let j=0; j<shotsOcrJsonArr.length; j++) {
                         ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
-                        if(shotsOcrJsonArr[j].filtered_ocr){
-                            // console.log('FILTERSCENE:', shotsOcrJsonArr[j].filtered_ocr);
-                            filteredOCRArr.push(shotsOcrJsonArr[j].filtered_ocr.trim());
-                        }
+                        // if(shotsOcrJsonArr[j].filtered_ocr){
+                        //     // console.log('FILTERSCENE:', shotsOcrJsonArr[j].filtered_ocr);
+                        //     filteredOCRArr.push(shotsOcrJsonArr[j].filtered_ocr.trim());
+                        // }
                     }
                     ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
-                    filteredOCRArr = Utils.removeDuplicatesFromStringArr(filteredOCRArr);
+                    // filteredOCRArr = Utils.removeDuplicatesFromStringArr(filteredOCRArr);
                     
                     let finalSceneOcr = '';
                     for (let j=0; j<ocrArrForScene.length; j++) {
@@ -372,16 +373,16 @@ async function addVideoDataToDb(inputJson) {
                     }
                     finalSceneOcr = finalSceneOcr.trim();
 
-                    let finalFilteredSceneOcr = '';
-                    for (let j=0; j<filteredOCRArr.length; j++) {
-                        if(filteredOCRArr[j] != '' || filteredOCRArr[j] != undefined || filteredOCRArr[j] != ' ' || filteredOCRArr[j] != '\n') {
-                            finalFilteredSceneOcr = finalFilteredSceneOcr + '\n' + filteredOCRArr[j];
-                        }
-                    }
-                    finalFilteredSceneOcr = finalFilteredSceneOcr.trim();
+                    // let finalFilteredSceneOcr = '';
+                    // for (let j=0; j<filteredOCRArr.length; j++) {
+                    //     if(filteredOCRArr[j] != '' || filteredOCRArr[j] != undefined || filteredOCRArr[j] != ' ' || filteredOCRArr[j] != '\n') {
+                    //         finalFilteredSceneOcr = finalFilteredSceneOcr + '\n' + filteredOCRArr[j];
+                    //     }
+                    // }
+                    // finalFilteredSceneOcr = finalFilteredSceneOcr.trim();
 
-                    // await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
-                    await db.one("UPDATE scene SET original_ocr = $1, filtered_ocr = $2  WHERE scene_id = $3 RETURNING id", [finalSceneOcr, finalFilteredSceneOcr, currSceneId], a => + a.id);
+                    await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
+                    // await db.one("UPDATE scene SET original_ocr = $1, filtered_ocr = $2  WHERE scene_id = $3 RETURNING id", [finalSceneOcr, finalFilteredSceneOcr, currSceneId], a => + a.id);
 
                 }catch(e) {
                     console.log(e);
