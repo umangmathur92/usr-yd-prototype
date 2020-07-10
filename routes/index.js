@@ -58,6 +58,10 @@ router.get('/onDemand/:youtubeId', function(req, res, next) {
   res.render('onDemand', { title: 'On Demand' });
 });
 
+router.get('/onDemandUserstudy/:youtubeId', function(req, res, next) {
+  res.render('onDemandUserstudy', { title: 'On Demand User Study' });
+});
+
 router.get('/uploadVideo', function(req, res, next) {
   res.render('uploadVideo', { title: 'Upload Video' });
 });
@@ -92,9 +96,9 @@ router.get('/getAllKeyFrames', function(req, res, next) {
 router.get('/getKeyFrames', function(req, res, next) {
   //let query = video.fetchKeyFrames();
 
-  let {sceneId, videoTime} = req.query;
+  let {sceneId, videoTime, sceneStartTime} = req.query;
   console.log("The vals are: "+sceneId+"  "+videoTime);
-  let queryResult = video.fetchKeyFrames(sceneId, videoTime);
+  let queryResult = video.fetchKeyFrames(sceneId, videoTime, sceneStartTime);
   queryResult.then(result => {
     console.log("The vals are: "+sceneId+"  "+videoTime);
        res.send(result);

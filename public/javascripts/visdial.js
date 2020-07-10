@@ -55,7 +55,7 @@ async function fetchKeyFrames() {
   console.log("video time for keyframes: ", videotime, " and scene_id is: ", scene_id);
   var path;
   try {
-          let targetUrl = '/getKeyFrames' + '?sceneId=' + scene_id + '&videoTime=' + videotime;
+          let targetUrl = '/getKeyFrames' + '?sceneId=' + scene_id + '&videoTime=' + videotime + '&sceneStartTime=' + startTime;
           var TotalFrames = 0;
           $.get(targetUrl, function (response) {
               KeyFramesArr = response;
@@ -160,7 +160,7 @@ function WebSocketTest() {
          // Let us open a web socket
         //  var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/lobby/");
             //  ws = new WebSocket("ws://13.59.252.226:8001/users/");
-            ws = new WebSocket("ws://3.15.186.136:8001/chat/");
+            ws = new WebSocket("ws://3.133.118.240:8001/chat/");
             ws.onopen = function() {
               //   ws.send(ws_id);
               console.log("Websocket opened");
@@ -277,7 +277,7 @@ function readURL(input, ws_id, frameNo) {
         formData.append('file', input.files[0]);
  //       formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 //    "https://cors-anywhere.herokuapp.com/http://3.23.102.127:8001/upload/"
-       var URL1 = "http://3.15.186.136:8001/upload/";
+       var URL1 = "http://3.133.118.240:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -387,7 +387,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.15.186.136:8001/";
+      var URL = "http://3.133.118.240:8001/";
 
       $.ajax({
               type: 'POST',
