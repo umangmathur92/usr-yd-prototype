@@ -8,6 +8,7 @@ const db = require('../db/database');
 const quesAns = require('../model/questionAnswer');
 const sceneModification = require('./sceneModification');
 const userStudy = require('./userStudy');
+const userStudy4 = require('./userStudy4');
 const chatRoom = require('./chatRoom');
 const mergeScene = require('./mergeScene');
 const uploadVideoRoute  = require('./uploadVideo'); 
@@ -20,6 +21,7 @@ const filterDescriptionBleuController = require('../controllers/FilterBaselineDe
 const bodyParser = require('body-parser');
 
 router.use('/userStudy',userStudy);
+router.use('/userStudy4',userStudy4); // Routes for on-demand user study (summer 2020)
 router.use('/us3/question', questionAnswer);
 router.use('/sceneModification', sceneModification);
 router.use('/room', chatRoom);
@@ -52,6 +54,10 @@ router.get('/addvideo', function(req, res, next) {
 
 router.get('/audioDescription/:youtubeId', function(req, res, next) {
     res.render('audioDescription', { title: 'AudioD escription' });
+});
+
+router.get('/audioDescriptionUserStudy/:youtubeId', function(req, res, next) {
+  res.render('audioDescriptionUserStudy', { title: 'User Study 4' });
 });
 
 router.get('/onDemand/:youtubeId', function(req, res, next) {
