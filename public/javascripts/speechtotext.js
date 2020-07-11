@@ -35,6 +35,14 @@ recognition.onresult = (event) => {
 
         // appendQnA(data);
         // socket.emit('send-chat-message', roomName, speechToText, questionId, name, QUESTION);
+        let data = {    userId: userId,
+                        question: speechToText
+                    };
+            
+        $.post('/userStudy4/addQuestion', data, function (res) {
+            console.log('Question Added');
+        });
+
         console.log({speechToText});
         count = totalFrames;
         $("#question").val(speechToText);

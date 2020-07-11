@@ -7,6 +7,7 @@ var express = require('express');
 var router = express.Router();
 const userStudy = require('../model/userStudy');
 const userStudy4 = require('../model/userStudy4');
+const questionUserStudy4 = require('../model/questionUserStudy4');
 const db = require('../db/database');
 const fs = require('fs');
 var path = require('path');
@@ -156,6 +157,41 @@ router.delete('/deleteScene', function(req, res, next) {
   });
 });
 
+router.get('/getAllQuestions', function (req, res) {
+  let userId = req.query.userId;
+  console.log({userId});
+  let queryResult = questionUserStudy4.getQuestionByUserId(userId);
+  console.log({queryResult});
+  queryResult
+    .then(result => {
+      res.send(result);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send(err);
+    });
+});
+
+
+router.post('/addQuestion', function(req, res, next) {
+  let queryResult = questionUserStudy4.addQuestion(req.body);
+  queryResult.then(result => {
+    res.send('Question inserted successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
+router.delete('/deleteQuestion', function(req, res, next) {
+  let queryResult = questionUserStudy4.deleteAllQuestionsByUserId(req.body.userId);
+  queryResult.then(result => {
+    res.status(200).send('Question deleted successfully');  
+  }).catch((err) => {
+    res.status(400).send(err);
+    console.log(err)
+  });
+});
 
 module.exports = router;
 
