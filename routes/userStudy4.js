@@ -27,7 +27,7 @@ router.get('/', function (req, res) {
   
   //list of video for a user
 router.get('/video', function (req, res) {
-    res.render('userstudy4/videoUserStudy4', { title: 'User Study Video' });
+    res.render('userStudy4/videoUserStudy4', { title: 'User Study Video' });
 });
 
 //list of video for visually impaired users
