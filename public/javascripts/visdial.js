@@ -160,7 +160,7 @@ function WebSocketTest() {
          // Let us open a web socket
         //  var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/lobby/");
             //  ws = new WebSocket("ws://13.59.252.226:8001/users/");
-            ws = new WebSocket("ws://3.135.202.162:8005/chat/");
+            ws = new WebSocket("ws://18.191.222.131:8001/chat/");
             ws.onopen = function() {
               //   ws.send(ws_id);
               console.log("Websocket opened");
@@ -277,7 +277,7 @@ function readURL(input, ws_id, frameNo) {
         formData.append('file', input.files[0]);
  //       formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 //    "https://cors-anywhere.herokuapp.com/http://3.23.102.127:8001/upload/"
-       var URL1 = "http://3.135.202.162:8005/upload/";
+       var URL1 = "http://18.191.222.131:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -387,7 +387,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.135.202.162:8005/";
+      var URL = "http://18.191.222.131:8001/";
 
       $.ajax({
               type: 'POST',
