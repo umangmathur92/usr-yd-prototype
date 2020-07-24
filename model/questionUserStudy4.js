@@ -7,9 +7,10 @@ let questionUserStudy4 = {
     addQuestion: function(data, callback) {
         // console.log('inside question:', data);
         let questionId = uuidv1();
+        let todayDate = new Date();
         // let answerId = uuidv1();
         const sql = `START TRANSACTION; 
-        INSERT into question_us4 (question_id, question, user_id) VALUES ('${questionId}','${data.question}','${data.userId}'); 
+        INSERT into question_us4 (question_id, question, user_id, timestamp) VALUES ('${questionId}','${data.question}','${data.userId}','${todayDate.toLocaleString()}'); 
         COMMIT;`;
         // console.log({sql});
         return db.query(sql, callback);

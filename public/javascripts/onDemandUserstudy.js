@@ -4,7 +4,8 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId;
+let userId = "5117b1e0-4c45-11ea-b77f-2e728ce88125";
+let volunteerId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
@@ -45,7 +46,8 @@ let audio_flag = false;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
-    userId = getUrlVars()["u"];
+    volunteerId = getUrlVars()["u"];
+    // userId = getUrlVars()["u"];
     enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();

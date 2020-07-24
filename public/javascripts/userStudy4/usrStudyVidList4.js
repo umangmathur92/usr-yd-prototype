@@ -65,7 +65,7 @@ function updateUI(vidArr) {
             surveyLink = 'https://forms.gle/vkyExP3UqeNkNKiE9';
         }
         if(isOnDemandSupported){
-            generatedHtml += `<b><a href="/onDemandUserStudy/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
+            generatedHtml += `<b><a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
             <input type="checkbox" style="margin-right: 8px;">
             <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
             Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;

@@ -41,7 +41,7 @@ recognition.onresult = (event) => {
 
         // appendQnA(data);
         // socket.emit('send-chat-message', roomName, speechToText, questionId, name, QUESTION);
-        let data = {    userId: userId,
+        let data = {    userId: volunteerId,
                         question: speechToText
                     };
             
