@@ -1,11 +1,41 @@
 let userId = '';
+let tutorialHtml = '';
 
 $(document).ready(function () {
     let url = location.search.substring(1);
     userId = new URLSearchParams(url).get('userId');
     let targetUrl = '/userStudy4/users?userId=' + userId;
+    fetchTutorialVideo();
     fetchVideo(targetUrl);
 });
+
+function fetchTutorialVideo() {
+    let targetUrl = '/userStudy4/tutorialVideo';
+    $.get(targetUrl, function (vidArr) {
+        // let generatedHtml = '';
+        let userName = vidArr[0].name;
+        for (let i = 0; i < vidArr.length; i++) {
+            let vid = vidArr[i];
+            let videoId = vid.video_id;
+            let videoTitle = vid.title;
+            let volunteerId = vid.volunteer_id;
+            let isAiSupported = vid.ai_support;
+            let isOnDemandSupported = vid.on_demand_support;
+            let aiSupportStr = isAiSupported ? 'With Baseline Descriptions' : 'Without Baseline Descriptions';
+            let onDemandSupportStr = isOnDemandSupported ? 'With On Demand' : 'Without On Demand';
+            let aiParam = vid.ai_support===true ? 'yes' : 'no';
+            let surveyLink = "#";
+            
+                tutorialHtml += `<b><a href="/userStudy4/onDemandTutorial/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
+                <input type="checkbox" style="margin-right: 8px;">
+                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
+                Tutorial Video : ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+                
+                tutorialHtml += `</b><br>`;  
+            }
+
+    });
+}
 
 function fetchVideo(targetUrl) {
     $.get(targetUrl, function (vidJsonArr) {
@@ -15,7 +45,8 @@ function fetchVideo(targetUrl) {
 
 function updateUI(vidArr) {
     console.log(vidArr);
-    let generatedHtml = '';
+    // let generatedHtml = '';
+    let generatedHtml = tutorialHtml;
     let userName = vidArr[0].name;
     for (let i = 0; i < vidArr.length; i++) {
         let vid = vidArr[i];

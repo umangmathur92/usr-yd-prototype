@@ -115,7 +115,7 @@ function sendImage(path,ws_id,frameNo){
       var myImage = document.querySelector('img');
       objectURL = URL.createObjectURL(myBlob);
       console.log("The url is: "+objectURL);
-      myImage.src = objectURL;
+      // myImage.src = objectURL;
 
       var reader = new FileReader();
       reader.readAsDataURL(myBlob);

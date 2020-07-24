@@ -13,6 +13,12 @@ const recognition = new window.SpeechRecognition();
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 
+function askQuestion(){
+    console.log('Record button clicked..Recording....');
+    player.pauseVideo();
+    recognition.start();
+}
+
 recordButton.addEventListener('click', (e) => {
     e.preventDefault();
    // player.pauseVideo();
@@ -42,7 +48,7 @@ recognition.onresult = (event) => {
         $.post('/userStudy4/addQuestion', data, function (res) {
             console.log('Question Added');
         });
-
+        noOfQuestionsAsked += 1;
         console.log({speechToText});
         count = totalFrames;
         $("#question").val(speechToText);
