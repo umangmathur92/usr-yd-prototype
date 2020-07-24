@@ -200,6 +200,26 @@ router.post('/addQuestion', function(req, res, next) {
   });
 });
 
+router.post('/addCaption', function(req, res, next) {
+  let queryResult = questionUserStudy4.addCaption(req.body);
+  queryResult.then(result => {
+    res.send('Caption inserted successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
+router.post('/addAnswer', function(req, res, next) {
+  let queryResult = questionUserStudy4.addAnswer(req.body);
+  queryResult.then(result => {
+    res.send('Answer inserted successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
 router.delete('/deleteQuestion', function(req, res, next) {
   let queryResult = questionUserStudy4.deleteAllQuestionsByUserId(req.body.userId);
   queryResult.then(result => {

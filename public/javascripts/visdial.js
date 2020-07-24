@@ -169,6 +169,15 @@ function WebSocketTest() {
                   response_set.add(pred_caption);
                 }
                 console.log(all_pred_captions);
+                  /** Saving the caption in db */
+                  let data = {  userId: volunteerId,
+                                caption: all_pred_captions
+                  };
+        
+                $.post('/userStudy4/addCaption', data, function (res) {
+                    console.log('Caption Added');
+                });
+
                 var url_final = url_api.concat(all_pred_captions);
                 
                 if(!count){
@@ -205,7 +214,14 @@ function WebSocketTest() {
               all_answers += ( ". " + answer);
               response_set.add(answer);
             }
+              /** Saving the answer in db */
+            let data = {  userId: volunteerId,
+                          answer: all_answers
+                      };
 
+            $.post('/userStudy4/addAnswer', data, function (res) {
+              console.log('Answer Added');
+            });
             var url_final = url_api.concat(all_answers);
             if(!count)
             {

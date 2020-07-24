@@ -16,6 +16,30 @@ let questionUserStudy4 = {
         return db.query(sql, callback);
     }, 
 
+    addCaption: function(data, callback) {
+        
+        let answerId = uuidv1();
+        let todayDate = new Date();
+        let isCaption = true;
+
+        const sql = `START TRANSACTION; 
+        INSERT into answer_us4 (answer_id, user_id, answer, is_caption, timestamp) VALUES ('${answerId}','${data.userId}','${data.caption}', ${isCaption}, '${todayDate.toLocaleString()}'); 
+        COMMIT;`;
+        return db.query(sql, callback);
+    }, 
+
+    addAnswer: function(data, callback) {
+        
+        let answerId = uuidv1();
+        let todayDate = new Date();
+        let isCaption = false;
+
+        const sql = `START TRANSACTION; 
+        INSERT into answer_us4 (answer_id, user_id, answer, is_caption, timestamp) VALUES ('${answerId}','${data.userId}','${data.answer}', ${isCaption}, '${todayDate.toLocaleString()}'); 
+        COMMIT;`;
+        return db.query(sql, callback);
+    }, 
+
 
     getQuestionByUserId: function (userId, callback) {
         return db.query(`SELECT * FROM question_us4 where user_id = ${userId}`, callback);
