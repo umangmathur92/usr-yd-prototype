@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html onkeypress="isKeyPress(event)" onkeydown="isKeyDown(event)">
 <head>
   <title><%= title %></title>
   <script src="https://use.fontawesome.com/8a92be1af5.js"></script>
@@ -30,10 +30,12 @@
     </div>
     <br>
     <div class="container-fluid" style="position: absolute;top: 60px;">
-      <div class="row" id="innerDiv" onkeydown="isKeyDown(event)" onkeyup="isKeyUp(event)" tabindex="0" style="text-align: center; height:100%; justify-content: center;">
+      <div class="row" id="innerDiv" onkeydown="isCtrlKeyDown(event)" onkeyup="isCtrlKeyUp(event)" tabindex="0" style="text-align: center; height:100%; justify-content: center;">
         <div >
           <div style="margin:15px; font-size:15px;" font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
+          <div class="overlay">
           <div id="player"></div>
+        </div>
           <br>
           <div style="width: 100%;">
             <div style="width: 480px; height: 30px; padding:2px; margin: auto; border:0px solid black; background-color: darkgrey;">

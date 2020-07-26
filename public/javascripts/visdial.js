@@ -181,18 +181,32 @@ function WebSocketTest() {
                 var url_final = url_api.concat(all_pred_captions);
                 
                 if(!count){
+                    
+                      /** API call to transformers summarization tool */
+
+
+                      /** Text to speech conversion */
+                    let data = {  "inputText": all_pred_captions,
+                      "filePath": "output_" + userId + ".mp3"
+                    };
+
+                    $.post('/texttospeech', data, function (res) {
+                      console.log('TTS completed');
+                      audio_clip.src = "../audio/output_" + userId + ".mp3";
+                    });
+                    
                     console.log("Final: ",all_pred_captions);
                     all_pred_captions = "";
                     response_set.clear();
-          
-                    fetch(url_final)
-                    .then(function(response)
-                    {   
-                      audio_clip.src = response['url'];
-                      console.log("Final: ",response);
-                      all_pred_captions = "";
-                      response_set.clear();
-                    })
+                    // audio_clip.src = "../audio/output_" + userId + ".mp3";
+                    // fetch(url_final)
+                    // .then(function(response)
+                    // {   
+                    //   audio_clip.src = response['url'];
+                    //   console.log("Final: ",response);
+                    //   all_pred_captions = "";
+                    //   response_set.clear();
+                    // })
                 }
                   
           }
@@ -225,17 +239,31 @@ function WebSocketTest() {
             var url_final = url_api.concat(all_answers);
             if(!count)
             {
+                /** API call to transformers summarization tool */
+
+
+                /** Text to speech conversion */
+              let data = {  "inputText": all_answers,
+                            "filePath": "output_" + userId + ".mp3"
+                         };
+
+              $.post('/texttospeech', data, function (res) {
+                console.log('TTS completed');
+                audio_clip.src = "../audio/output_" + userId + ".mp3";
+              });
+
               console.log("Final: "+ all_answers);
               all_answers = "";
               response_set.clear();
+              // audio_clip.src = "../audio/output_" + userId + ".mp3";
 
-              fetch(url_final)
-              .then(function(response){
-                  audio_clip.src = response['url'];
-                  all_answers = "";
-                  response_set.clear();
+              // fetch(url_final)
+              // .then(function(response){
+              //     audio_clip.src = response['url'];
+              //     all_answers = "";
+              //     response_set.clear();
                   
-                })
+              //   })
             }
            
           }

@@ -186,6 +186,7 @@ async function generateMp3DurationForText(inputText) {
 module.exports = {
     getMp3ForDescription: getMp3ForDescription,
     generateMp3ForText: generateMp3ForText,
+    generateMp3ForTextInFileystem: generateMp3ForTextInFileystem,
     generateMp3ForAllDescriptionsInDb: generateMp3ForAllDescriptionsInDb,
     generateMp3DurationForText: generateMp3DurationForText
 }

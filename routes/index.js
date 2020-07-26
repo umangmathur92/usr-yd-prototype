@@ -535,7 +535,14 @@ router.post('/saveAiDescription', function(req, res, next) {
 router.post('/texttospeech', function(req, res, next) {
   let inputJson = req.body;
   let inputText = inputJson.inputText;
-  let task = textToSpeech.generateMp3ForText(inputText);
+  let filePath = inputJson.filePath;
+  let task = '';
+  if(filePath){
+    filePath = "public/audio/" + filePath;
+    task = textToSpeech.generateMp3ForTextInFileystem(filePath,inputText);
+  }
+  else
+    task = textToSpeech.generateMp3ForText(inputText);
   task.then(result => {
     res.send({success: result});
   });
