@@ -13,10 +13,16 @@ const recognition = new window.SpeechRecognition();
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 
-function askQuestion(){
+async function askQuestion(){
     console.log('Record button clicked..Recording....');
     player.pauseVideo();
     recognition.start();
+    // await new Promise(r => setTimeout(r, 4000));
+    // recognition.stop();
+}
+
+function fetchAnswer(){
+    recognition.stop();
 }
 
 recordButton.addEventListener('click', (e) => {
@@ -26,6 +32,8 @@ recordButton.addEventListener('click', (e) => {
    player.pauseVideo();
    recognition.start();
    e.stopPropagation();
+//    await new Promise(r => setTimeout(r, 4000));
+//     recognition.stop();
 });
 
 recognition.onresult = (event) => {

@@ -14,6 +14,12 @@ function isKeyPress(event) {
                   console.log("The Q Key was pressed!");
                 askQuestion();
                   break;
+      case 83:
+      case 115: x.innerHTML = "The S Key was pressed!";
+                  console.log("The S Key was pressed!");
+                  fetchAnswer();
+                  break;
+                    
       case 32:
             x.innerHTML = "The space Key was pressed!";
             if(player.getPlayerState() == YT.PlayerState.PLAYING)
