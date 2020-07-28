@@ -68,6 +68,10 @@ router.get('/onDemandUserstudy/:youtubeId', function(req, res, next) {
   res.render('onDemandUserstudy', { title: 'On Demand User Study' });
 });
 
+router.get('/onDemandTutorial/:youtubeId', function(req, res, next) {
+  res.render('onDemandTutorial', { title: 'On Demand Tutorial' });
+});
+
 router.get('/uploadVideo', function(req, res, next) {
   res.render('uploadVideo', { title: 'Upload Video' });
 });

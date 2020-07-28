@@ -13,28 +13,42 @@
   <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 <body background="/images/bg.jpg" style="background-repeat: no-repeat; background-size: cover;">
-    <div id="mainDiv">
     <div>
   <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
     <!--img src="../images/yd.jpg" class="img-header"-->
     <div class="container">
-      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a>
+      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study Tutorial</a>
     </div>
     <img id="btn-timer" src="/images/pause_white.png" style="height: 20px; width:20px; color: white; margin-right: 10px;">
     <b><span style="color: white">Time Elapsed:&nbsp;</span>
       <span style="color: white" id="txt-timeElaspsed">00:00</span></b>
     </nav>
-    <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <!-- <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
         <b><span style="color: white">To verify that you can use the virtual chat bot properly, you need to ask at least 4 questions during this 2 minute video. If you don't ask any questions during 30 second, then the video will pause and let you ask a question</span>
-            </b>    </nav>
+            </b>    </nav> -->
     </div>
     <br>
-    <div class="container-fluid" style="position: absolute;top: 60px;">
-      <div class="row" id="innerDiv" onkeydown="isCtrlKeyDown(event)" onkeyup="isCtrlKeyUp(event)" tabindex="0" style="text-align: center; height:100%; justify-content: center;">
+    <div class="container-fluid" style="margin-top:32px;">
+    <div class="row" style="position: absolute;top: 60px;">
+      <div class="col-md-3">
+        <div style="background-color: #1a4b6e; padding: 16px; height: 100%;"> 
+            <div>
+                <h1 style="color: white; text-align: center;">Instructions</h1>
+                <br>
+                <h6 style="color: white; text-align:justify;" ;="">We are conducting a research study on video description for blind and visually impaired users. Today you will be participating in a study, which should take approximately two hours. If at any point you decide you no longer wish to participate, please say so and we will stop the study and your data will not be used for the study. Responses will be confidential and completely anonymous, and your name will not appear anywhere in the final write up. You will be assigned a unique number for identification.<br><br> 
+                    You will be describing two short videos with text. Describing a video means describing what you see on the screen in text. This includes the people, the scenes, and any text that appears on the screen. You will first be given a short video tutorial to show you how to use the video description software.<br><br>
+                    One of the videos you will be describing will have some text already pre-written, but the other video will not have pre-written text in the software.
+                    Once you have described each video, we will ask you to fill out a short survey.
+                    At the end, we will ask you a few questions about your experience.
+                </h6>
+            </div>
+        </div>
+    </div>
+      <div class="col-md-6">
         <div >
-          <div style="margin:15px; font-size:15px;" font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
-          <div class="overlay">
-          <div id="player"></div>
+          <div style="margin:15px; font-size:15px; align-content: center; text-align: center;" font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
+          <div style="align-content: center; text-align: center;">
+          <div class="overlay" id="player" ></div>
         </div>
           <br>
           <div style="width: 100%;">
@@ -53,7 +67,7 @@
                   </label>
                 </span>   
             </span>
-                <!-- <button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Virtual Chatbot </button> -->
+                
                 <div style="text-align:center;visibility: hidden;">
                       <audio id="myAudio" style="visibility: hidden;" controls autoplay>
                                     Your browser doesnot support Audio.
@@ -61,20 +75,19 @@
 
             </div>
           </div>
-          <div>
-            <!-- <button onclick="startRecording()"> Record </button> -->
-            <div id= "vischat"><button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Virtual Chatbot </button></div>
+          <div style="align-content: center; text-align: center;">
+          
+            <div id= "vischat"><button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Visual Chatbot </button></div>
             <div id= "record"><button id="record-button" class="btn btn-danger btn-l" style= "margin:10px;width:300px" >Ask Question</button></div>
             <p id="demo"></p>  
         </div>
-          <div>
+          <div style="visibility: hidden;">
             <button class="btn btn-danger" id="btnScroll" style="visibility: hidden;">Temp button to reset scene/block_modification table for this user</button>
-            <!-- <button class="btn btn-danger" id="btnTemp" style="visibility: visible;">Temp Button to update main tables</button> -->
-            <!-- <section id="stopWatch"> <p id="timer"> Time Elapsed : 00:00:00 </p> <button id="start"> Start </button> <button id="stop"> Stop </button> <p id="fulltime"> </p> </section> -->    
+            
           </div>
         </div>
         <div style="visibility: hidden;">
-          <!--div style="background-color: #1a4b6e;color:#fff;font-size: 15px;"><b>AI Generated Description</b></div-->
+          
           <div style="height:80%; background-color:#fff;">
             <div class="list-container" data-scene-details="" style="height: 100%">      
               <ul id="ul-scene-list" class="scene-list">
@@ -86,11 +99,28 @@
           <br>
           <button class="btn btn-danger btn-l" id="btnSubmit">Save &amp; Close Window</button>
         </div>
-
       </div>
     </div>
+    
     </div>
-    <script src="/javascripts/userStudy4/onDemandTutorial.js"></script>
+    <div class="col-md-3">
+      <div style="background-color: #1a4b6e; padding: 16px; height: 100%;"> 
+          <div>
+              <h1 style="color: white; text-align: center;">Controls</h1>
+              <br>
+              <h6 style="color: white; text-align:justify;" ;="">
+                <ul>
+                  <li> Space Bar - Play/Pause </li>
+                  <li> C - Start Visual Chatbot </li>
+                  <li> Q - Ask a Question </li>
+                </ul>
+              </h6>
+          </div>
+      </div>
+  </div>
+  </div>
+</div>
+    <script src="/javascripts/onDemandTutorial.js"></script>
     <script src="http://www.youtube.com/iframe_api" async></script>
     <script src="/javascripts/visdial.js"> </script>
     <script src="/javascripts/speechtotext.js"> </script>

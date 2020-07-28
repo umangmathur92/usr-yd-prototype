@@ -4,7 +4,7 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId = "5117b1e0-4c45-11ea-b77f-2e728ce88125";
+let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
 let volunteerId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
@@ -45,6 +45,8 @@ let desc_flag = false;
 let audio_flag = false;
 
 let noOfQuestionsAsked = 0;
+let playQuestionAudio = new Audio('../audio/tutorial_question.mp3');
+// let audio_clip = document.getElementById("myAudio");
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
@@ -509,14 +511,17 @@ async function updateTime() {
         videotime = player.getCurrentTime();
         // console.log("No state change");
     }
+    // if(Math.floor(videotime/30) <= noOfQuestionsAsked)
+    //     STATE = 0;
 
     if(Math.floor(videotime/30) > noOfQuestionsAsked){
-        pauseVideo();
-        if(currAudio)
-            currAudio.pause();
+        if(player.getPlayerState() == YT.PlayerState.PLAYING){
+            pauseVideo();
+        await checkQuestion();
+        }
     }
 
-    if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
+    else if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
         console.log("Forward");
         STATE = 0;
         await updateProgress(videotime); // S1 Different func

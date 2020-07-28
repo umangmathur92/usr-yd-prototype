@@ -30,10 +30,6 @@ router.get('/video', function (req, res) {
     res.render('userStudy4/videoUserStudy4', { title: 'User Study Video' });
 });
 
-router.get('/onDemandTutorial/:youtubeId', function(req, res, next) {
-  res.render('userStudy4/onDemandTutorial', { title: 'On Demand Tutorial' });
-});
-
 router.get('/tutorialVideo', function (req, res){
     let userId = 'on-demand-tutorial'
     let queryResult = db.query(`SELECT u.user_id, u.video_id, v.title, u.volunteer_id, u.ai_support, u.on_demand_support, usr.name FROM us_user_video u JOIN video v ON u.video_id = v.youtube_id JOIN us_user usr ON usr.uuid = u.user_id WHERE u.user_id = $1 ORDER by u.id`,[userId]);

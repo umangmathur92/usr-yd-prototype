@@ -17,6 +17,7 @@ let count = 0;
 let all_pred_captions = "";
 let all_answers = "";
 let response_set = new Set();
+let audio_path = "1";
 
 $("#question").keypress(function(e) {
     var key = e.which;
@@ -136,7 +137,7 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("ws://18.191.222.131:8001/chat/");
+            ws = new WebSocket("ws://3.15.220.168:8001/chat/");
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -170,11 +171,11 @@ function WebSocketTest() {
                 }
                 console.log(all_pred_captions);
                   /** Saving the caption in db */
-                  let data = {  userId: volunteerId,
+                  let dbData2 = {  userId: volunteerId,
                                 caption: all_pred_captions
                   };
         
-                $.post('/userStudy4/addCaption', data, function (res) {
+                $.post('/userStudy4/addCaption', dbData2, function (res) {
                     console.log('Caption Added');
                 });
 
@@ -183,21 +184,35 @@ function WebSocketTest() {
                 if(!count){
                     
                       /** API call to transformers summarization tool */
-
+                      $.get('https://cors-anywhere.herokuapp.com/http://3.15.220.168:5000/' + all_pred_captions, function (res) {
+                        console.log('Transformers output: ',res);
+                      all_pred_captions = res["result"];
 
                       /** Text to speech conversion */
-                    let data = {  "inputText": all_pred_captions,
-                      "filePath": "output_" + userId + ".mp3"
+                    let textData = {  "inputText": all_pred_captions,
+                      "filePath": "output_" + userId + "_" + audio_path + ".mp3"
                     };
 
-                    $.post('/texttospeech', data, function (res) {
-                      console.log('TTS completed');
-                      audio_clip.src = "../audio/output_" + userId + ".mp3";
+                    $.post('/texttospeech', textData, function (res) {
+                      let date = new Date();
+                      console.log('TTS completed: '+ date.getTime());
+                      audio_clip.src = "/audio/output_" + userId + "_" + audio_path + ".mp3";
+                      audio_clip.onended = function() {
+                        audio_clip.src = null;
+                        if (audio_path == "1")
+                          audio_path = "0";
+                        else
+                          audio_path = "1";
+                        console.log("On demand Audio ended")
+                        // alert("The audio has ended");
+                    }
+                      // audio_clip.src = null;
                     });
                     
                     console.log("Final: ",all_pred_captions);
                     all_pred_captions = "";
                     response_set.clear();
+                  });
                     // audio_clip.src = "../audio/output_" + userId + ".mp3";
                     // fetch(url_final)
                     // .then(function(response)
@@ -229,11 +244,11 @@ function WebSocketTest() {
               response_set.add(answer);
             }
               /** Saving the answer in db */
-            let data = {  userId: volunteerId,
+            let dbData = {  userId: volunteerId,
                           answer: all_answers
                       };
 
-            $.post('/userStudy4/addAnswer', data, function (res) {
+            $.post('/userStudy4/addAnswer', dbData, function (res) {
               console.log('Answer Added');
             });
             var url_final = url_api.concat(all_answers);
@@ -243,13 +258,22 @@ function WebSocketTest() {
 
 
                 /** Text to speech conversion */
-              let data = {  "inputText": all_answers,
+              let textData2 = {  "inputText": all_answers,
                             "filePath": "output_" + userId + ".mp3"
                          };
 
-              $.post('/texttospeech', data, function (res) {
+              $.post('/texttospeech', textData2, function (res) {
                 console.log('TTS completed');
-                audio_clip.src = "../audio/output_" + userId + ".mp3";
+                audio_clip.src = "/audio/output_" + userId + "_" + audio_path + ".mp3";
+                      audio_clip.onended = function() {
+                        audio_clip.src = null;
+                        if (audio_path == "1")
+                          audio_path = "0";
+                        else
+                          audio_path = "1";
+                        console.log("On demand Audio ended")
+                        // alert("The audio has ended");
+                    }
               });
 
               console.log("Final: "+ all_answers);
@@ -280,7 +304,7 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "http://18.191.222.131:8001/upload/";
+        var URL1 = "http://3.15.220.168:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -325,7 +349,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://18.191.222.131:8001/";
+      var URL = "http://3.15.220.168:8001/";
 
       $.ajax({
               type: 'POST',
@@ -339,4 +363,12 @@ if (question.length >= 3) {
               justClearedHistory = false; // Now user can click clear history
           });
   }
+}
+
+async function checkQuestion(){
+  
+audio_clip.src = "/audio/tutorial_question.mp3";
+  audio_clip.onended = function() {
+          // currAudio = null;
+      }
 }

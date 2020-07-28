@@ -38,7 +38,10 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         const [response] = await client.synthesizeSpeech(request);
         const writeFile = util.promisify(fse.outputFile);
         await writeFile(fileNamePath, response.audioContent, 'binary');
-        console.log(`Audio content written to file: ${fileNamePath}`);
+        let date = new Date();
+        console.log(`Audio content written to file: ${fileNamePath}: `+date.getTime());
+        await new Promise(r => setTimeout(r, 100));    
+        console.log(`New time: `+date.getTime());
         return true;
     } catch (error) {
         console.log(error);

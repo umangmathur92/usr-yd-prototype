@@ -26,7 +26,7 @@ function fetchTutorialVideo() {
             let aiParam = vid.ai_support===true ? 'yes' : 'no';
             let surveyLink = "#";
             
-                tutorialHtml += `<b><a href="/userStudy4/onDemandTutorial/${videoId}?u=${volunteerId}&ai=${aiParam}" class="list-group-item" >
+                tutorialHtml += `<b><a href="/onDemandTutorial/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
                 <input type="checkbox" style="margin-right: 8px;">
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
                 Tutorial Video : ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
