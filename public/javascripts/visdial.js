@@ -137,7 +137,7 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("ws://3.15.220.168:8001/chat/");
+            ws = new WebSocket("ws://3.137.41.154:8001/chat/");
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -184,7 +184,7 @@ function WebSocketTest() {
                 if(!count){
                     
                       /** API call to transformers summarization tool */
-                      $.get('https://cors-anywhere.herokuapp.com/http://3.15.220.168:5000/' + all_pred_captions, function (res) {
+                      $.get('https://cors-anywhere.herokuapp.com/http://3.137.41.154:5000/' + all_pred_captions, function (res) {
                         console.log('Transformers output: ',res);
                       all_pred_captions = res["result"];
 
@@ -259,7 +259,7 @@ function WebSocketTest() {
 
                 /** Text to speech conversion */
               let textData2 = {  "inputText": all_answers,
-                            "filePath": "output_" + userId + ".mp3"
+                                "filePath": "output_" + userId + "_" + audio_path + ".mp3"
                          };
 
               $.post('/texttospeech', textData2, function (res) {
@@ -304,7 +304,7 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "http://3.15.220.168:8001/upload/";
+        var URL1 = "http://3.137.41.154:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -349,7 +349,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.15.220.168:8001/";
+      var URL = "http://3.137.41.154:8001/";
 
       $.ajax({
               type: 'POST',
