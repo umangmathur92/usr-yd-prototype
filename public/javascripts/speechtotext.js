@@ -22,7 +22,8 @@ async function askQuestion(){
 }
 
 function fetchAnswer(){
-    recognition.stop();
+    console.log("Function to stop speech recognition");
+    // recognition.stop();
 }
 
 recordButton.addEventListener('click', (e) => {
