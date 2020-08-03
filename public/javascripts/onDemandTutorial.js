@@ -686,6 +686,7 @@ function onPlayerStateChange(event) {
     let playerState = event.data;
     switch(playerState) {
         case YT.PlayerState.PLAYING:
+        audio_clip.pause();
         console.log('i was called: playing state')
         $("#btn-play-pause").html('<img src = "/images/pause.png" style="height: 25px; width: 25px;">');
         break;
@@ -1052,4 +1053,38 @@ function populateAllSceneArrAndAllBlockArr(blocksJsonArr) {
 function isPlaying(audioElement) {
     if(audioElement!=null)  
         return !audioElement.paused; 
+}
+
+function seekBackward(){
+    let isStatePlaying = false;
+    if(player.getPlayerState() == YT.PlayerState.PLAYING)   
+        isStatePlaying = true;
+
+    pauseVideo();
+    let currentTime = player.getCurrentTime();
+    
+    if(currentTime > 5)
+        player.seekTo(currentTime - 5);
+    else
+        player.seekTo(0);
+    
+    if(isStatePlaying)
+        playVideo();
+}
+
+function seekForward(){
+    let isStatePlaying = false;
+    if(player.getPlayerState() == YT.PlayerState.PLAYING)   
+        isStatePlaying = true;
+
+    pauseVideo();
+    let currentTime = player.getCurrentTime();
+    // console.log(player.getDuration());
+    if(currentTime < player.getDuration() - 5)
+        player.seekTo(currentTime + 5);
+    else
+        player.seekTo(player.getDuration());
+    
+    if(isStatePlaying)
+        playVideo();
 }

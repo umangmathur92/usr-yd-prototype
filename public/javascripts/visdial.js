@@ -18,6 +18,8 @@ let all_pred_captions = "";
 let all_answers = "";
 let response_set = new Set();
 let audio_path = "1";
+var isChatbotOn = false;
+var chatbotTimeStamp = -1;
 
 $("#question").keypress(function(e) {
     var key = e.which;
@@ -46,6 +48,7 @@ async function fetchKeyFrames() {
     let scene_id = currScene.sc_id;
     let startTime = currScene.start_time;
     console.log("video time for keyframes: ", videotime, " and scene_id is: ", scene_id);
+    chatbotTimeStamp = videotime;
     var path;
     try {
             let targetUrl = '/getKeyFrames' + '?sceneId=' + scene_id + '&videoTime=' + videotime + '&sceneStartTime=' + startTime;
@@ -88,6 +91,20 @@ function sendWSid(ws_id) {
 function sendWS(){ 
   sendImage(path,wsID); 
   console.log("The path received is: ",path); 
+}
+
+function startChatbot(){
+
+  if(chatbotTimeStamp == videotime && isChatbotOn){
+
+    for(let i=0;i<totalFrames;i++)
+        submitQuestion(i); 
+    $("#question").val('');
+  }
+  else{
+    isChatbotOn = false;
+    fetchKeyFrames();
+  }
 }
 
 function sendImage(path,ws_id,frameNo){
@@ -137,7 +154,7 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("ws://3.137.41.154:8001/chat/");
+            ws = new WebSocket("ws://3.17.176.253:8001/chat/");
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -184,7 +201,7 @@ function WebSocketTest() {
                 if(!count){
                     
                       /** API call to transformers summarization tool */
-                      $.get('https://cors-anywhere.herokuapp.com/http://3.137.41.154:5000/' + all_pred_captions, function (res) {
+                      $.get('https://cors-anywhere.herokuapp.com/http://3.17.176.253:5000/' + all_pred_captions, function (res) {
                         console.log('Transformers output: ',res);
                       all_pred_captions = res["result"];
 
@@ -207,6 +224,7 @@ function WebSocketTest() {
                         // alert("The audio has ended");
                     }
                       // audio_clip.src = null;
+                      isChatbotOn = true;
                     });
                     
                     console.log("Final: ",all_pred_captions);
@@ -263,8 +281,10 @@ function WebSocketTest() {
                          };
 
               $.post('/texttospeech', textData2, function (res) {
-                console.log('TTS completed');
-                audio_clip.src = "/audio/output_" + userId + "_" + audio_path + ".mp3";
+                let date = new Date();
+                console.log('TTS completed: '+ date.getTime());
+                let randomNum = Math.random();
+                audio_clip.src = "../audio/output_" + userId + "_" + audio_path + ".mp3" + '?random='+randomNum;
                       audio_clip.onended = function() {
                         audio_clip.src = null;
                         if (audio_path == "1")
@@ -304,7 +324,7 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "http://3.137.41.154:8001/upload/";
+        var URL1 = "http://3.17.176.253:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -349,7 +369,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.137.41.154:8001/";
+      var URL = "http://3.17.176.253:8001/";
 
       $.ajax({
               type: 'POST',

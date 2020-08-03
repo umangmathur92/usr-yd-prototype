@@ -39,9 +39,11 @@ function isKeyPress(event) {
     }
     else if (event.keyCode == '37'){
       x.innerHTML = "The Left Arrow Key was pressed!";
+      seekBackward();
     }
     else if (event.keyCode == '39'){
       x.innerHTML = "The Right Arrow Key was pressed!";
+      seekForward();
     }
   }
 
