@@ -12,7 +12,8 @@ function isKeyPress(event) {
       case 81:
       case 113: x.innerHTML = "The Q Key was pressed!";
                   console.log("The Q Key was pressed!");
-                askQuestion();
+                // askQuestion();
+                  startChatbot();
                   break;
       case 83:
       case 115: x.innerHTML = "The S Key was pressed!";

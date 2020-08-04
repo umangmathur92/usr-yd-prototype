@@ -17,8 +17,10 @@ let count = 0;
 let all_pred_captions = "";
 let all_answers = "";
 let response_set = new Set();
+let response_map = {};
 let audio_path = "1";
 var isChatbotOn = false;
+var isChatbotInProcess = false;
 var chatbotTimeStamp = -1;
 
 $("#question").keypress(function(e) {
@@ -74,6 +76,7 @@ async function fetchKeyFrames() {
                 path = KeyFramesArr[i].thumbnail_url;
                 sendImage(path,ws_id[i]);
                 map[ws_id[i]] = i;
+                response_map[i] = "";
             }
             });
             return true;
@@ -95,14 +98,16 @@ function sendWS(){
 
 function startChatbot(){
 
-  if(chatbotTimeStamp == videotime && isChatbotOn){
-
-    for(let i=0;i<totalFrames;i++)
-        submitQuestion(i); 
-    $("#question").val('');
+  if(videotime - 0.2 < chatbotTimeStamp && chatbotTimeStamp < videotime + 0.2 && isChatbotOn){
+    askQuestion();
+    // for(let i=0;i<totalFrames;i++)
+    //     submitQuestion(i); 
+    // $("#question").val('');
   }
-  else{
+  else if(!isChatbotInProcess){
+    isChatbotInProcess = true;
     isChatbotOn = false;
+    doubleBeep();
     fetchKeyFrames();
   }
 }
@@ -154,7 +159,7 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("ws://3.17.176.253:8001/chat/");
+            ws = new WebSocket("ws://13.59.47.124:8001/chat/");
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -168,6 +173,7 @@ function WebSocketTest() {
             data = JSON.parse(data['result']);
             var socket_id = data.socketid;
             prev_history[map[socket_id]] = data["history"];
+            let keyframeNo = map[socket_id];
 
             if("pred_caption" in data){
                 var pred_caption = data.pred_caption;
@@ -179,12 +185,15 @@ function WebSocketTest() {
                 let url_tts = "http://18.221.192.73:5001/texttospeech";
                 // debugger;
                 if(all_pred_captions.length == 0)
-                    all_pred_captions = pred_caption;
+                    {all_pred_captions = pred_caption;
+                      response_map[keyframeNo] = pred_caption;
+                    }
 
                 else if(pred_caption != all_pred_captions && !response_set.has(pred_caption))
                 { 
                   all_pred_captions += ( ". " + pred_caption);
                   response_set.add(pred_caption);
+                  response_map[keyframeNo] = pred_caption;
                 }
                 console.log(all_pred_captions);
                   /** Saving the caption in db */
@@ -201,15 +210,24 @@ function WebSocketTest() {
                 if(!count){
                     
                       /** API call to transformers summarization tool */
-                      $.get('https://cors-anywhere.herokuapp.com/http://3.17.176.253:5000/' + all_pred_captions, function (res) {
-                        console.log('Transformers output: ',res);
-                      all_pred_captions = res["result"];
-
+                      // $.get('http://13.59.47.124:5000/' + all_pred_captions, function (res) {
+                      //   console.log('Transformers output: ',res);
+                      // all_pred_captions = res["result"];
+                      console.log(response_map);
+                      let final_pred_captions = "";
+                      for(let i=0; i<Object.keys(response_map).length; i++){
+                        final_pred_captions += response_map[i];
+                        final_pred_captions += ". ";
+                      }
+                      console.log("Final Pred Captions: ",final_pred_captions);
                       /** Text to speech conversion */
-                    let textData = {  "inputText": all_pred_captions,
+                    let textData = {  "inputText": final_pred_captions,
                       "filePath": "output_" + userId + "_" + audio_path + ".mp3"
                     };
 
+                    if(isChatbotInProcess){
+
+                    
                     $.post('/texttospeech', textData, function (res) {
                       let date = new Date();
                       console.log('TTS completed: '+ date.getTime());
@@ -225,12 +243,17 @@ function WebSocketTest() {
                     }
                       // audio_clip.src = null;
                       isChatbotOn = true;
+                      isChatbotInProcess = false;
                     });
+
+                  }
                     
                     console.log("Final: ",all_pred_captions);
                     all_pred_captions = "";
                     response_set.clear();
-                  });
+                    // Object.keys(response_map).forEach(function(key) { delete response_map[key]; }); //Comment: Deep Clean
+                    response_map = {};
+                  // }); Comment: Ending braces for transformers API
                     // audio_clip.src = "../audio/output_" + userId + ".mp3";
                     // fetch(url_final)
                     // .then(function(response)
@@ -324,7 +347,7 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "http://3.17.176.253:8001/upload/";
+        var URL1 = "http://13.59.47.124:8001/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -369,7 +392,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://3.17.176.253:8001/";
+      var URL = "http://13.59.47.124:8001/";
 
       $.ajax({
               type: 'POST',
