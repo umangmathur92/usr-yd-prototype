@@ -159,7 +159,7 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("ws://13.59.47.124:8001/chat/");
+            ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -347,7 +347,7 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "http://13.59.47.124:8001/upload/";
+        var URL1 = "https://dev-api.youdescribe.org/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -392,7 +392,7 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "http://13.59.47.124:8001/";
+      var URL = "https://dev-api.youdescribe.org/";
 
       $.ajax({
               type: 'POST',
