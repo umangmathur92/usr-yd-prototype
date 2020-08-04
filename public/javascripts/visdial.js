@@ -238,7 +238,8 @@ function WebSocketTest() {
                           audio_path = "0";
                         else
                           audio_path = "1";
-                        console.log("On demand Audio ended")
+                        console.log("On demand Audio ended");
+                        startChatbot();
                         // alert("The audio has ended");
                     }
                       // audio_clip.src = null;
