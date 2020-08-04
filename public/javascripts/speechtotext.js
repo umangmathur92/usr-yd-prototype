@@ -103,7 +103,7 @@ function beep() {
 
 async function doubleBeep() {
     
-    let snd = new  Audio("../audio/earcons/beep-09.mp3");
+    let snd = new  Audio("../audio/earcons/beep-09.wav");
 
     snd.play();
     // beep();
