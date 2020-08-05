@@ -514,14 +514,15 @@ async function updateTime() {
     // if(Math.floor(videotime/30) <= noOfQuestionsAsked)
     //     STATE = 0;
 
-    if(Math.floor(videotime/30) > noOfQuestionsAsked){
-        if(player.getPlayerState() == YT.PlayerState.PLAYING){
-            pauseVideo();
-        await checkQuestion();
-        }
-    }
+    // if(Math.floor(videotime/30) > noOfQuestionsAsked){
+    //     if(player.getPlayerState() == YT.PlayerState.PLAYING){
+    //         pauseVideo();
+    //     await checkQuestion();
+    //     }
+    // }
 
-    else if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
+    // else if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
+    if(prevSceneNum >= 0 && videotime - oldTime > 0.3) {
         console.log("Forward");
         STATE = 0;
         await updateProgress(videotime); // S1 Different func

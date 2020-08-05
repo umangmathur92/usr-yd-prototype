@@ -7,7 +7,7 @@ function isKeyPress(event) {
       case 67:
       case 99: x.innerHTML = "The C Key was pressed!";
                 console.log("The C Key was pressed!");
-              fetchKeyFrames();
+              // fetchKeyFrames();
                 break;
       case 81:
       case 113: x.innerHTML = "The Q Key was pressed!";
@@ -18,7 +18,7 @@ function isKeyPress(event) {
       case 83:
       case 115: x.innerHTML = "The S Key was pressed!";
                   console.log("The S Key was pressed!");
-                  fetchAnswer();
+                  // fetchAnswer();
                   break;
                     
       case 32:

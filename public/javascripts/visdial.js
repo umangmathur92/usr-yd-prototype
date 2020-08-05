@@ -22,6 +22,9 @@ let audio_path = "1";
 var isChatbotOn = false;
 var isChatbotInProcess = false;
 var chatbotTimeStamp = -1;
+let time1 = 0;
+let time2 = 0;
+let time3 = 0;
 
 $("#question").keypress(function(e) {
     var key = e.which;
@@ -78,6 +81,13 @@ async function fetchKeyFrames() {
                 map[ws_id[i]] = i;
                 response_map[i] = "";
             }
+            // let docVal = document.getElementById('cd1').innerHTML;
+            let docVal = "Time stamp for chatbot initialization: ";
+            let currentTime = new Date();
+            docVal += currentTime.toLocaleTimeString();
+            document.getElementById('cd1').innerHTML = docVal;
+            time1 = currentTime.getTime();
+
             });
             return true;
     } 
@@ -208,7 +218,17 @@ function WebSocketTest() {
                 var url_final = url_api.concat(all_pred_captions);
                 
                 if(!count){
-                    
+                    // let docVal = document.getElementById('cd2').innerHTML;
+                    let docVal = "Time stamp for chatbot response: ";
+                    let currentTime = new Date();
+                    docVal += currentTime.toLocaleTimeString();
+                    document.getElementById('cd2').innerHTML = docVal;
+
+                      time2 = currentTime.getTime();
+                      // docVal = document.getElementById('cd3').innerHTML;
+                      docVal = "Time taken for chatbot response: ";
+                       docVal += (time2 - time1)/1000;
+                       document.getElementById('cd3').innerHTML = docVal;
                       /** API call to transformers summarization tool */
                       // $.get('http://13.59.47.124:5000/' + all_pred_captions, function (res) {
                       //   console.log('Transformers output: ',res);
@@ -245,6 +265,13 @@ function WebSocketTest() {
                       // audio_clip.src = null;
                       isChatbotOn = true;
                       isChatbotInProcess = false;
+                      let currentTime = new Date;
+                      time3 = currentTime.getTime();
+                      // let docVal = document.getElementById('cd4').innerHTML;
+                      let docVal = "Time taken for Text-to-speech: ";
+                       docVal += (time3 - time2)/1000;
+                       document.getElementById('cd4').innerHTML = docVal;
+
                     });
 
                   }
@@ -296,6 +323,18 @@ function WebSocketTest() {
             var url_final = url_api.concat(all_answers);
             if(!count)
             {
+                    let docVal = "Time stamp for answer/response: ";
+                    let currentTime = new Date();
+                    docVal += currentTime.toLocaleTimeString();
+                    document.getElementById('qd2').innerHTML = docVal;
+
+                      time2 = currentTime.getTime();
+                      // docVal = document.getElementById('cd3').innerHTML;
+                      docVal = "Time taken for answer/response: ";
+                      docVal += (time2 - time1)/1000;
+                      document.getElementById('qd3').innerHTML = docVal;
+
+
                 /** API call to transformers summarization tool */
 
 
@@ -318,6 +357,13 @@ function WebSocketTest() {
                         console.log("On demand Audio ended")
                         // alert("The audio has ended");
                     }
+
+                    let currentTime = new Date;
+                    time3 = currentTime.getTime();
+                    // let docVal = document.getElementById('cd4').innerHTML;
+                    let docVal = "Time taken for Text-to-speech: ";
+                     docVal += (time3 - time2)/1000;
+                     document.getElementById('qd4').innerHTML = docVal;
               });
 
               console.log("Final: "+ all_answers);

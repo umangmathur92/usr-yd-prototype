@@ -30,9 +30,10 @@ function fetchAnswer(){
 recordButton.addEventListener('click', (e) => {
     e.preventDefault();
    // player.pauseVideo();
-   console.log('Record button clicked..Recording....');
-   player.pauseVideo();
-   recognition.start();
+//    console.log('Record button clicked..Recording....');
+//    player.pauseVideo();
+//    recognition.start();
+    startChatbot();
    e.stopPropagation();
 //    await new Promise(r => setTimeout(r, 4000));
 //     recognition.stop();
@@ -59,6 +60,17 @@ recognition.onresult = (event) => {
         $.post('/userStudy4/addQuestion', data, function (res) {
             console.log('Question Added');
         });
+
+        let docVal = "";
+        docVal += speechToText;
+        document.getElementById('qd5').innerHTML = docVal
+
+            docVal = "Time stamp for question: ";
+            let currentTime = new Date();
+            docVal += currentTime.toLocaleTimeString();
+            document.getElementById('qd1').innerHTML = docVal;
+            time1 = currentTime.getTime();
+
         noOfQuestionsAsked += 1;
         console.log({speechToText});
         count = totalFrames;
