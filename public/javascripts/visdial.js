@@ -228,7 +228,7 @@ function WebSocketTest() {
                       // docVal = document.getElementById('cd3').innerHTML;
                       docVal = "Time taken for chatbot response: ";
                        docVal += (time2 - time1)/1000;
-                       document.getElementById('cd3').innerHTML = docVal;
+                       document.getElementById('cd3').innerHTML = docVal + " s";
                       /** API call to transformers summarization tool */
                       // $.get('http://13.59.47.124:5000/' + all_pred_captions, function (res) {
                       //   console.log('Transformers output: ',res);
@@ -270,7 +270,7 @@ function WebSocketTest() {
                       // let docVal = document.getElementById('cd4').innerHTML;
                       let docVal = "Time taken for Text-to-speech: ";
                        docVal += (time3 - time2)/1000;
-                       document.getElementById('cd4').innerHTML = docVal;
+                       document.getElementById('cd4').innerHTML = docVal + " s";
 
                     });
 
@@ -332,7 +332,7 @@ function WebSocketTest() {
                       // docVal = document.getElementById('cd3').innerHTML;
                       docVal = "Time taken for answer/response: ";
                       docVal += (time2 - time1)/1000;
-                      document.getElementById('qd3').innerHTML = docVal;
+                      document.getElementById('qd3').innerHTML = docVal + " s";
 
 
                 /** API call to transformers summarization tool */
@@ -363,7 +363,7 @@ function WebSocketTest() {
                     // let docVal = document.getElementById('cd4').innerHTML;
                     let docVal = "Time taken for Text-to-speech: ";
                      docVal += (time3 - time2)/1000;
-                     document.getElementById('qd4').innerHTML = docVal;
+                     document.getElementById('qd4').innerHTML = docVal + " s";
               });
 
               console.log("Final: "+ all_answers);
