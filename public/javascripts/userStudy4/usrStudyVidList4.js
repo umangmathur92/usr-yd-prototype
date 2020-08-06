@@ -4,9 +4,9 @@ let tutorialHtml = '';
 $(document).ready(function () {
     let url = location.search.substring(1);
     userId = new URLSearchParams(url).get('userId');
-    let targetUrl = '/userStudy4/users?userId=' + userId;
+    
     fetchTutorialVideo();
-    fetchVideo(targetUrl);
+    
 });
 
 function fetchTutorialVideo() {
@@ -33,7 +33,8 @@ function fetchTutorialVideo() {
                 
                 tutorialHtml += `</b><br>`;  
             }
-
+            let targetUrl = '/userStudy4/users?userId=' + userId;
+            fetchVideo(targetUrl);
     });
 }
 
