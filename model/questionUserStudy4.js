@@ -6,13 +6,14 @@ let questionUserStudy4 = {
 
     addQuestion: function(data, callback) {
         // console.log('inside question:', data);
-        let questionId = uuidv1();
+        // let questionId = uuidv1();
         let todayDate = new Date();
         // let answerId = uuidv1();
         const sql = `START TRANSACTION; 
-        INSERT into question_us4 (question_id, question, user_id, timestamp) VALUES ('${questionId}','${data.question}','${data.userId}','${todayDate.toLocaleString()}'); 
+        INSERT into question_us4 (question_id, question, user_id, video_timestamp, timestamp) VALUES ('${data.questionId}','${data.question}','${data.userId}', ${data.youtube_timestamp}, '${todayDate.toLocaleString()}'); 
         COMMIT;`;
         // console.log({sql});
+        // callback = {questionId: questionId};
         return db.query(sql, callback);
     }, 
 
@@ -21,9 +22,9 @@ let questionUserStudy4 = {
         let answerId = uuidv1();
         let todayDate = new Date();
         let isCaption = true;
-
+        console.log("New: ",typeof(data.youtube_timestamp));
         const sql = `START TRANSACTION; 
-        INSERT into answer_us4 (answer_id, user_id, answer, is_caption, timestamp) VALUES ('${answerId}','${data.userId}','${data.caption}', ${isCaption}, '${todayDate.toLocaleString()}'); 
+        INSERT into answer_us4 (answer_id, user_id, answer, is_caption, keyframes, video_timestamp, timestamp) VALUES ('${answerId}','${data.userId}','${data.caption}', ${isCaption}, '${data.key_frame}', ${data.youtube_timestamp}, '${todayDate.toLocaleString()}'); 
         COMMIT;`;
         return db.query(sql, callback);
     }, 
@@ -35,7 +36,7 @@ let questionUserStudy4 = {
         let isCaption = false;
 
         const sql = `START TRANSACTION; 
-        INSERT into answer_us4 (answer_id, user_id, answer, is_caption, timestamp) VALUES ('${answerId}','${data.userId}','${data.answer}', ${isCaption}, '${todayDate.toLocaleString()}'); 
+        INSERT into answer_us4 (answer_id, question_id, user_id, answer, is_caption, keyframes, video_timestamp, timestamp) VALUES ('${answerId}','${data.question_id}','${data.userId}','${data.answer}', ${isCaption}, '${data.key_frame}', ${data.youtube_timestamp}, '${todayDate.toLocaleString()}'); 
         COMMIT;`;
         return db.query(sql, callback);
     }, 

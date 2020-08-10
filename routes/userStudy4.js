@@ -9,6 +9,7 @@ const userStudy = require('../model/userStudy');
 const userStudy4 = require('../model/userStudy4');
 const questionUserStudy4 = require('../model/questionUserStudy4');
 const db = require('../db/database');
+const uuidv1 = require('uuid/v1');
 const fs = require('fs');
 var path = require('path');
 const youtubedl = require('youtube-dl');
@@ -187,9 +188,13 @@ router.get('/getAllQuestions', function (req, res) {
 
 
 router.post('/addQuestion', function(req, res, next) {
+  let questionId = uuidv1();
+  req.body["questionId"] = questionId;
+  console.log(req.body);
   let queryResult = questionUserStudy4.addQuestion(req.body);
   queryResult.then(result => {
-    res.send('Question inserted successfully');  
+    console.log(result);
+    res.send({questionId, result : 'Question inserted successfully'});  
   }).catch((err) => {
     res.send(err);
     console.log(err)

@@ -42,6 +42,12 @@ router.get('/', function(req, res, next) {
   res.render('homeUserStudy2', { title: 'User Study 2' });
 });
 
+router.get('/chatbot', function(req, res, next) {
+  //res.render('homeUserStudy', { title: 'Express' });
+  //res.render('home', { title: 'Express' });
+  res.render('chatbot', { title: 'User Study 2' });
+});
+
 
 router.get('/notify', function(req, res, next) {
   console.log('Notification received');

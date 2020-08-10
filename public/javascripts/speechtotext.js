@@ -54,13 +54,14 @@ recognition.onresult = (event) => {
         // socket.emit('send-chat-message', roomName, speechToText, questionId, name, QUESTION);
         // beep();
         let data = {    userId: volunteerId,
-                        question: speechToText
+                        question: speechToText,
+                        youtube_timestamp: chatbotTimeStamp.toFixed(3)
                     };
             
         $.post('/userStudy4/addQuestion', data, function (res) {
             console.log('Question Added');
-        });
-
+        console.log(res);
+        question_id = res.questionId;
         let docVal = "";
         docVal += speechToText;
         document.getElementById('qd5').innerHTML = docVal
@@ -80,6 +81,7 @@ recognition.onresult = (event) => {
                     submitQuestion(i); 
         $("#question").val('');
         // console.log('Confidence: ' + event.results[0][0].confidence);
+    });
     }else{
         console.log({speechToText});
     }

@@ -6,7 +6,7 @@ var prev_history = [];
 var generated_caption = "";
 var job_id = [];
 var image_question_mapping = [];
-var question_id = 1;
+// var question_id = 1;
 var question_user = "";
 var currentUploadedImageDiv = ""; // set the current uploaded image div
 var justClearedHistory = true;
@@ -22,6 +22,8 @@ let audio_path = "1";
 var isChatbotOn = false;
 var isChatbotInProcess = false;
 var chatbotTimeStamp = -1;
+let question_id = "";
+let keyframeMap = {};
 let time1 = 0;
 let time2 = 0;
 let time3 = 0;
@@ -72,12 +74,14 @@ async function fetchKeyFrames() {
             .done(function(){
             map = {};
             ws_id = [];
+            keyframeMap = {};
             for(let i=0;i<totalFrames;i++)
             {
                 ws_id[i] = uuidv4();
                 sendWSid(ws_id[i]);
                 path = KeyFramesArr[i].thumbnail_url;
                 sendImage(path,ws_id[i]);
+                keyframeMap[ws_id[i]] = path;
                 map[ws_id[i]] = i;
                 response_map[i] = "";
             }
@@ -208,7 +212,9 @@ function WebSocketTest() {
                 console.log(all_pred_captions);
                   /** Saving the caption in db */
                   let dbData2 = {  userId: volunteerId,
-                                caption: all_pred_captions
+                                caption: pred_caption,
+                                youtube_timestamp: chatbotTimeStamp.toFixed(3),
+                                key_frame : keyframeMap[socket_id]
                   };
         
                 $.post('/userStudy4/addCaption', dbData2, function (res) {
@@ -314,7 +320,10 @@ function WebSocketTest() {
             }
               /** Saving the answer in db */
             let dbData = {  userId: volunteerId,
-                          answer: all_answers
+                          answer: all_answers,
+                          question_id: question_id,
+                          youtube_timestamp: chatbotTimeStamp.toFixed(3),
+                          key_frame : keyframeMap[socket_id]
                       };
 
             $.post('/userStudy4/addAnswer', dbData, function (res) {
