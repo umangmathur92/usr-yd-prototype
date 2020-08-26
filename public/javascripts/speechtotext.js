@@ -39,6 +39,24 @@ recordButton.addEventListener('click', (e) => {
 //     recognition.stop();
 });
 
+// recognition.onend = function() {
+//     console.log('recognition onend has been called');
+
+//     recognition.start();
+// };
+
+// recognition.onnomatch = function() {
+//     console.log('recognition onmatch has been called');
+    
+//     recognition.start();
+// };
+
+
+// recognition.onspeechend = function() {
+//     console.log('Speech has stopped being detected');
+//     // recognition.stop();
+//     // recognition.abort();
+//   }
 recognition.onresult = (event) => {
     const speechToText = event.results[0][0].transcript;
     console.log('Recording stpped!');

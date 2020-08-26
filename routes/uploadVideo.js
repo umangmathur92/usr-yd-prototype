@@ -35,6 +35,7 @@ async function downloadVideo(url, videoTitle){
           console.log({ jsonPath });
           console.log({ __dirname });
           const video = youtubedl(url, ['--format=18']);
+          // const video = youtubedl(url, ['--format=137/22/18']);
 
           // Will be called when the download starts.
           video.on('info', function (info) {

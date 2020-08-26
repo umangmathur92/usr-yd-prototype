@@ -383,6 +383,7 @@ class UploadVideoController{
             console.log({ jsonPath });
             console.log({ __dirname });
             const video = youtubedl(url, ['--format=18']);
+            // const video = youtubedl(url, ['--format=best']);
 
             // Will be called when the download starts.
             video.on('info', function (info) {
