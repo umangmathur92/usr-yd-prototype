@@ -4,7 +4,7 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId = "5117b1e0-4c45-11ea-b77f-2e728ce88125";
+let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
 let volunteerId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
@@ -49,28 +49,15 @@ $(document).ready(function() {
     volunteerId = getUrlVars()["u"];
     // userId = getUrlVars()["u"];
     enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
+    if(!enableAi){
+        userId = '';
+    }
+
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
     youtubeId = lastPathSegment;
     fetchVideoInfo(youtubeId);
     
-    $("#btnScroll").click(function() {
-        resetVidModifiedTableData();
-    });
-    $('#btnSubmit').click(async function() {
-        let shoudShowAlert = true;
-        updateAll(shoudShowAlert);
-    });
-    $('#btnTemp').click(async function() {
-        updateMainTables();
-    });
-    $('#btn-video-breakpoint-toggle').change(function() {
-        if($(this).is(":checked")) {
-            autoPauseAtEachScene = true;
-        } else {
-            autoPauseAtEachScene = false;
-        }
-    });
     $("#btn-play-pause").click(function() {
         onPlayPauseButtonClick();
     });
@@ -918,110 +905,6 @@ const getNewQnAData = () =>{
     return qnaData;
 }
 
-async function updateAll(shoudShowAlert) {
-    let postJson = fetchJsonBodyForAllTextFields(userId);
-    const qnaData = getNewQnAData();    
-    postJson.qnaData = qnaData;
-    postJson.videoId = youtubeId;
-    console.log({'HERE': postJson});
-    try{
-        await $.post('/saveAiDescription', postJson, function (response) {
-            if(shoudShowAlert) {
-                if(response.success) {
-                    alert('Submitted Successfully\nYou will be redirected to the Video List Page');
-                    window.history.back();
-                } else {
-                    console.log(response);
-                    alert('Update Status: ' + response.success);
-                }
-            }
-        });
-    }catch(e){
-
-        console.log(e);
-        response.send(e);
-    }
-   
-}
-
-//added start time, end time and has Ai for saving in descrption table
-function fetchJsonBodyForAllTextFields(userId) {
-    let listContainer = document.querySelector('.list-container');
-    sceneDetails = JSON.parse(listContainer.dataset.sceneDetails);
-
-    let parentJsonBody = {};
-    let sceneArrJson = [];
-
-    console.log({'INSIDE fetchJsonBodyForAllTextFields ' : sceneDetails});
-    let currScene ;
-    for(let i=0; i < sceneDetails.length; i++) {
-        currScene = sceneDetails[i];
-        let currSceneId = currScene.sc_id;
-        let currSceneDescTextId = '#s_d_' + currSceneId;
-        let currSceneOcrTextId = '#s_o_' + currSceneId;
-        let sceneJsonObj = {};
-        sceneJsonObj.scene_id = currSceneId;
-        let csTestbox = $(currSceneDescTextId)
-        if(csTestbox && csTestbox.val()){
-            sceneJsonObj.modified_description = csTestbox.val().trim();
-            sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
-            sceneJsonObj.start_time = currScene.start_time;
-            sceneJsonObj.end_time = currScene.finish_time;
-            sceneJsonObj.has_ai = enableAi;
-            sceneJsonObj.deletedScene = currScene.deletedScene;
-            sceneArrJson.push(sceneJsonObj);
-        }
-    }
-
-    parentJsonBody.user_id = userId;
-    parentJsonBody.scene_arr = sceneArrJson;
-    parentJsonBody.time_taken = timeElapsedOnPage;
-
-    console.log({parentJsonBody});
-    return parentJsonBody;
-}
-
-async function updateMainTables() {
-    let postJson = fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr);
-
-    console.log({postJson})
-    await $.post('/updateBlockAndScene', postJson, function (response) {
-        if(response.success) {
-            window.alert('Updated Successfully');
-        } else {
-            window.alert('Update Failed');
-        }
-    });
-}
-
-function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
-    let parentJsonBody = {};
-    let sceneArrJson = [];
-    let blockArrJson = [];
-    for(let i=0; i<allSceneArr.length; i++) {
-        let currScene = allSceneArr[i];
-        let currSceneId = currScene.sc_id;
-        let currSceneDescTextId = '#s_d_' + currSceneId;
-        let currSceneOcrTextId = '#s_o_' + currSceneId;
-        let sceneJsonObj = {};
-        sceneJsonObj.scene_id = currSceneId;
-        sceneJsonObj.original_description = $(currSceneDescTextId).val().trim();
-        sceneJsonObj.original_ocr = $(currSceneOcrTextId).val().trim();
-        sceneArrJson.push(sceneJsonObj);
-    }
-    for(let i=0; i<allBlockArr.length; i++) {
-        let currBlock = allBlockArr[i];
-        let currBlockId = currBlock.block_id;
-        let currBlockDescTextId = '#b_d_' + currBlockId;
-        let blockJsonObj = {};
-        blockJsonObj.block_id = currBlockId;
-        blockJsonObj.original_description = $(currBlockDescTextId).val().trim();
-        blockArrJson.push(blockJsonObj);
-    }
-    parentJsonBody.scene_arr = sceneArrJson;
-    parentJsonBody.block_arr = blockArrJson;
-    return parentJsonBody;
-}
 
 
 function populateSceneIdToListPositionMap(sceneDetailsArr) {

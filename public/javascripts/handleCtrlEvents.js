@@ -79,3 +79,37 @@ function isKeyPress(event) {
         let x = document.getElementById("demo");
         x.innerHTML = "The key is up now";
     }
+
+    function seekBackward(){
+      let isStatePlaying = false;
+      if(player.getPlayerState() == YT.PlayerState.PLAYING)   
+          isStatePlaying = true;
+  
+      pauseVideo();
+      let currentTime = player.getCurrentTime();
+      
+      if(currentTime > 5)
+          player.seekTo(currentTime - 5);
+      else
+          player.seekTo(0);
+      
+      if(isStatePlaying)
+          playVideo();
+  }
+  
+  function seekForward(){
+      let isStatePlaying = false;
+      if(player.getPlayerState() == YT.PlayerState.PLAYING)   
+          isStatePlaying = true;
+  
+      pauseVideo();
+      let currentTime = player.getCurrentTime();
+      // console.log(player.getDuration());
+      if(currentTime < player.getDuration() - 5)
+          player.seekTo(currentTime + 5);
+      else
+          player.seekTo(player.getDuration());
+      
+      if(isStatePlaying)
+          playVideo();
+  }

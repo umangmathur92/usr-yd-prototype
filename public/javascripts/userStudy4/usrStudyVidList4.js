@@ -72,10 +72,16 @@ function updateUI(vidArr) {
             Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
         }
         else{
-            generatedHtml += `<b><a href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
-            <input type="checkbox" style="margin-right: 8px;">
-            <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
-            Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+            if(isAiSupported)
+                generatedHtml += `<b><a href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
+                <input type="checkbox" style="margin-right: 8px;">
+                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
+                Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+            else
+                generatedHtml += `<b><a href="/playvideoaudio/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
+                <input type="checkbox" style="margin-right: 8px;">
+                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
+                Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
         }
         generatedHtml += `<b><a href="${surveyLink}" class="list-group-item" target="_blank" >
         <input type="checkbox" style="margin-right: 8px;">

@@ -4,7 +4,8 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId;
+let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+let volunteerId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = "#doesnotexist";
@@ -45,23 +46,14 @@ let audio_flag = false;
 
 $(document).ready(function () {
   $("#btn-video-breakpoint-toggle").prop("checked", true);
-  userId = getUrlVars()["u"];
+  volunteerId = getUrlVars()["u"];
+  // userId = getUrlVars()["u"];
   enableAi = getUrlVars()["ai"] == "yes" ? true : false;
   let href = location.href;
   const lastPathSegment = new URL(href).pathname.split("/").pop();
   youtubeId = lastPathSegment;
   fetchVideoInfo(youtubeId);
 
-  $("#btnScroll").click(function () {
-    resetVidModifiedTableData();
-  });
-  $("#btnSubmit").click(async function () {
-    let shoudShowAlert = true;
-    updateAll(shoudShowAlert);
-  });
-  $("#btnTemp").click(async function () {
-    updateMainTables();
-  });
   $("#btn-video-breakpoint-toggle").change(function () {
     if ($(this).is(":checked")) {
       autoPauseAtEachScene = true;
@@ -862,47 +854,6 @@ function fetchJsonBodyForAllTextFields(userId) {
   return parentJsonBody;
 }
 
-async function updateMainTables() {
-  let postJson = fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr);
-
-  console.log({ postJson });
-  await $.post("/updateBlockAndScene", postJson, function (response) {
-    if (response.success) {
-      window.alert("Updated Successfully");
-    } else {
-      window.alert("Update Failed");
-    }
-  });
-}
-
-function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
-  let parentJsonBody = {};
-  let sceneArrJson = [];
-  let blockArrJson = [];
-  for (let i = 0; i < allSceneArr.length; i++) {
-    let currScene = allSceneArr[i];
-    let currSceneId = currScene.sc_id;
-    let currSceneDescTextId = "#s_d_" + currSceneId;
-    let currSceneOcrTextId = "#s_o_" + currSceneId;
-    let sceneJsonObj = {};
-    sceneJsonObj.scene_id = currSceneId;
-    sceneJsonObj.original_description = $(currSceneDescTextId).val().trim();
-    sceneJsonObj.original_ocr = $(currSceneOcrTextId).val().trim();
-    sceneArrJson.push(sceneJsonObj);
-  }
-  for (let i = 0; i < allBlockArr.length; i++) {
-    let currBlock = allBlockArr[i];
-    let currBlockId = currBlock.block_id;
-    let currBlockDescTextId = "#b_d_" + currBlockId;
-    let blockJsonObj = {};
-    blockJsonObj.block_id = currBlockId;
-    blockJsonObj.original_description = $(currBlockDescTextId).val().trim();
-    blockArrJson.push(blockJsonObj);
-  }
-  parentJsonBody.scene_arr = sceneArrJson;
-  parentJsonBody.block_arr = blockArrJson;
-  return parentJsonBody;
-}
 
 function populateSceneIdToListPositionMap(sceneDetailsArr) {
   let listPositionIndex = 0;

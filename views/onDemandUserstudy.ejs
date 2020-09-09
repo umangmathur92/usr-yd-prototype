@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html onkeypress="isKeyPress(event)" onkeydown="isKeyDown(event)">
 <head>
   <title><%= title %></title>
   <script src="https://use.fontawesome.com/8a92be1af5.js"></script>
@@ -14,7 +14,6 @@
 </head>
 <body background="/images/bg.jpg" style="background-repeat: no-repeat; background-size: cover;">
   <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
-    <!--img src="../images/yd.jpg" class="img-header"-->
     <div class="container">
       <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a>
     </div>
@@ -48,6 +47,7 @@
                 <button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Visual Chatbot </button>
                 <div style="text-align:center;">
                   <div><p></p>
+                    <p id="demo" style="visibility: hidden;"></p>  
                   </div>
                   <!-- <input id="question" type="text" style="visibility: visible;height: 40px;width: 70%;text-align: center;" placeholder="Start typing question here ..." autocomplete="off"></div> -->
                       <audio id="myAudio" style="visibility: hidden;" controls autoplay>
@@ -56,18 +56,11 @@
               </div>
             </div>
           </div>
-          <div>
-            <!-- <button onclick="startRecording()"> Record </button> -->
+          <!-- <div>
             <div id= "record"><button id="record-button" class="btn btn-danger btn-l" style= "margin:10px;width:300px" >Ask Question</button></div>
-          </div>
-          <div>
-            <button class="btn btn-danger" id="btnScroll" style="visibility: hidden;">Temp button to reset scene/block_modification table for this user</button>
-            <!-- <button class="btn btn-danger" id="btnTemp" style="visibility: visible;">Temp Button to update main tables</button> -->
-            <!-- <section id="stopWatch"> <p id="timer"> Time Elapsed : 00:00:00 </p> <button id="start"> Start </button> <button id="stop"> Stop </button> <p id="fulltime"> </p> </section> -->    
-          </div>
+          </div> -->
         </div>
         <div style="visibility: hidden;">
-          <!--div style="background-color: #1a4b6e;color:#fff;font-size: 15px;"><b>AI Generated Description</b></div-->
           <div style="height:80%; background-color:#fff;">
             <div class="list-container" data-scene-details="" style="height: 100%">      
               <ul id="ul-scene-list" class="scene-list">
@@ -77,7 +70,6 @@
           </div>
           <div style="background-color: #1a4b6e;color:#fff;"> _ </div>
           <br>
-          <button class="btn btn-danger btn-l" id="btnSubmit">Save &amp; Close Window</button>
         </div>
 
       </div>
@@ -86,6 +78,7 @@
     <script src="https://www.youtube.com/iframe_api" async></script>
     <script src="/javascripts/visdial.js"> </script>
     <script src="/javascripts/speechtotext.js"> </script>
+    <script src="/javascripts/handleCtrlEvents.js"> </script>
 
 <script>
 
