@@ -15,7 +15,7 @@
 <body background="/images/bg.jpg" style="background-repeat: no-repeat; background-size: cover;">
   <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
     <div class="container">
-      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a>
+      <a id="page-title" class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study</a>
     </div>
     <img id="btn-timer" src="/images/pause_white.png" style="height: 20px; width:20px; color: white; margin-right: 10px;">
     <b><span style="color: white">Time Elapsed:&nbsp;</span>
@@ -44,9 +44,24 @@
                   </label>
                 </span>   
             </span>
-                <button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Visual Chatbot </button>
+                <button onclick="fetchKeyFrames()" style="visibility: hidden;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Visual Chatbot </button>
                 <div style="text-align:center;">
-                  <div><p></p>
+                  <div>
+                    <h6 style="text-align:center; color: red !important; font-weight: bolder;">Press Space Bar or Click Play Button to Start the Video</h6>
+                    <div style="background-color: #1a4b6e; padding: 16px; height: 100%;"> 
+                      <div>
+                          <h1 style="color: white; text-align: center;">Controls</h1>
+                          <br>
+                          <h6 style="color: white; text-align:justify;" ;="">
+                            <ul>
+                              <li> Space Bar - Play/Pause </li>
+                              <li> Right Arrow Key - Seek Forward </li>
+                              <li> Left Arrow Key - Seek Backward </li>
+                              <li> Q - Ask a Question </li>
+                            </ul>
+                          </h6>
+                      </div>
+                  </div>
                     <p id="demo" style="visibility: hidden;"></p>  
                   </div>
                   <!-- <input id="question" type="text" style="visibility: visible;height: 40px;width: 70%;text-align: center;" placeholder="Start typing question here ..." autocomplete="off"></div> -->
@@ -71,7 +86,8 @@
           <div style="background-color: #1a4b6e;color:#fff;"> _ </div>
           <br>
         </div>
-
+        <div>
+      </div>
       </div>
     </div>
     <script src="/javascripts/onDemandUserstudy.js"></script>

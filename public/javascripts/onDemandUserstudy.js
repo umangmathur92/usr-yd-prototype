@@ -4,12 +4,15 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+// let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+let userId = "f03cb948-474b-4084-9192-650ba62d396b";
 let volunteerId;
 let prevSceneNum = -1;
+let lastSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = '#doesnotexist';
 let enableAi = false;
+let baselineDesc = "and Baseline Descriptions";
 let autoPauseAtEachScene = true;
 let timeElapsedOnPage = 0;
 let isTimerPaused = false;
@@ -51,7 +54,9 @@ $(document).ready(function() {
     enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     if(!enableAi){
         userId = '';
+        baselineDesc = 'Descriptions';
     }
+    document.getElementById("page-title").innerHTML = "On Demand " + baselineDesc;
 
     let href = location.href;
     const lastPathSegment = new URL(href).pathname.split('/').pop();
@@ -510,6 +515,8 @@ async function onPlayerReady(event) {
 async function updateTime() {
     while(true){
         if(desc_flag){
+            if (player.getPlayerState() != YT.PlayerState.ENDED){
+
     var oldTime = videotime;
      if(player && player.getCurrentTime) {
         videotime = player.getCurrentTime();
@@ -571,7 +578,7 @@ async function updateTime() {
     $('#elapsed_time').text(formatTime(player.getCurrentTime()));
     console.log("Time event");
     // msleep(100);
-}  
+}}  
     await new Promise(r => setTimeout(r, 100));    
 }
     
@@ -830,29 +837,22 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
-            if(scene_audio_extend_set.has(sceneNum)) {
-                // STATE = 1;
-                // pauseVideo();
-                // let totalAudios = sentenceAudioMap[prevSceneNum];
-                let flag = true;
-                // let i=0;
-                // YT_FLAG = true;
-                    if(flag && currAudio==null)
-                    {currAudio = sentenceAudioMap[sceneNum][0];
-                        console.log("Will play now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    player.setVolume(15);
-                    currAudio.play();
-                    currAudio.onended = function() {
-                                console.log('player state is: ' + player.getPlayerState());
-                        // if(player.getPlayerState() == YT.PlayerState.PAUSED) {
-                        //     console.log('I was called');
-                        //     // STATE = 0;
-                        //     // STATE_TIME = -1;
-                        //     currAudio = null;
-                        //     player.setVolume(75);
-                        //     // playVideo();
-                        // }
-                    }}}
+            if (scene_audio_extend_set.has(lastSceneNum)) {
+                console.log(lastSceneNum);
+                console.log(prevSceneNum);
+                currAudio = sentenceAudioMap[lastSceneNum][0];
+                // player.setVolume(15);
+                currAudio.play();
+                currAudio.onended = function () {
+        
+                  if (player.getPlayerState() == YT.PlayerState.PAUSED) {
+                    STATE = 0;
+                    STATE_TIME = -1;
+                    currAudio = null;         
+                  }
+                };
+        
+              }
         case YT.PlayerState.CUED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
@@ -951,6 +951,10 @@ function getSceneFromTime(currentTime) {
         let startTime = parseFloat(sceneDetails[i].start_time);
         startTimesArr.push(startTime);
     }
+    if (lastSceneNum == -1){
+        let l = startTimesArr.length - 1;
+        lastSceneNum = sceneDetails[l].sc_num;
+      }
     let sceneIndex = getIndexOfInputArrForTargetVal(currentTime, startTimesArr);
     return sceneDetails[sceneIndex];
 }

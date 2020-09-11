@@ -4,9 +4,11 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+// let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+let userId = "f03cb948-474b-4084-9192-650ba62d396b";
 let volunteerId;
 let prevSceneNum = -1;
+let lastSceneNum = -1;
 let timeAtWhichLastPaused = -1;
 let previouslyHighlightedContainerId = "#doesnotexist";
 let enableAi = false;
@@ -538,7 +540,8 @@ async function updateTime() {
   
     while (true) {
     if (desc_flag) {
-      
+      if (player.getPlayerState() != YT.PlayerState.ENDED){
+          
         let oldTime = videotime;
         if (player && player.getCurrentTime) 
             videotime = player.getCurrentTime();
@@ -598,7 +601,7 @@ async function updateTime() {
       }
       $("#elapsed_time").text(formatTime(player.getCurrentTime()));
       console.log("Time event");
-    }
+    }}
     await new Promise((r) => setTimeout(r, 100));
   }
 }
@@ -611,7 +614,7 @@ async function updateProgress(currentTime) {
   let currScene = getSceneFromTime(currentTime, allSceneArr);
   let sceneNum = currScene.sc_num;
   prevSceneNum = sceneNum;
-  if (currAudio !== null && isPlaying(currAudio)) 
+  if (currAudio !== null && isPlaying(currAudio))
     currAudio.pause();
   
   currAudio = null;
@@ -631,7 +634,7 @@ async function onProgress(currentTime) {
       first_extend_flag = false;
   else if (prevSceneNum != -1 && sceneNum != prevSceneNum) 
   {
-    if (scene_audio_extend_set.has(prevSceneNum)) 
+    if (scene_audio_extend_set.has(prevSceneNum))
     {
       STATE = 1;
       pauseVideo();
@@ -732,6 +735,23 @@ function onPlayerStateChange(event) {
       break;
     case YT.PlayerState.UNSTARTED:
     case YT.PlayerState.ENDED:
+      console.log("Play extended audio here!!");
+      if (scene_audio_extend_set.has(lastSceneNum)) {
+        console.log(lastSceneNum);
+        console.log(prevSceneNum);
+        currAudio = sentenceAudioMap[lastSceneNum][0];
+        // player.setVolume(15);
+        currAudio.play();
+        currAudio.onended = function () {
+
+          if (player.getPlayerState() == YT.PlayerState.PAUSED) {
+            STATE = 0;
+            STATE_TIME = -1;
+            currAudio = null;         
+          }
+        };
+
+      }
     case YT.PlayerState.CUED:
       $("#btn-play-pause").html(
         '<img src = "/images/play.png" style="height: 25px; width: 25px;">'
@@ -897,6 +917,10 @@ function getSceneFromTime(currentTime) {
   for (let i = 0; i < sceneDetails.length; i++) {
     let startTime = parseFloat(sceneDetails[i].start_time);
     startTimesArr.push(startTime);
+  }
+  if (lastSceneNum == -1){
+    let l = startTimesArr.length - 1;
+    lastSceneNum = sceneDetails[l].sc_num;
   }
   let sceneIndex = getIndexOfInputArrForTargetVal(currentTime, startTimesArr);
   return sceneDetails[sceneIndex];
