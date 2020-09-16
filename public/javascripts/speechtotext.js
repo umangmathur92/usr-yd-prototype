@@ -27,17 +27,17 @@ function fetchAnswer(){
     // recognition.stop();
 }
 
-recordButton.addEventListener('click', (e) => {
-    e.preventDefault();
-   // player.pauseVideo();
-//    console.log('Record button clicked..Recording....');
-//    player.pauseVideo();
-//    recognition.start();
-    startChatbot();
-   e.stopPropagation();
-//    await new Promise(r => setTimeout(r, 4000));
-//     recognition.stop();
-});
+// recordButton.addEventListener('click', (e) => {
+//     e.preventDefault();
+//    // player.pauseVideo();
+// //    console.log('Record button clicked..Recording....');
+// //    player.pauseVideo();
+// //    recognition.start();
+//     startChatbot();
+//    e.stopPropagation();
+// //    await new Promise(r => setTimeout(r, 4000));
+// //     recognition.stop();
+// });
 
 // recognition.onend = function() {
 //     console.log('recognition onend has been called');
@@ -50,7 +50,9 @@ recordButton.addEventListener('click', (e) => {
     
 //     recognition.start();
 // };
-
+recognition.onstart = function() {
+    console.log('Speech recognition service has started');
+  } 
 
 // recognition.onspeechend = function() {
 //     console.log('Speech has stopped being detected');
@@ -80,15 +82,15 @@ recognition.onresult = (event) => {
             console.log('Question Added');
         console.log(res);
         question_id = res.questionId;
-        let docVal = "";
-        docVal += speechToText;
-        document.getElementById('qd5').innerHTML = docVal
+        // let docVal = "";
+        // docVal += speechToText;
+        // document.getElementById('qd5').innerHTML = docVal
 
-            docVal = "Time stamp for question: ";
-            let currentTime = new Date();
-            docVal += currentTime.toLocaleTimeString();
-            document.getElementById('qd1').innerHTML = docVal;
-            time1 = currentTime.getTime();
+        //     docVal = "Time stamp for question: ";
+        //     let currentTime = new Date();
+        //     docVal += currentTime.toLocaleTimeString();
+        //     document.getElementById('qd1').innerHTML = docVal;
+        //     time1 = currentTime.getTime();
 
         noOfQuestionsAsked += 1;
         console.log({speechToText});

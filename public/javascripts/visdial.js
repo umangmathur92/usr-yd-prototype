@@ -86,11 +86,11 @@ async function fetchKeyFrames() {
                 response_map[i] = "";
             }
             // let docVal = document.getElementById('cd1').innerHTML;
-            let docVal = "Time stamp for chatbot initialization: ";
-            let currentTime = new Date();
-            docVal += currentTime.toLocaleTimeString();
-            document.getElementById('cd1').innerHTML = docVal;
-            time1 = currentTime.getTime();
+            // let docVal = "Time stamp for chatbot initialization: ";
+            // let currentTime = new Date();
+            // docVal += currentTime.toLocaleTimeString();
+            // document.getElementById('cd1').innerHTML = docVal;
+            // time1 = currentTime.getTime();
 
             });
             return true;
@@ -173,8 +173,8 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
-            // ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
+            // ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
+            ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -226,16 +226,16 @@ function WebSocketTest() {
                 
                 if(!count){
                     // let docVal = document.getElementById('cd2').innerHTML;
-                    let docVal = "Time stamp for chatbot response: ";
-                    let currentTime = new Date();
-                    docVal += currentTime.toLocaleTimeString();
-                    document.getElementById('cd2').innerHTML = docVal;
+                    // let docVal = "Time stamp for chatbot response: ";
+                    // let currentTime = new Date();
+                    // docVal += currentTime.toLocaleTimeString();
+                    // document.getElementById('cd2').innerHTML = docVal;
 
-                      time2 = currentTime.getTime();
-                      // docVal = document.getElementById('cd3').innerHTML;
-                      docVal = "Time taken for chatbot response: ";
-                       docVal += (time2 - time1)/1000;
-                       document.getElementById('cd3').innerHTML = docVal + " s";
+                    //   time2 = currentTime.getTime();
+                    //   // docVal = document.getElementById('cd3').innerHTML;
+                    //   docVal = "Time taken for chatbot response: ";
+                    //    docVal += (time2 - time1)/1000;
+                    //    document.getElementById('cd3').innerHTML = docVal + " s";
                       /** API call to transformers summarization tool */
                       // $.get('http://13.59.47.124:5000/' + all_pred_captions, function (res) {
                       //   console.log('Transformers output: ',res);
@@ -272,12 +272,12 @@ function WebSocketTest() {
                       // audio_clip.src = null;
                       isChatbotOn = true;
                       isChatbotInProcess = false;
-                      let currentTime = new Date;
-                      time3 = currentTime.getTime();
+                      // let currentTime = new Date;
+                      // time3 = currentTime.getTime();
                       // let docVal = document.getElementById('cd4').innerHTML;
-                      let docVal = "Time taken for Text-to-speech: ";
-                       docVal += (time3 - time2)/1000;
-                       document.getElementById('cd4').innerHTML = docVal + " s";
+                      // let docVal = "Time taken for Text-to-speech: ";
+                      //  docVal += (time3 - time2)/1000;
+                      //  document.getElementById('cd4').innerHTML = docVal + " s";
 
                     });
 
@@ -333,16 +333,16 @@ function WebSocketTest() {
             var url_final = url_api.concat(all_answers);
             if(!count)
             {
-                    let docVal = "Time stamp for answer/response: ";
-                    let currentTime = new Date();
-                    docVal += currentTime.toLocaleTimeString();
-                    document.getElementById('qd2').innerHTML = docVal;
+                    // let docVal = "Time stamp for answer/response: ";
+                    // let currentTime = new Date();
+                    // docVal += currentTime.toLocaleTimeString();
+                    // document.getElementById('qd2').innerHTML = docVal;
 
-                      time2 = currentTime.getTime();
+                      // time2 = currentTime.getTime();
                       // docVal = document.getElementById('cd3').innerHTML;
-                      docVal = "Time taken for answer/response: ";
-                      docVal += (time2 - time1)/1000;
-                      document.getElementById('qd3').innerHTML = docVal + " s";
+                      // docVal = "Time taken for answer/response: ";
+                      // docVal += (time2 - time1)/1000;
+                      // document.getElementById('qd3').innerHTML = docVal + " s";
 
 
                 /** API call to transformers summarization tool */
@@ -368,12 +368,12 @@ function WebSocketTest() {
                         // alert("The audio has ended");
                     }
 
-                    let currentTime = new Date;
-                    time3 = currentTime.getTime();
+                    // let currentTime = new Date;
+                    // time3 = currentTime.getTime();
                     // let docVal = document.getElementById('cd4').innerHTML;
-                    let docVal = "Time taken for Text-to-speech: ";
-                     docVal += (time3 - time2)/1000;
-                     document.getElementById('qd4').innerHTML = docVal + " s";
+                    // let docVal = "Time taken for Text-to-speech: ";
+                    //  docVal += (time3 - time2)/1000;
+                    //  document.getElementById('qd4').innerHTML = docVal + " s";
               });
 
               console.log("Final: "+ all_answers);
@@ -404,8 +404,8 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "https://dev-api.youdescribe.org/upload/";
-        // var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/upload/"; (to test from local)
+        // var URL1 = "https://dev-api.youdescribe.org/upload/";
+        var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/upload/"; //(to test from local)
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -450,8 +450,8 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "https://dev-api.youdescribe.org/";
-      // var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
+      // var URL = "https://dev-api.youdescribe.org/";
+      var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
 
       $.ajax({
               type: 'POST',
