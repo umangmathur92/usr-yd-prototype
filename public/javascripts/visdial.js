@@ -173,8 +173,8 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            // ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
-            ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
+            ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
+            // ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -404,8 +404,8 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        // var URL1 = "https://dev-api.youdescribe.org/upload/";
-        var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/upload/"; //(to test from local)
+        var URL1 = "https://dev-api.youdescribe.org/upload/";
+        // var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/upload/"; //(to test from local)
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
@@ -450,8 +450,8 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      // var URL = "https://dev-api.youdescribe.org/";
-      var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
+      var URL = "https://dev-api.youdescribe.org/";
+      // var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
 
       $.ajax({
               type: 'POST',
