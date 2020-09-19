@@ -89,6 +89,10 @@ function incrementSeconds() {
 function fetchVideoInfo(youtubeId) {
     WebSocketTest();
     console.log(userId);
+    // let baselineUrl = '/fetchDescriptionDescriberId' + '?videoid=' + youtubeId + 'userId=' + volunteerId + 'vol' + vol;
+    // $.get(targetUrl, function (response) {
+    //     userId = response.describerId;
+    // });
     // let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
     let targetUrl = `/fetchVideoData?videoid=${youtubeId}&userId=${userId}`
     $.get(targetUrl, function (response) {
