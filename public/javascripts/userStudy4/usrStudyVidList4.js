@@ -53,9 +53,10 @@ function updateUI(vidArr) {
         let vid = vidArr[i];
         let videoId = vid.video_id;
         let videoTitle = vid.title;
-        let volunteerId = vid.volunteer_id;
+        let volunteerId = vid.volunteer_id; // on-demand Describer
         let isAiSupported = vid.ai_support;
         let isOnDemandSupported = vid.on_demand_support;
+        let describerId = volunteerId=='f03cb948-474b-4084-9192-650ba62d396b'? 1 : 2;
         let aiSupportStr = isAiSupported ? 'With Baseline Descriptions' : 'Without Baseline Descriptions';
         let onDemandSupportStr = isOnDemandSupported ? 'With On Demand' : 'Without On Demand';
         let aiParam = vid.ai_support===true ? 'yes' : 'no';
@@ -66,14 +67,14 @@ function updateUI(vidArr) {
             surveyLink = 'https://forms.gle/vkyExP3UqeNkNKiE9';
         }
         if(isOnDemandSupported){
-            generatedHtml += `<b><a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
+            generatedHtml += `<b><a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
             <input type="checkbox" style="margin-right: 8px;">
             <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
             Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
         }
         else{
             if(isAiSupported)
-                generatedHtml += `<b><a href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
+                generatedHtml += `<b><a href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
                 <input type="checkbox" style="margin-right: 8px;">
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
                 Video ${i+1}: ${videoTitle} (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;

@@ -52,6 +52,8 @@ $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
     volunteerId = getUrlVars()["u"];
     // userId = getUrlVars()["u"];
+    describerId = getUrlVars()["did"];
+    userId = describerId=="1" ? "f03cb948-474b-4084-9192-650ba62d396b" : "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
     enableAi = (getUrlVars()["ai"] == 'yes') ? true : false;
     if(!enableAi){
         userId = '';

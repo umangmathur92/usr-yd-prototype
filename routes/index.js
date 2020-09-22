@@ -63,6 +63,7 @@ router.get('/audioDescription/:youtubeId', function(req, res, next) {
 });
 
 router.get('/audioDescriptionUserStudy/:youtubeId', function(req, res, next) {
+  // Verify the user id before sending the UI
   res.render('audioDescriptionUserStudy', { title: 'User Study 4' });
 });
 
@@ -71,10 +72,12 @@ router.get('/onDemand/:youtubeId', function(req, res, next) {
 });
 
 router.get('/onDemandUserstudy/:youtubeId', function(req, res, next) {
+  // Verify the user id before sending the UI
   res.render('onDemandUserstudy', { title: 'On Demand User Study' });
 });
 
 router.get('/onDemandTutorial/:youtubeId', function(req, res, next) {
+  // Verify the user id before sending the UI
   res.render('onDemandTutorial', { title: 'On Demand Tutorial' });
 });
 
