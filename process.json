@@ -1,9 +1,10 @@
-module.exports = {
+{
     "apps": [
         {
             "name": "my-app",
             "script": "npm",
-            "args" : "start"
+            "args" : "start",
+            "ignore_watch": ["public/keyframes"]
         }
     ]
 }
