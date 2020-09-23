@@ -66,9 +66,9 @@ async function fetchKeyFrames() {
                 console.log(KeyFramesArr);
                 totalFrames = KeyFramesArr.length;
                 count = totalFrames;
-                path = KeyFramesArr[0].thumbnail_url;
+                path = KeyFramesArr[0].keyframe_url;
                 for(let i=0; i< KeyFramesArr.length; i++)
-                    console.log("The url is: "+ KeyFramesArr[i].thumbnail_url);           
+                    console.log("The url is: "+ KeyFramesArr[i].keyframe_url);           
                 // debugger;    
             })
             .done(function(){
@@ -79,7 +79,7 @@ async function fetchKeyFrames() {
             {
                 ws_id[i] = uuidv4();
                 sendWSid(ws_id[i]);
-                path = KeyFramesArr[i].thumbnail_url;
+                path = KeyFramesArr[i].keyframe_url;
                 sendImage(path,ws_id[i]);
                 keyframeMap[ws_id[i]] = path;
                 map[ws_id[i]] = i;
