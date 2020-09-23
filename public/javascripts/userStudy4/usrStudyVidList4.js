@@ -34,7 +34,17 @@ function fetchTutorialVideo() {
                 tutorialHtml += `</b><br>`;  
             }
             let targetUrl = '/userStudy4/users?userId=' + userId;
-            fetchVideo(targetUrl);
+            let checkTutorialUrl = '/userStudy4/checkTutorial?userId=' + userId;
+            $.get(checkTutorialUrl, function (res) {
+                
+                console.log(res);
+                if (res[0]["is_tutorial_complete"]){
+                fetchVideo(targetUrl);
+                }
+                else{
+                    $( ".list-group").append(tutorialHtml);
+                }
+            });
     });
 }
 

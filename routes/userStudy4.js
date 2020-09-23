@@ -157,6 +157,45 @@ router.get('/users/', function (req, res) {
       });
     }
   });
+
+  router.get('/checkTutorial',function(req, res, next) {
+    console.log({param: req.query.userId});
+    let userId = req.query.userId;
+    if(userId){
+      
+      let queryResult = db.query(`SELECT u.is_tutorial_complete FROM us_user u WHERE u.uuid = $1`,[userId]);
+      queryResult
+      .then(result => {
+        console.log({result});
+        res.send(result);
+      })
+      .catch((err) => {
+        console.log({err});
+        res.send(err);
+      });
+    }
+    else{
+      res.send({status : "error"});
+    }
+  });
+
+    /** Updates tutorial as complete for a user */
+  router.post('/updateTutorial',function(req, res, next) {
+    console.log({param: req.query.userId});
+    let userId = req.query.userId;
+    let done = true;
+
+    if(userId){
+      
+      let queryResult = db.query(`UPDATE us_user u SET u.is_tutorial_complete = $1 WHERE u.uuid = $2`,[done, userId]);
+      queryResult
+      .then(result => { res.send(result);})
+      .catch((err) => { res.send(err);});
+    }
+    else{
+      res.send({status : "error"});
+    }
+  });
   
 
 
