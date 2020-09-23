@@ -14,6 +14,7 @@ const mergeScene = require('./mergeScene');
 const uploadVideoRoute  = require('./uploadVideo'); 
 const sentences = require('../backend/sentences.js');
 const pythiaCaption = require('../routes/pythiaCaption');
+const keyframeUpdate = require('../routes/keyframeUpdate');
 const bleu = require('../npm_python/nodejs/bleu.js');
 const audioDescription = require('../backend/audioDescriptions.js');
 const audioDesc = require('../backend/audioDesc.js');
@@ -28,6 +29,7 @@ router.use('/room', chatRoom);
 router.use('/merge', mergeScene);
 router.use('/vi', uploadVideoRoute);
 router.use('/pythia',pythiaCaption);
+router.use('/keyframe',keyframeUpdate);
 
 // Put these statements before you define any routes.
 router.use(bodyParser.urlencoded({ extended: true }));

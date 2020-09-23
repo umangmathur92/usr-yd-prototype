@@ -103,9 +103,9 @@ async function fetchKeyFrames(sceneId,videoTime,sceneStartTime,volunteerId = '51
     /** Fetch last 5 keyframes irrespective of scene numbers */
 async function fetchKeyFrames2(sceneId,videoTime,sceneStartTime) {
 
-    // let match = sceneId.split('_');
-    // match = match[match.length-3];
-    let match = sceneId.split('_')[0];
+    let match = sceneId.split('_');
+    match = match[match.length-3];
+    // let match = sceneId.split('_')[0];
     console.log('match: ',match);
     match += '%';
     console.log('match: ',match);
