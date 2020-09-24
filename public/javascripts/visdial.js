@@ -21,6 +21,7 @@ let response_map = {};
 let audio_path = "1";
 var isChatbotOn = false;
 var isChatbotInProcess = false;
+var isQuestionInProcess = false;
 var chatbotTimeStamp = -1;
 let question_id = "";
 let keyframeMap = {};
@@ -113,6 +114,7 @@ function sendWS(){
 function startChatbot(){
 
   if(videotime - 0.2 < chatbotTimeStamp && chatbotTimeStamp < videotime + 0.2 && isChatbotOn){
+    isQuestionInProcess = true;
     askQuestion();
     // for(let i=0;i<totalFrames;i++)
     //     submitQuestion(i); 
@@ -128,7 +130,7 @@ function startChatbot(){
 
 function sendImage(path,ws_id,frameNo){
 
-  fetch('https://cors-anywhere.herokuapp.com/'+path).then(function(response) {
+  fetch(path).then(function(response) {
       
       return response.blob();
       
@@ -352,30 +354,31 @@ function WebSocketTest() {
               let textData2 = {  "inputText": all_answers,
                                 "filePath": "output_" + userId + "_" + audio_path + ".mp3"
                          };
-
-              $.post('/texttospeech', textData2, function (res) {
-                let date = new Date();
-                console.log('TTS completed: '+ date.getTime());
-                let randomNum = Math.random();
-                audio_clip.src = "../audio/output_" + userId + "_" + audio_path + ".mp3" + '?random='+randomNum;
-                      audio_clip.onended = function() {
-                        audio_clip.src = null;
-                        if (audio_path == "1")
-                          audio_path = "0";
-                        else
-                          audio_path = "1";
-                        console.log("On demand Audio ended")
-                        // alert("The audio has ended");
-                    }
-
-                    // let currentTime = new Date;
-                    // time3 = currentTime.getTime();
-                    // let docVal = document.getElementById('cd4').innerHTML;
-                    // let docVal = "Time taken for Text-to-speech: ";
-                    //  docVal += (time3 - time2)/1000;
-                    //  document.getElementById('qd4').innerHTML = docVal + " s";
-              });
-
+              if (isQuestionInProcess)
+              {              
+                $.post('/texttospeech', textData2, function (res) {
+                  let date = new Date();
+                  console.log('TTS completed: '+ date.getTime());
+                  let randomNum = Math.random();
+                  audio_clip.src = "../audio/output_" + userId + "_" + audio_path + ".mp3" + '?random='+randomNum;
+                        audio_clip.onended = function() {
+                          audio_clip.src = null;
+                          if (audio_path == "1")
+                            audio_path = "0";
+                          else
+                            audio_path = "1";
+                          console.log("On demand Audio ended")
+                          // alert("The audio has ended");
+                      }
+                      isQuestionInProcess = false;
+                      // let currentTime = new Date;
+                      // time3 = currentTime.getTime();
+                      // let docVal = document.getElementById('cd4').innerHTML;
+                      // let docVal = "Time taken for Text-to-speech: ";
+                      //  docVal += (time3 - time2)/1000;
+                      //  document.getElementById('qd4').innerHTML = docVal + " s";
+                });
+              }
               console.log("Final: "+ all_answers);
               all_answers = "";
               response_set.clear();

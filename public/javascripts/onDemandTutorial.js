@@ -672,6 +672,7 @@ function onPlayerStateChange(event) {
         case YT.PlayerState.PLAYING:
         audio_clip.pause();
         isChatbotInProcess = false;
+        isQuestionInProcess = false;
         console.log('i was called: playing state')
         $("#btn-play-pause").html('<img src = "/images/pause.png" style="height: 25px; width: 25px;">');
         break;
