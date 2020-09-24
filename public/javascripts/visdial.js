@@ -2,7 +2,7 @@
 
 var image = [];
 var image_url = "";
-var prev_history = [];
+var prev_history = {};
 var generated_caption = "";
 var job_id = [];
 var image_question_mapping = [];
@@ -194,7 +194,7 @@ function WebSocketTest() {
                 var pred_caption = data.pred_caption;
                 console.log("The pred caption is: "+ pred_caption);
                 // prev_history[map[socket_id]].push(pred_caption);
-                prev_history[map[socket_id]] = pred_caption;
+                // prev_history[map[socket_id]] = pred_caption;
                 count--;
                 var url_api = "http://api.voicerss.org/?key=ff91e773474146079653fbb513f71d76&hl=en-us&src=";
                 let url_tts = "http://18.221.192.73:5001/texttospeech";
