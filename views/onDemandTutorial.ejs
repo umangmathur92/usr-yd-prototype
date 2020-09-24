@@ -35,20 +35,36 @@
             <div>
                 <h1 style="color: white; text-align: center;">Instructions</h1>
                 <br>
-                <h6 style="color: white; text-align:justify;" ;="">This is a Tutorial site for using the Visual Chatbot to get on demand descriptions for the video.
-                  This site will help you get acquainted with the use of the Visual Chatbot. <br><br>
-                  To ask a question, you can press the key 'Q' or click on the button that says "Question" to ask a question. Initially, you will hear a long beep. This means the description is fetched
-                  from the Visual Chatbot. Once the description is finished playing, you will hear a short beep which means you can ask a question.
+                <!-- This tutorial will help you become acquainted with the Visual Chatbot controls.
+When you first land on a video page, the video will initially be paused. Pressing the space bar will begin playback. Using the right and left arrow keys will scan forward and backward, respectively. Pressing the space bar again will pause playback.
+To ask a question, press the Q key. After the description is read, you will hear a short beep, then you may ask your question. You may ask multiple questions while the video is paused. Please try to ask questions every 30 seconds during the tutorial to help calibrate the Visual Chatbot. -->
+                <h6 style="color: white; text-align:justify;" ;="">This tutorial will help you become acquainted with the Visual Chatbot controls. <br><br>
+                  When you first land on a video page, the video will initially be paused. Pressing the space bar will begin playback. Using the right and left arrow keys will scan forward and backward, respectively. Pressing the space bar again will pause playback.
                   <br><br>
-                  You may continue playing the video with regular controls. When you press the 'Q' key, you will hear the long beep first whenever the timestamp of the video is changed. <br><br>
-                  Note: Make sure to ask a question every 30 seconds to complete this tutorial.
+                  To ask a question, press the Q key. After the description is read, you will hear a short beep, then you may ask your question. You may ask multiple questions while the video is paused. Please try to ask questions every 30 seconds during the tutorial to help calibrate the Visual Chatbot.
 
                 </h6>
+
+                <h1 style="color: white; text-align: center;">Controls</h1>
+              <br>
+              <h6 style="color: white; text-align:justify;" ;="">
+                <div style="text-align: center;">
+                Press Space Bar to Start the Video
+                </div>
+                <br>
+                <ul>
+                  <li> Space Bar - Play/Pause </li>
+                  <li> Right Arrow Key - Seek Forward </li>
+                  <li> Left Arrow Key - Seek Backward </li>
+                  <li> Q - Ask a Question </li>
+                </ul>
+              </h6>
+
             </div>
         </div>
     </div>
       <div class="col-md-6">
-        <h6 style="text-align:center; color: red !important; font-weight: bolder;">Press Space Bar or Click Play Button to Start the Video</h6>
+        <h6 style="text-align:center; visibility: hidden; color: red !important; font-weight: bolder;">Press Space Bar or Click Play Button to Start the Video</h6>
         <div >
           <div style="margin:15px; font-size:15px; align-content: center; text-align: center;" font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
           <div style="align-content: center; text-align: center;">
@@ -82,34 +98,10 @@
           <div style="align-content: center; text-align: center;">
           
             <!-- <div id= "vischat"><button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Visual Chatbot </button></div> -->
-            <div id= "record"><button id="record-button" class="btn btn-danger btn-l" style= "margin:10px;width:300px" >Ask Question</button></div>
+            <div id= "record" style="visibility: hidden;"><button id="record-button" class="btn btn-danger btn-l" style= "margin:10px;width:300px" >Ask Question</button></div>
             <div id="question" type="text" style="visibility: visible;text-align: center;" placeholder="Start typing question here ..." autocomplete="off"></div>
             <p id="demo" style="visibility: hidden;"></p>  
         </div>
-        <div id="chatbotData" style="height:200px;border-style: dashed; border-width: 2px; border-color:blue;"> 
-          <h6 style="text-align: center; font-weight: bold;"> Descriptions' Response Time</h6>
-          <ul style="font-size: small;">
-            <li id="cd1"> Timestamp of chatbot initialization: </li>
-            <li id="cd2"> Timestamp of chatbot response: </li>
-            <li id="cd3"> Time taken for chatbot response: </li>
-            <li id="cd4"> Time taken for Text-to-speech: </li>
-          </ul>
-        </div>
-        <div id="questionData" style="height:200px;border-style: dashed; border-width: 2px; border-color:blue;"> 
-          <h6 style="text-align: center; font-weight: bold;"> Answer's Response Time</h6>
-          <ul style="font-size: small;">
-            <li id="qd1"> Timestamp of question: </li>
-            <li id="qd2"> Timestamp of answer/response: </li>
-            <li id="qd3"> Time taken for answer/response: </li>
-            <li id="qd4"> Time taken for Text-to-speech: </li>
-            <li style="font-weight: bold;"> Question asked: </li>
-          </ul>
-          <p id="qd5" style="font-size: small; text-align: center;"></p>
-        </div>
-          <div style="visibility: hidden;">
-            <button class="btn btn-danger" id="btnScroll" style="visibility: hidden;">Temp button to reset scene/block_modification table for this user</button>
-            
-          </div>
         </div>
         <div style="visibility: hidden;">
           
@@ -128,23 +120,7 @@
     </div>
     
     </div>
-    <div class="col-md-3">
-      <div style="background-color: #1a4b6e; padding: 16px; height: 100%;"> 
-          <div>
-              <h1 style="color: white; text-align: center;">Controls</h1>
-              <br>
-              <h6 style="color: white; text-align:justify;" ;="">
-                <ul>
-                  <li> Space Bar - Play/Pause </li>
-                  <li> Right Arrow Key - Seek Forward </li>
-                  <li> Left Arrow Key - Seek Backward </li>
-                  <li> C - Start Visual Chatbot </li>
-                  <li> Q - Ask a Question </li>
-                </ul>
-              </h6>
-          </div>
-      </div>
-  </div>
+    
   </div>
 </div>
     <script src="/javascripts/onDemandTutorial.js"></script>
