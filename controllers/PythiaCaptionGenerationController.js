@@ -13,9 +13,9 @@ class PythiaCaptionGenerationController{
             let captionArr = [];
             console.log('Fetching Pythia captions for keyframes.....');
             for(let i=0; i< data.length; i++){
-                let thumbnail_url = data[i].thumbnail_url;
+                let thumbnail_url = data[i].keyframe_url;
                 let keyframe_id = data[i].keyframe_id;
-                // console.log({thumbnail_url});
+                console.log({thumbnail_url});
                 let captionResponse = await this.fetchPythiaCaption(thumbnail_url);
                 // console.log({Pycaption: captionResponse.data});
                 data[i].updatedPythiaCaption =  captionResponse.data;

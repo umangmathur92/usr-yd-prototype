@@ -692,6 +692,12 @@ res.send({'result': result});
 });
 });
 
+router.get('/runScript', function(req, res, next){
+  let task = audioDescription.runScript();
+  task.then(result => {
+  res.send({'result': result});
+  });
+  });
 router.get('/generateAudioDescriptionMp3ForScene', function(req, res, next){
   let videoId= req.query.videoId;
   let volunteerId = req.query.volunteerId;
