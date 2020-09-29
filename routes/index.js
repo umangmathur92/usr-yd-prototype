@@ -117,11 +117,11 @@ router.get('/getAllKeyFrames', function(req, res, next) {
 router.get('/getKeyFrames', function(req, res, next) {
   //let query = video.fetchKeyFrames();
 
-  let {sceneId, videoTime, sceneStartTime} = req.query;
-  console.log("The vals are: "+sceneId+"  "+videoTime);
-  let queryResult = video.fetchKeyFrames(sceneId, videoTime, sceneStartTime);
+  let {videoId, videoTime, sceneStartTime, numOfKeyframes} = req.query;
+  console.log("The vals are: "+videoId+"  "+videoTime);
+  let queryResult = video.fetchKeyFrames(videoId, videoTime, sceneStartTime, numOfKeyframes);
   queryResult.then(result => {
-    console.log("The vals are: "+sceneId+"  "+videoTime);
+    console.log("The vals are: "+videoId+"  "+videoTime);
        res.send(result);
     });
 });

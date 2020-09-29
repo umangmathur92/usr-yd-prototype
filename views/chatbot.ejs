@@ -3,6 +3,26 @@
 <button onclick="startSim()"> Start Simulator</button>
 <p id="result"> Time taken (sec)</p>
 <p id="result1"> TIme</p>
+<p id="result2"> TIme</p>
+<p id="result3"> TIme</p>
+<p id="result4"> TIme</p>
+<p id="result5"> TIme</p>
+<p id="result6"> TIme</p>
+<p id="result7"> TIme</p>
+<p id="result8"> TIme</p>
+<p id="result9"> TIme</p>
+<p id="result10"> TIme</p>
+<p id="result11"> TIme</p>
+<p id="result12"> TIme</p>
+<p id="result13"> TIme</p>
+<p id="result14"> TIme</p>
+<p id="result15"> TIme</p>
+<p id="result16"> TIme</p>
+<p id="result17"> TIme</p>
+<p id="result18"> TIme</p>
+<p id="result19"> TIme</p>
+<p id="result20"> TIme</p>
+
 
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -42,7 +62,7 @@ let initialCount = 1;
 function startSim(){
     count = document.getElementById("userInput").value;
     tempCount = document.getElementById("userInput").value;
-    keyframeCount = 3;
+    keyframeCount = 1;
     count *= keyframeCount;
     console.log("Count: ",count);
     // count = 2
@@ -133,7 +153,7 @@ function WebSocketTest() {
     
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("ws://13.59.47.124:8001/chat/");
+            ws = new WebSocket("ws://18.220.96.7:8000/chat/");
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -144,8 +164,11 @@ function WebSocketTest() {
             console.log("Message is received...");
             console.log(JSON.parse(evt.data));
             var data = JSON.parse(evt.data);
-            data = JSON.parse(data['result']);
-            var socket_id = data.socketid;
+            var socket_id = '';
+            if("result" in data){
+              data = JSON.parse(data['result']);
+              socket_id = data.socketid;
+            }
             // prev_history[map[socket_id]] = data["history"];
             // let keyframeNo = map[socket_id];
 
@@ -161,7 +184,7 @@ function WebSocketTest() {
                     let currentTime = new Date();
                     time2 = currentTime.getTime();
                     document.getElementById("result"+initialCount).innerHTML = (time2 - time1)/1000;
-                    // autoSim();
+                    autoSim();
                 }
                   
           }
@@ -177,7 +200,7 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "http://13.59.47.124:8001/upload/";
+        var URL1 = "http://18.220.96.7:8000/upload/";
         formData.append('socketid', ws_id);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({

@@ -71,8 +71,8 @@ async function fetchAllKeyFrames(videoId) {
     return result;
 }
 
-async function fetchKeyFrames(sceneId,videoTime,sceneStartTime,volunteerId = '5117b1e0-4c45-11ea-b77f-2e728ce88125') {
-    return await fetchKeyFrames2(sceneId,videoTime,sceneStartTime);
+async function fetchKeyFrames(videoId,videoTime,sceneStartTime,numOfKeyframes=1, volunteerId = '5117b1e0-4c45-11ea-b77f-2e728ce88125') {
+    return await fetchKeyFrames2(videoId,videoTime,sceneStartTime,numOfKeyframes);
     console.log("Ent: testking");
     allScenesStr = await db.any(`SELECT merged_scene FROM descriptions WHERE scene_id = '${sceneId}' AND volunteer_id = '${volunteerId}'`);
     console.log("All scenes from: ", typeof(allScenesStr[0].merged_scene));
@@ -101,19 +101,20 @@ async function fetchKeyFrames(sceneId,videoTime,sceneStartTime,volunteerId = '51
 }
 
     /** Fetch last 5 keyframes irrespective of scene numbers */
-async function fetchKeyFrames2(sceneId,videoTime,sceneStartTime) {
+async function fetchKeyFrames2(videoId,videoTime,sceneStartTime,numOfKeyframes=1) {
 
-    let match = sceneId.split('_');
-    match = match[match.length-3];
+    // let match = sceneId.split('_');
+    // match = match[match.length-3];
     // let match = sceneId.split('_')[0];
+    let match = videoId;
     console.log('match: ',match);
     match += '%';
     console.log('match: ',match);
     sceneStartTime = 0;
     // result = await db.any(`SELECT thumbnail_url from keyframe where keyframe_id::text LIKE '${match}' AND start_time < ${videoTime} AND start_time > ${sceneStartTime} ORDER BY start_time DESC LIMIT 1`);
-    result = await db.any(`SELECT keyframe_url from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
+    result = await db.any(`SELECT keyframe_url from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT ${numOfKeyframes}`);
     console.log('res: ',result);
-    return result.reverse();
+    return [result.reverse()[0]];
 }
 
 

@@ -710,3 +710,11 @@ function onPlayPauseButtonClick() {
         break;
     }
 }
+
+
+function resetVidModifiedTableData() {
+    let url = '/reset/' + youtubeId + '/' + userId;
+    $.get(url, function(response) {
+        window.alert(JSON.stringify(response));
+    });
+}

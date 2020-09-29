@@ -25,6 +25,8 @@ var isQuestionInProcess = false;
 var chatbotTimeStamp = -1;
 let question_id = "";
 let keyframeMap = {};
+let filterBadCaptions = ["<unk>","can't tell"]; 
+let keyframeCount = 1;
 let time1 = 0;
 let time2 = 0;
 let time3 = 0;
@@ -48,7 +50,7 @@ var ws_id = []
 var totalFrames = 0;
 var map = {};
 
-async function fetchKeyFrames() {
+async function fetchKeyFrames(numOfKeyFrames=1) {
 
     pauseVideo();
     currScene = getSceneFromTime(videotime, allSceneArr);
@@ -57,9 +59,10 @@ async function fetchKeyFrames() {
     let startTime = currScene.start_time;
     console.log("video time for keyframes: ", videotime, " and scene_id is: ", scene_id);
     chatbotTimeStamp = videotime;
+    keyframeCount = numOfKeyFrames;
     var path;
     try {
-            let targetUrl = '/getKeyFrames' + '?sceneId=' + scene_id + '&videoTime=' + videotime + '&sceneStartTime=' + startTime;
+            let targetUrl = '/getKeyFrames' + '?videoId=' + youtubeId + '&videoTime=' + videotime + '&sceneStartTime=' + startTime + '&numOfKeyframes=' + numOfKeyFrames;
             var TotalFrames = 0;
             $.get(targetUrl, function (response) {
                 KeyFramesArr = response;
@@ -254,7 +257,16 @@ function WebSocketTest() {
                       "filePath": "output_" + userId + "_" + audio_path + ".mp3"
                     };
 
-                    if(isChatbotInProcess){
+                    let isBadCaption = filterBadCaptions.some(el => final_pred_captions.includes(el));
+                    // let isBadCaption = new RegExp(filterBadCaptions.join('|')).test(final_pred_captions);
+                    // let isBadCaption = final_pred_captions.includes("<unk>") || final_pred_captions.includes("can't tell");
+                    
+                    if(isBadCaption){
+                        if(keyframeCount < 3){
+                          fetchKeyFrames(keyframeCount+1);
+                        }
+                    }
+                    else if(isChatbotInProcess){
 
                     
                     $.post('/texttospeech', textData, function (res) {

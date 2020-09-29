@@ -46,6 +46,7 @@ let audio_flag = false;
 
 let noOfQuestionsAsked = 0;
 let playQuestionAudio = new Audio('../audio/tutorial_question.mp3');
+let playTutorialCompletionAudio = new Audio('../audio/tutorial_completion.mp3');
 // let audio_clip = document.getElementById("myAudio");
 
 $(document).ready(function() {
@@ -684,21 +685,28 @@ function onPlayerStateChange(event) {
         break;
         case YT.PlayerState.UNSTARTED:
         case YT.PlayerState.ENDED:
-            if(scene_audio_extend_set.has(sceneNum)) {
-                // STATE = 1;
-                // pauseVideo();
-                // let totalAudios = sentenceAudioMap[prevSceneNum];
-                let flag = true;
-                // let i=0;
-                // YT_FLAG = true;
-                    if(flag && currAudio==null)
-                    {currAudio = sentenceAudioMap[sceneNum][0];
-                        console.log("Will play now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    player.setVolume(15);
-                    currAudio.play();
-                    currAudio.onended = function() {
-                                console.log('player state is: ' + player.getPlayerState());
-                    }}}
+            
+        /** POST request to provide access to other systems */
+            audio_clip.src = "/audio/tutorial_completion.mp3";
+            audio_clip.onended = function() {
+            // currAudio = null;
+            }
+
+            // if(scene_audio_extend_set.has(sceneNum)) {
+            //     // STATE = 1;
+            //     // pauseVideo();
+            //     // let totalAudios = sentenceAudioMap[prevSceneNum];
+            //     let flag = true;
+            //     // let i=0;
+            //     // YT_FLAG = true;
+            //         if(flag && currAudio==null)
+            //         {currAudio = sentenceAudioMap[sceneNum][0];
+            //             console.log("Will play now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            //         player.setVolume(15);
+            //         currAudio.play();
+            //         currAudio.onended = function() {
+            //                     console.log('player state is: ' + player.getPlayerState());
+            //         }}}
         case YT.PlayerState.CUED:
         $("#btn-play-pause").html('<img src = "/images/play.png" style="height: 25px; width: 25px;">');
         timeAtWhichLastPaused = player.getCurrentTime();
