@@ -5,9 +5,9 @@ let keyframeRevise = {
     addKeyframe: function(data, callback) {
 
         const sql = `START TRANSACTION; 
-        INSERT into keyframe_revised (keyframe_id, video_id, keyframe_num, keyframe_url, timestamp) VALUES ('${data.keyframeId}','${data.videoId}',${data.keyframeNum}, '${data.keyframeURL}', ${data.timestamp}); 
+        INSERT into keyframe_revised(keyframe_id, video_id, keyframe_num, keyframe_url, timestamp, pythia_caption) VALUES('${data.keyframeId}','${data.videoId}',${data.keyframeNum}, '${data.keyframeURL}', ${data.timestamp}, '${data.caption}'); 
         COMMIT;`;
-
+        console.log({sql});
         return db.query(sql, callback);
     }, 
 
