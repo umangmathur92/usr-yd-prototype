@@ -16,14 +16,15 @@ class PythiaCaptionGenerationController{
                 let thumbnail_url = data[i].keyframe_url;
                 let keyframe_id = data[i].keyframe_id;
                 console.log({thumbnail_url});
-                let captionResponse = await this.fetchPythiaCaption(thumbnail_url);
-                // console.log({Pycaption: captionResponse.data});
+                // let captionResponse = await this.fetchPythiaCaption(thumbnail_url);
+                let captionResponse = {data: data[i].pythia_caption};
+                console.log({Pycaption: captionResponse.data});
                 data[i].updatedPythiaCaption =  captionResponse.data;
                 captionArr.push({keyframe_id, thumbnail_url, caption: captionResponse.data });
             }
                 // console.log({captionArr});
             //  console.log({data});
-            let response = await keyframeModel.updatePythiaCaption(captionArr);
+            // let response = await keyframeModel.updatePythiaCaption(captionArr);
             // console.log(response);
 
             let pythiaCaptions = await keyframeModel.getKeyFramesByVideoId(videoId);

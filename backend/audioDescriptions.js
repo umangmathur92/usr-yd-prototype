@@ -873,7 +873,7 @@ async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneN
 }
 
 async function runScript(){
-    let videoId = 'Q9Xp77AENXI';
+    let videoId = 'let1xiLvzf0';
     let sql = `SELECT * FROM keyframe_revised WHERE video_id = '${videoId}';`;
     // sql = `START TRANSACTION;` + sql + `COMMIT;`;
     let callback = '';
@@ -891,14 +891,14 @@ async function runScript(){
     }
 }
 /** Fetch scene num from a given timestamp, videoId */
-    async function fetchSceneId(timestamp, videoId, sentence_id='d8fcfd52-b0b3-4969-bf03-1dc54b681b5d_Q9Xp77AENXI_ai_0_0'){
+    async function fetchSceneId(timestamp, videoId, sentence_id='2bdf7e85-be9d-438c-ad63-d96ad2dd476f_let1xiLvzf0_ai_0_0'){
     
         console.log('Scene timestamps: '+timestamp+'  and '+videoId+' and '+sentence_id);
         let newstr = sentence_id.split('_');
         let volunteerId = newstr[0];
     
-        let sceneStartTimesArr = await db.query(`SELECT start_time FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
-        let sceneNumArr = await db.query(`SELECT scene_id FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
+        let sceneStartTimesArr = await db.query(`SELECT start_time FROM descriptions WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
+        let sceneNumArr = await db.query(`SELECT scene_id FROM descriptions WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
         // console.log('Scene timestamps: '+sceneStartTimesArr+'  and '+sceneNumArr);
         if(timestamp < 0)
             return -1;
