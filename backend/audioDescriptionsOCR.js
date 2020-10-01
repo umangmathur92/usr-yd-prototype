@@ -10,14 +10,12 @@ const rimraf = require("rimraf");
 async function generateAudioDescriptionsForOCRInDbWithInfo(vid_id, vol_id, res) {
         
     await generateMp3ForOCR(vid_id, vol_id);
-
-
 }
 
 async function generateMp3ForOCR(vid_id, vol_id){
     
     try{
-        let OCRListArr = await db.any(`SELECT * FROM ocr_timestamps WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by timestamp`);
+        let OCRListArr = await db.any(`SELECT * FROM descriptions_ocr WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by timestamp`);
         
         rimraf.sync(`public/audio/${vid_id}/ai/${vol_id}/ocr`);
 
@@ -103,15 +101,14 @@ async function generateTimestampsForOCR(vid_id, vol_id){
 
                 if (time_gap >= ocr_time_duration[i]){
                     // Insert in db as inline at ocr_timestamp[i] as start time
+                    // Insert in db (new table) as video_dialog
 
                 }
                 else{
                     // Insert in db as extended at time_end
+                    // Insert in db (new table) as scene_end_time (corner case: if we've to play OCR and description together as extended)
 
                 }
-    
-    
-    
             }
     
 

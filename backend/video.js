@@ -111,7 +111,7 @@ async function fetchKeyFrames2(sceneId,videoTime,sceneStartTime) {
     console.log('match: ',match);
     sceneStartTime = 0;
     // result = await db.any(`SELECT thumbnail_url from keyframe where keyframe_id::text LIKE '${match}' AND start_time < ${videoTime} AND start_time > ${sceneStartTime} ORDER BY start_time DESC LIMIT 1`);
-    result = await db.any(`SELECT keyframe_url from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
+    result = await db.any(`SELECT keyframe_url, pythia_caption, keyframe_num from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
     console.log('res: ',result);
     return result.reverse();
 }

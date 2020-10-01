@@ -25,6 +25,8 @@ var isQuestionInProcess = false;
 var chatbotTimeStamp = -1;
 let question_id = "";
 let keyframeMap = {};
+let pythiaCaption = '';
+let imageKey = '';
 let time1 = 0;
 let time2 = 0;
 let time3 = 0;
@@ -80,6 +82,10 @@ async function fetchKeyFrames() {
             {
                 ws_id[i] = uuidv4();
                 sendWSid(ws_id[i]);
+                pythiaCaption = KeyFramesArr[i].pythia_caption;
+                console.log({pythiaCaption});
+                imageKey = youtubeId + '_frame_' + KeyFramesArr[i].keyframe_num;
+                console.log({imageKey});
                 path = KeyFramesArr[i].keyframe_url;
                 sendImage(path,ws_id[i]);
                 keyframeMap[ws_id[i]] = path;
@@ -175,8 +181,8 @@ function uuidv4() {
 function WebSocketTest() {
   console.log('Generate uuid: '+uuidv4());
       if ("WebSocket" in window) {
-            ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
-            // ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
+            // ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
+            ws = new WebSocket("ws://13.59.47.124:8000/chat/"); //to test from local
             ws.onopen = function() {
               console.log("Websocket opened");
          };
@@ -407,9 +413,10 @@ function readURL(input, ws_id, frameNo) {
         var reader = new FileReader();
         var formData = new FormData();
         formData.append('file', input.files[0]);
-        var URL1 = "https://dev-api.youdescribe.org/upload/";
-        // var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/upload/"; //(to test from local)
+        // var URL1 = "https://dev-api.youdescribe.org/upload/";
+        var URL1 = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8000/upload/"; //(to test from local)
         formData.append('socketid', ws_id);
+        formData.append('pythia_caption', pythiaCaption);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
                 type: 'POST',
@@ -453,8 +460,9 @@ if (question.length >= 3) {
       formData.append('socketid', ws_id[i]);
       formData.append('question', question);
       formData.append('job_id', job_id[i]);
-      var URL = "https://dev-api.youdescribe.org/";
-      // var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
+      formData.append('image_key', imageKey);
+      // var URL = "https://dev-api.youdescribe.org/";
+      var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8000/"; // to test from local
 
       $.ajax({
               type: 'POST',
