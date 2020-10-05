@@ -13,6 +13,7 @@ const chatRoom = require('./chatRoom');
 const mergeScene = require('./mergeScene');
 const uploadVideoRoute  = require('./uploadVideo'); 
 const sentences = require('../backend/sentences.js');
+const audioDescriptionOCR = require('../backend/audioDescriptionsOCR.js');
 const pythiaCaption = require('../routes/pythiaCaption');
 const keyframeUpdate = require('../routes/keyframeUpdate');
 const bleu = require('../npm_python/nodejs/bleu.js');
@@ -631,6 +632,27 @@ router.get('/mergeSentencesInDb', function(req, res, next) {
     res.send({success: result});
   });
 });
+
+router.get('/generateOCRTimestampsInDb', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id, vol_id} = inputJson;
+  let task = audioDescriptionOCR.generateAudioDescriptionsForOCRInDbWithInfo(vid_id, vol_id, res);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
+router.get('/mergeOCRExtendedAudio', function(req, res, next) {
+  let inputJson = req.query;
+  console.log('input: ',inputJson);
+  let {vid_id, vol_id} = inputJson;
+  let task = audioDescriptionOCR.mergeOCRExtendedAudio(vid_id, vol_id);
+  task.then(result => {
+    res.send({success: result});
+  });
+});
+
 
               /*  For sentence generation ends  */
 

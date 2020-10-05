@@ -278,7 +278,7 @@ async function generateTimestampsforScene(dbVideoId, dbVolId, sceneId, descripti
         let scene_end_time = sceneInfo[0].end_time;
         let scene_num = sceneInfo[0].scene_num;
 
-        let dialog_timestamps = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${dbVideoId}' ORDER BY start_time`);
+        let dialog_timestamps = await db.query(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${dbVideoId}' ORDER BY start_time`);
         let currDialogStartTimes = [];
         let currDialogEndTimes = [];
         let len = dialog_timestamps.length - 1;
@@ -489,7 +489,7 @@ for(let i=0; i<descriptionListArr.length; i++) {
     scenes[currDescription.scene_num] = times;    
 }
 
-let video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
+let video_dialogs = await db.any(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${vid_id}' order by start_time`);
 
 for(let i=0; i<video_dialogs.length; i++) {
     let currDialog = video_dialogs[i];
