@@ -15,9 +15,9 @@ function isKeyPress(event) {
                 // askQuestion();
                   startChatbot();
                   break;
-      case 83:
-      case 115: x.innerHTML = "The S Key was pressed!";
-                  console.log("The S Key was pressed!");
+      case 69:
+      case 100: x.innerHTML = "The D Key was pressed!";
+                  console.log("The D Key was pressed!");
                   // fetchAnswer();
                   break;
                     

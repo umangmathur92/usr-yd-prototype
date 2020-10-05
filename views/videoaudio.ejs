@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html onkeypress="isKeyPress(event)" onkeydown="isKeyDown(event)">
 <head>
     <title>YouDescribe</title>
     <script src="https://use.fontawesome.com/8a92be1af5.js"></script>
@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">  
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">      
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel='stylesheet' href='/stylesheets/style.css' />
@@ -59,6 +59,7 @@
                     <div style="background-color: #1a4b6e;color:#fff;"> _ </div-->
                     <br>
                     <button style="visibility: hidden;" class="btn btn-danger btn-l" id="btnSubmit">Save &amp; Close Window</button>
+                    <p id="demo" style="visibility: hidden;"></p>  
                 </div>
             </div>
         </div>
