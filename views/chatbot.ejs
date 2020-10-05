@@ -33,6 +33,7 @@ let audio_path = "1";
 var isChatbotOn = false;
 var isChatbotInProcess = false;
 var chatbotTimeStamp = -1;
+let pythiaCaption = "A group of people in a large room";
 let time1 = 0;
 let time2 = 0;
 let time3 = 0;
@@ -42,7 +43,7 @@ let initialCount = 1;
 function startSim(){
     count = document.getElementById("userInput").value;
     tempCount = document.getElementById("userInput").value;
-    keyframeCount = 3;
+    keyframeCount = 1;
     count *= keyframeCount;
     console.log("Count: ",count);
     // count = 2
@@ -179,6 +180,7 @@ function readURL(input, ws_id, frameNo) {
         formData.append('file', input.files[0]);
         var URL1 = "http://13.59.47.124:8001/upload/";
         formData.append('socketid', ws_id);
+        formData.append('pythia_caption', pythiaCaption);
         console.log('DSocket id in pOST is: '+ws_id);
         $.ajax({
                 type: 'POST',
