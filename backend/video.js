@@ -71,47 +71,11 @@ async function fetchAllKeyFrames(videoId) {
     return result;
 }
 
-async function fetchKeyFrames(sceneId,videoTime,sceneStartTime,volunteerId = '5117b1e0-4c45-11ea-b77f-2e728ce88125') {
-    return await fetchKeyFrames2(sceneId,videoTime,sceneStartTime);
-    console.log("Ent: testking");
-    allScenesStr = await db.any(`SELECT merged_scene FROM descriptions WHERE scene_id = '${sceneId}' AND volunteer_id = '${volunteerId}'`);
-    console.log("All scenes from: ", typeof(allScenesStr[0].merged_scene));
-    AllScenes = allScenesStr[0].merged_scene
-    AllScenes = AllScenes.substring(1,AllScenes.length - 1);
-    console.log("All scenes from: ", AllScenes);
-    allScenesArr = AllScenes.split(",");
-    for(let i = 0; i < allScenesArr.length; i++)
-        allScenesArr[i] = allScenesArr[i].substring(1,allScenesArr[i].length - 1);
-    allScenesArr.push(sceneId);
-
-    let params = [];
-    for(let i = 1; i <= allScenesArr.length; i++) {
-    params.push('$' + i);
-    }
-    console.log("query: ", `SELECT thumbnail_url from keyframe where start_time < ${videoTime}  and shot_id IN (SELECT shot_id FROM shot where scene_id IN  (` + params.join(',') + `))`);
-    // shots = await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
-    // console.log("shots are: " ,shots);
-    // console.log("shots are: " ,typeof(shots));
-    // console.log("All scenes from: ", allScenes[0].merged_scene);
-    result = await db.any(`SELECT thumbnail_url from keyframe where start_time < ${videoTime}  and shot_id IN (SELECT shot_id FROM shot where scene_id IN  (` + params.join(',') + `))`, allScenesArr );
-    console.log("res: ",result);
-    return result;
-    // return await db.any("SELECT thumbnail_url from keyframe where start_time < "+ videoTime +"  and shot_id IN (SELECT shot_id FROM shot where scene_id = '" + sceneId +"')" );
-    // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
-}
-
     /** Fetch last 5 keyframes irrespective of scene numbers */
-async function fetchKeyFrames2(sceneId,videoTime,sceneStartTime) {
+async function fetchKeyFrames(videoId,videoTime) {
 
-    let match = sceneId.split('_');
-    match = match[match.length-3];
-    // let match = sceneId.split('_')[0];
-    console.log('match: ',match);
-    match += '%';
-    console.log('match: ',match);
-    sceneStartTime = 0;
-    // result = await db.any(`SELECT thumbnail_url from keyframe where keyframe_id::text LIKE '${match}' AND start_time < ${videoTime} AND start_time > ${sceneStartTime} ORDER BY start_time DESC LIMIT 1`);
-    result = await db.any(`SELECT keyframe_url, pythia_caption, keyframe_num from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
+    // result = await db.any(`SELECT keyframe_url, pythia_caption, keyframe_num from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
+    result = await db.any(`SELECT keyframe_url, pythia_caption, keyframe_num from keyframe_revised where video_id = '${videoId}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
     console.log('res: ',result);
     return result.reverse();
 }
@@ -158,7 +122,7 @@ async function fetchVideoData(videoId, userId) {
 
 async function fetchSentences(videoId, userId) {
     console.log("Now: testking");
-    return await db.any(`SELECT * FROM descriptions_new_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${userId}' ORDER BY scene_num, sentence_id`);
+    return await db.any(`SELECT * FROM descriptions_new_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${userId}' ORDER BY scene_num, audio_start_time`);
     // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
 }
 

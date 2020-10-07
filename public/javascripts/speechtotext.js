@@ -5,7 +5,6 @@ if ('SpeechRecognition' in window) {
     // supportMsg.innerHTML = 'Your browser <strong>supports</strong> speech recognition.'; // speech recognition API supported
     // alert("Speech supported");
 } else {
-    // supportMsg.classList.add('not-supported');
     alert("Speech not supported");
 }
 
@@ -18,61 +17,20 @@ async function askQuestion(){
     player.pauseVideo();
     beep();
     recognition.start();
-    // await new Promise(r => setTimeout(r, 4000));
-    // recognition.stop();
 }
 
 function fetchAnswer(){
     console.log("Function to stop speech recognition");
-    // recognition.stop();
 }
 
-// recordButton.addEventListener('click', (e) => {
-//     e.preventDefault();
-//    // player.pauseVideo();
-// //    console.log('Record button clicked..Recording....');
-// //    player.pauseVideo();
-// //    recognition.start();
-//     startChatbot();
-//    e.stopPropagation();
-// //    await new Promise(r => setTimeout(r, 4000));
-// //     recognition.stop();
-// });
-
-// recognition.onend = function() {
-//     console.log('recognition onend has been called');
-
-//     recognition.start();
-// };
-
-// recognition.onnomatch = function() {
-//     console.log('recognition onmatch has been called');
-    
-//     recognition.start();
-// };
 recognition.onstart = function() {
     console.log('Speech recognition service has started');
   } 
 
-// recognition.onspeechend = function() {
-//     console.log('Speech has stopped being detected');
-//     // recognition.stop();
-//     // recognition.abort();
-//   }
 recognition.onresult = (event) => {
     const speechToText = event.results[0][0].transcript;
     console.log('Recording stpped!');
     if(speechToText.length > 0){
-        // let questionId = create_UUID();
-        // let data = {    name: roomName,
-        //                 message: speechToText ,
-        //                 questionId, 
-        //                 QUESTION
-        //             };
-
-        // appendQnA(data);
-        // socket.emit('send-chat-message', roomName, speechToText, questionId, name, QUESTION);
-        // beep();
         let data = {    userId: volunteerId,
                         question: speechToText,
                         youtube_timestamp: chatbotTimeStamp.toFixed(3)
@@ -82,39 +40,15 @@ recognition.onresult = (event) => {
             console.log('Question Added');
         console.log(res);
         question_id = res.questionId;
-        // let docVal = "";
-        // docVal += speechToText;
-        // document.getElementById('qd5').innerHTML = docVal
-
-        //     docVal = "Time stamp for question: ";
-        //     let currentTime = new Date();
-        //     docVal += currentTime.toLocaleTimeString();
-        //     document.getElementById('qd1').innerHTML = docVal;
-        //     time1 = currentTime.getTime();
-
         noOfQuestionsAsked += 1;
-        console.log({speechToText});
-        count = totalFrames;
-        $("#question").val(speechToText);
-        // startChatbot();
-                for(let i=0;i<totalFrames;i++)
-                    submitQuestion(i); 
-        $("#question").val('');
+        console.log({speechToText});        
+        fetchKeyFrames(speechToText); 
         // console.log('Confidence: ' + event.results[0][0].confidence);
     });
     }else{
         console.log({speechToText});
     }
 }
-// let supportMsg = document.getElementById('supportMsg');
-// //SPeech Synthesis
-// if ('speechSynthesis' in window) {
-// 	supportMsg.innerHTML = 'Your browser <strong>supports</strong> speech synthesis.';
-// } else {
-//     supportMsg.innerHTML = `Sorry your browser <strong>does not support</strong> speech synthesis.<br>
-//                             Try this in <a href="https://www.google.co.uk/intl/en/chrome/browser/canary.html">Chrome Canary</a>.`;
-// 	supportMsg.classList.add('not-supported');
-// }
 
 let button = document.getElementById('speak');
 
@@ -140,52 +74,4 @@ async function doubleBeep() {
     let snd = new  Audio("../audio/earcons/beep-09.wav");
 
     snd.play();
-    // beep();
-    // await new Promise(r => setTimeout(r, 100));
-    // beep();
 }
-
-// var ques = ""
-
-//     // STT starts here
-// function startRecording(){
-//     // alert("Recording began")
-
-//     navigator.mediaDevices.getUserMedia({audio:true})
-// 	.then(stream => {
-//         console.log("Texxt is: ");
-// 		rec = new MediaRecorder(stream);
-// 		rec.ondataavailable = e => {
-//             console.log("Texxt is: ");
-// 			audioChunks.push(e.data);
-// 			if (rec.state == "inactive"){
-//         let blob = new Blob(audioChunks,{type:'audio/wav'});
-//                 // Call Jianfei's API
-                
-//                     const url = "http://52.53.151.37:8080/v1/audioclips/speechtotext"
-                    
-//             const param = {
-//                 method: "POST",
-//                     body: {
-//                         "audiofile": blob,
-//                         "callbackurl": ""
-//                 }    
-//             }
-//             let text= ""
-//             console.log("Texxt is: ");
-
-//             fetch(url,param)
-//             .then(data => {console.log(data);})
-//             .then(res => {console.log(res); text = res.data.sentence;})
-//             .catch(error=>console.log(error))
-
-
-
-
-//                 // question = STT(input)
-//                 $("#question").val(text);
-
-//                 for(let i=0;i<framesCount;i++)
-//                     submitQuestion(i); 
-//     }}});   
-// }

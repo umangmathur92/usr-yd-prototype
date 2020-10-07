@@ -12,13 +12,13 @@ function isKeyPress(event) {
       case 81:
       case 113: x.innerHTML = "The Q Key was pressed!";
                   console.log("The Q Key was pressed!");
-                // askQuestion();
-                  startChatbot();
+                  askQuestion();
+                  // startChatbot();
                   break;
       case 69:
       case 100: x.innerHTML = "The D Key was pressed!";
                   console.log("The D Key was pressed!");
-                  // fetchAnswer();
+                  fetchImageCaption();
                   break;
                     
       case 32:
