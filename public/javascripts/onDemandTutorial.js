@@ -314,7 +314,7 @@ async function updateProgress(currentTime) {
   currentTime = currentTime.toFixed(3);
   let currScene = getIndexFromExtended(currentTime);
 
-  //let sceneNum = currScene.sc_num;
+  // let sceneNum = currScene.sc_num;
 
   prevSceneNum = currScene;
 
