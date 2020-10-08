@@ -425,37 +425,84 @@ async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTim
     while(i < l && timestamp > startTimesArr[i]){
         i++;
     }
-    let startTime1 = i==0 ? 0 : startTimesArr[i-1];
-    let endTime1 = i==0 ? 0 : endTimesArr[i-1];
+    // ts: 12 - 8s, ts: 20 - 6s
+    // 1 -5, 7-10, 12-20, 25-29, ......
+    let startTime1 = i==0 ? 0 : startTimesArr[i-1]; //7
+    let endTime1 = i==0 ? 0 : endTimesArr[i-1]; // 9
 
-    let startTime2 = i==l ? videoEndTime : startTimesArr[i];
-    let endTime2 = i==l ? videoEndTime : endTimesArr[i];
+    let startTime2 = i==l ? videoEndTime : startTimesArr[i]; // 15
+    let endTime2 = i==l ? videoEndTime : endTimesArr[i]; //19
+ 
+    let gap = startTime2-endTime1;
 
-    if(timestamp > endTime1){
-        if (duration < (startTime2 - timestamp))
-        {
-            result['isInline'] = true;
-            result['start_time'] = timestamp;
-            return result;
+        //TODO:
+        /**
+        // Case 1: Start playing inlin from endTime1 instead of timestmap
+        //Steps - 1. gap >= duration
+        //          => Start time of audio, a. timestamp b. starttime2 - duration
+        //      2.  gap < duration
+        //          => Play as extended at timestamp
+                3. not in gap
+                    => set a threshold of m sec
+                    a. endTime1 - timesatmp < m 
+                        i.  gap > duration, play inline
+                        ii. else extended at endtime1
+                    b. endTime1 - timesatmp > m 
+                        i. (optional) if timestamp - startTime1  < m, play extended at startTime1
+                        ii. all other cases, play as extended at timestamp
+
+ */
+
+ /** Inside time gap */
+    if(timestamp > endTime1 && timestamp < startTime2){
+    
+        //1. gap >= duration
+        if (duration < gap)
+        {   
+            // a. timestamp
+            if((timestamp + duration) < startTime2){
+                result['isInline'] = true;
+                result['start_time'] = timestamp;
+                return result;
+            }
+            // b.
+            else{ 
+                result['isInline'] = true;
+                result['start_time'] = startTime2 - duration - 0.1;
+                return result;
+            }
         }
+        //2.  gap < duration
         else{
             result['isInline'] = false;
             result['start_time'] = timestamp;
             return result;
         }
     }
+    /** Not in gap */
     else{
-        if (sceneEndTime > endTime1 && duration < (Math.min(startTime2, sceneEndTime) - endTime1))
-        {
-            result['isInline'] = true;
-            result['start_time'] = endTime1; // or scene_end time
-            return result;
-        }
-        else{
-            result['isInline'] = false;
-            result['start_time'] = Math.min(endTime1,sceneEndTime); // or scene_end time
-            return result;
-        }
+
+        let threshold = 3;
+            //a. endTime1 - timesatmp < m
+            if(endTime1 - timestamp < threshold){
+                //     i.  gap > duration, play inline
+                if(gap > duration){
+                    result['isInline'] = true;
+                    result['start_time'] = endTime1; // or scene_end time
+                    return result;        
+                }
+                //     ii. else extended at endtime1
+                else{
+                    result['isInline'] = false;
+                    result['start_time'] = endTime1; // or scene_end time
+                    return result;
+                }
+            }
+            else{
+                result['isInline'] = false;
+                result['start_time'] = timestamp; // or scene_end time
+                return result;
+            }
     }
     
 }

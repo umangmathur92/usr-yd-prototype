@@ -296,11 +296,11 @@ async function updateTime() {
 
 async function updateProgress(currentTime){
     currentTime = currentTime.toFixed(3);
-    let currScene = getSceneFromTime(currentTime);
+    let currScene = getIndexFromExtended(currentTime);
     
-    let sceneNum = currScene.sc_num;
+    // let sceneNum = currScene.sc_num;
     
-    prevSceneNum = sceneNum;
+    prevSceneNum = currScene;
     
     if (currAudio !== null && isPlaying(currAudio))
         currAudio.pause(); 
