@@ -529,7 +529,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         const request = {
             input: {text: inputText},
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
-            audioConfig: {audioEncoding: 'MP3'},
+            audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
         };
         const [response] = await client.synthesizeSpeech(request);
         const writeFile = util.promisify(fse.outputFile);

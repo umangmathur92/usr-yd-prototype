@@ -105,7 +105,7 @@ function fetchVideoInfo(youtubeId) {
         let target_url_sentence = '/getSentences' + '?videoId=' + youtubeId + '&userId=' + userId;
         $.get(target_url_sentence, function (response) {
             // KeyFramesArr = response;
-            debugger;
+            // debugger;
             console.log('sentence start times'+response[0]);
             allSentenceArr = response;
             let prevSceneNo = -1;
