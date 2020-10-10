@@ -20,7 +20,7 @@ let ws_id = uuidv4();
 async function fetchImageCaption() {
     pauseVideo();
     console.log("video time for keyframes: ", videotime);
-    // chatbotTimeStamp = videotime;
+    let captionTimeStamp = videotime;
   let targetUrl = '/getKeyFrames' + '?videoId=' + youtubeId + '&videoTime=' + videotime;
   $.get(targetUrl, function (response) {
     console.log(response);
@@ -38,6 +38,7 @@ async function fetchImageCaption() {
                       audio_clip.onended = function() {
                         audio_clip.src = null;
                         audio_path == "0" ? "1" : "0";
+                        playVideo();
                     }
                       isChatbotOn = true;
                       isChatbotInProcess = false;
@@ -45,7 +46,7 @@ async function fetchImageCaption() {
 
                     let dbData2 = {  userId: volunteerId,
                       caption: caption,
-                      youtube_timestamp: chatbotTimeStamp.toFixed(3),
+                      youtube_timestamp: captionTimeStamp.toFixed(3),
                       key_frame : keyframeUrl
                       };
         
