@@ -634,7 +634,7 @@ async function mergeSentenceAudios(video_id, vol_id){
     }
     
     try{
-    let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${video_id}' AND volunteer_id = '${vol_id}' ORDER BY scene_num, sentence_id`);
+    let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${video_id}' AND volunteer_id = '${vol_id}' ORDER BY scene_num, id`);
     let size = 0;
     let sentence = [];
     let sentence_id = [];
