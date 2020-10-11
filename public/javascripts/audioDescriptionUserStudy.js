@@ -52,7 +52,7 @@ $(document).ready(function () {
   volunteerId = getUrlVars()["u"];
   // userId = getUrlVars()["u"];
   describerId = getUrlVars()["did"];
-  userId = describerId=="1" ? "f03cb948-474b-4084-9192-650ba62d396b" : "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+  userId = describerId=="1" ? "f03cb948-474b-4084-9192-650ba62d396b" : "c833874d-e2f1-45b3-afd1-16ac6d7fa0b4";
   enableAi = getUrlVars()["ai"] == "yes" ? true : false;
   let href = location.href;
   const lastPathSegment = new URL(href).pathname.split("/").pop();
