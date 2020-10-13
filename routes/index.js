@@ -127,6 +127,17 @@ router.get('/getKeyFrames', function(req, res, next) {
     });
 });
 
+router.get('/getRevisedKeyFrames', function(req, res, next) {
+  //let query = video.fetchKeyFrames();
+
+  let {videoId, videoTime} = req.query;
+  console.log("The vals are: "+videoId+"  "+videoTime);
+  let queryResult = video.fetchRevisedKeyFrames(videoId,videoTime);
+  queryResult.then(result => {
+       res.send(result);
+    });
+});
+
 router.get('/filterDescriptionBleu', function(req, res, next) {
   let videoId = req.query.videoId;
   if(!videoId){

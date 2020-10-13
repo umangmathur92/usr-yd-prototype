@@ -80,6 +80,14 @@ async function fetchKeyFrames(videoId,videoTime) {
     return result.reverse();
 }
 
+async function fetchRevisedKeyFrames(vidId, videoTime){
+    if (videoTime==null){
+        result = await db.any(`SELECT * from keyframe_revised where video_id = '${vidId}' ORDER BY timestamp`);
+    console.log('res: ',result);
+    return result;
+    }
+    return [];
+}
 
 async function fetchDialogTimeStamps(videoId) {
     console.log("Ent: testking");
@@ -679,5 +687,6 @@ module.exports = {
     updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser,
     updateBlockAndScene: updateBlockAndScene,
     fetchVideoData: fetchVideoData,
-    fetchScene: fetchScene
+    fetchScene: fetchScene,
+    fetchRevisedKeyFrames: fetchRevisedKeyFrames
 }
