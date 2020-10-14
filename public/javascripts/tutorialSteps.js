@@ -12,18 +12,18 @@ let tutorialSteps = [];
 let step1 = new Step(
   function() {
     speak(
-      "If you are unsure what to do at any point, press the I key to hear a reminder on the current task. Let's start. Pressing the spacebar will control video playback. Try this now"
+      "If you are unsure what to do at any point, press the I key to hear a reminder on the current task. Let's start. Pressing the p key will control video playback. Try this now"
     );
     this.init = null;
   },
   function() {
-    speak("Press the spacebar twice to play and pause the video");
+    speak("Press the space key twice to play and pause the video");
   },
   function() {
     if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
   },
   function() {
-    if (playPause >= 2) {
+    if (playPause >= 1) {
       return true;
     } else {
       return false;
@@ -41,7 +41,30 @@ let step2 = new Step(
 
   function() {
     speak(
-      "Press the spacebar to continue and then press D to get a caption of the current image."
+      "Press the spacebar to continue and then press D at any time to get a caption of the current image."
+    );
+  },
+  function() {
+    if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
+  },
+  function() {
+    if (captionsRequested >= 1) {
+      return true;
+    }
+  }
+);
+
+let step3 = new Step(
+  function() {
+    speak(
+      "Good. Now, try asking a question about the current frame. You can ask something like, how many people are in the scene?"
+    );
+    this.init = null;
+  },
+
+  function() {
+    speak(
+      "Press the Q key to ask a question. After the beep, ask your question. "
     );
   },
   function() {
@@ -52,4 +75,4 @@ let step2 = new Step(
   }
 );
 
-tutorialSteps.push(step1, step2);
+tutorialSteps.push(step1, step2, step3);

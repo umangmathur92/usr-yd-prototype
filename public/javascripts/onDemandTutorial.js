@@ -51,15 +51,11 @@ let noOfQuestionsAsked = 0;
 let playQuestionAudio = new Audio("../audio/tutorial_question.mp3");
 // let audio_clip = document.getElementById("myAudio");
 
+let tutorialStarted = false;
 let currentInstruction = 0;
 let playPause = 0;
 let captionsRequested = 0;
 let questionsAsked = 0;
-let reminders = [
-  "Press the spacebar to play and pause the video",
-  "Press the D key to request an image caption",
-  "Press the Q key to ask a question"
-];
 
 $(document).ready(function() {
   $("#btn-video-breakpoint-toggle").prop("checked", true);
@@ -86,6 +82,7 @@ $(document).ready(function() {
 });
 
 function tutorialProgress() {
+  tutorialStarted = true;
   if (tutorialSteps[currentInstruction].init) {
     tutorialSteps[currentInstruction].init();
     tutorialSteps[currentInstruction].recurringSpeech();
@@ -110,7 +107,7 @@ function fetchVideoInfo(youtubeId) {
   $.get(targetUrl, function(response) {
     let vidJson = response;
     let vidTitle = vidJson.title;
-    $("#txtVidtitle").html(vidTitle);
+    $("#txtVidtitle").html("Video Title: " + vidTitle);
     desc_flag = true;
   });
 
@@ -450,13 +447,19 @@ function onPlayerStateChange(event) {
 }
 
 function playVideo() {
-  player.playVideo();
+  if (tutorialStarted) {
+    //speak("Video Play");
+    player.playVideo();
+  }
 }
 
 function pauseVideo() {
-  playPause += 1;
-  console.log("This is the file");
-  player.pauseVideo();
+  if (tutorialStarted) {
+    //speak("Video Play");
+    playPause += 1;
+    console.log("This is the file");
+    player.pauseVideo();
+  }
 }
 
 function stopVideo() {

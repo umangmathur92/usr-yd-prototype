@@ -14,14 +14,18 @@ function isKeyPress(event) {
     case 113:
       x.innerHTML = "The Q Key was pressed!";
       console.log("The Q Key was pressed!");
-      askQuestion();
+      askQuestion()
+        .then((questionsAsked += 1))
+        .then(console.log(questionsAsked));
       // startChatbot();
       break;
     case 69:
     case 100:
       x.innerHTML = "The D Key was pressed!";
       console.log("The D Key was pressed!");
-      fetchImageCaption();
+      fetchImageCaption()
+        .then((captionsRequested += 1))
+        .then(console.log(captionsRequested));
       break;
 
     case 73:
@@ -38,6 +42,15 @@ function isKeyPress(event) {
       break;
   }
 }
+$(window).keypress(function(e) {
+  if (e.key === " " || e.key === "Spacebar") {
+    // ' ' is standard, 'Spacebar' was used by IE9 and Firefox < 37
+    e.preventDefault();
+    console.log("Space pressed");
+    if (player.getPlayerState() == YT.PlayerState.PLAYING) pauseVideo();
+    else playVideo();
+  }
+});
 
 function isKeyDown(event) {
   let x = document.getElementById("demo");
