@@ -12,7 +12,7 @@ async function getMp3DurationForText(inputText) {
         const request = {
             input: {text: inputText},
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
-            audioConfig: {audioEncoding: 'MP3'},
+            audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
         };
         const [response] = await client.synthesizeSpeech(request);
         const writeFile = util.promisify(fs.writeFile);
@@ -89,7 +89,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         const request = {
             input: {text: inputText},
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
-            audioConfig: {audioEncoding: 'MP3'},
+            audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
         };
         const [response] = await client.synthesizeSpeech(request);
         const writeFile = util.promisify(fse.outputFile);
@@ -634,7 +634,7 @@ async function mergeSentenceAudios(video_id, vol_id){
     }
     
     try{
-    let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${video_id}' AND volunteer_id = '${vol_id}' ORDER BY scene_num, sentence_id`);
+    let sentenceListArr = await db.any(`SELECT * FROM descriptions_sentence WHERE video_id = '${video_id}' AND volunteer_id = '${vol_id}' ORDER BY scene_num, id`);
     let size = 0;
     let sentence = [];
     let sentence_id = [];
@@ -688,6 +688,9 @@ async function mergeSentenceAudios(video_id, vol_id){
         let sentence_id_first = sentence_id[i];
         let sentence_id_last = sentence_id[i];
 
+        if(new_sentence.length>0 && new_sentence[new_sentence.length-1] == `\n`)
+            new_sentence=new_sentence.replace('\n','.');
+
         i++;
 
         while(currSceneNum == sentence_scene[i] && currAudioType == sentence_audio_type[i] && i < l){
@@ -695,6 +698,9 @@ async function mergeSentenceAudios(video_id, vol_id){
             if(currAudioType == 'inline' && (oldAudioStartTime + oldAudioDur + 0.11) < sentence_audio_start_time[i] )
                 break;
             
+            if(sentence[i].length>0 && sentence[i][sentence[i].length-1] == `\n`)
+                    sentence[i]=sentence[i].replace('\n','.');
+
             new_sentence += (' ' + sentence[i]);
             oldAudioStartTime = sentence_audio_start_time[i];
             oldAudioDur = sentence_duration[i];

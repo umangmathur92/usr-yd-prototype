@@ -26,7 +26,7 @@
       <div class="row" style="text-align: center; height:100%; justify-content: center;">
         <div >
           <div style="margin:15px; font-size:15px;" font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
-          <div id="player"></div>
+          <div id="player" style="pointer-events: none;"></div>
           <br>
           <div style="width: 100%;">
             <div style="width: 480px; height: 30px; padding:2px; margin: auto; border:0px solid black; background-color: darkgrey;">
@@ -53,6 +53,7 @@
                       <audio id="myAudio" style="visibility: hidden;" controls autoplay>
                                     Your browser doesnot support Audio.
                                 </audio> 
+                      <audio id="baselineAudio" style="visibility: hidden;" controls autoplay> </audio> 
               </div>
             </div>
           </div>

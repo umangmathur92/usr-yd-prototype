@@ -18,16 +18,25 @@ let imageKey = "";
 let ws_id = uuidv4();
 
 async function fetchImageCaption() {
+<<<<<<< HEAD
   pauseVideo();
   console.log("video time for keyframes: ", videotime);
   // chatbotTimeStamp = videotime;
   let targetUrl =
     "/getKeyFrames" + "?videoId=" + youtubeId + "&videoTime=" + videotime;
   $.get(targetUrl, function(response) {
+=======
+    pauseVideo();
+    console.log("video time for keyframes: ", videotime);
+    let captionTimeStamp = videotime;
+  let targetUrl = '/getKeyFrames' + '?videoId=' + youtubeId + '&videoTime=' + videotime;
+  $.get(targetUrl, function (response) {
+>>>>>>> d4929355a3985a6b58d5c431815bd6643bc94486
     console.log(response);
     let keyframeUrl = response[0].keyframe_url;
     let caption = response[0].pythia_caption;
     pythiaCaption = caption;
+<<<<<<< HEAD
     let textData = {
       inputText: caption,
       filePath: "output_" + userId + "_" + audio_path + ".mp3"
@@ -63,6 +72,37 @@ async function fetchImageCaption() {
       console.log("Caption Added");
     });
   });
+=======
+    let textData = {  "inputText": caption,
+                      "filePath": "output_" + userId + "_" + audio_path + ".mp3"
+                    };
+
+                    $.post('/texttospeech', textData, function (res) {
+                      console.log("TTS complete");
+                      let randomNum = Math.random();
+                      audio_clip.src = "../audio/output_" + userId + "_" + audio_path + ".mp3" + '?random='+randomNum;
+                      audio_clip.onended = function() {
+                        audio_clip.src = null;
+                        audio_path == "0" ? "1" : "0";
+                        playVideo();
+                    }
+                      isChatbotOn = true;
+                      isChatbotInProcess = false;
+                    });
+
+                    let dbData2 = {  userId: volunteerId,
+                      caption: caption,
+                      youtube_timestamp: captionTimeStamp.toFixed(3),
+                      key_frame : keyframeUrl
+                      };
+        
+                    $.post('/userStudy4/addCaption', dbData2, function (res) {
+                        console.log('Caption Added');
+                    });
+
+                });
+
+>>>>>>> d4929355a3985a6b58d5c431815bd6643bc94486
 }
 
 async function fetchKeyFrames(speech = "") {

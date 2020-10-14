@@ -322,7 +322,7 @@ async function generateTimestampsForOCR(vid_id, vol_id){
     let video_end_time = await fetchVideoEndTime(vid_id, vol_id);
     // let video_start_time = Math.max(...video_end_times);
 
-    let ocr_info = await db.query(`SELECT * FROM descriptions_ocr WHERE video_id = '${vid_id}' and volunteer_id = '${vol_id}'`);
+    let ocr_info = await db.query(`SELECT * FROM descriptions_ocr WHERE video_id = '${vid_id}' and volunteer_id = '${vol_id}' ORDER BY timestamp`);
 
     let ocr_id = [];
     let ocr_text = [];
@@ -346,8 +346,8 @@ async function generateTimestampsForOCR(vid_id, vol_id){
     let inline_times = [];
 
     for(let i = 0; i < ocr_info.length; i++){
-        // time_gaps_start_time.sort();
-        // time_gaps_end_time.sort();
+        time_gaps_start_time.sort(function(a, b){return a - b});
+        time_gaps_end_time.sort(function(a, b){return a - b});
 
         let sceneEndTime = await fetchSceneEndtime(ocr_timestamp[i], vid_id, vol_id);
         resObj = await fetchNearestDialogInfo(ocr_timestamp[i], ocr_time_duration[i], time_gaps_start_time, time_gaps_end_time, video_end_time, sceneEndTime);
@@ -357,8 +357,8 @@ async function generateTimestampsForOCR(vid_id, vol_id){
             let startTime = resObj['start_time'];
             let endTime = resObj['start_time'] + ocr_time_duration[i];
 
-            // time_gaps_start_time.push(startTime);
-            // time_gaps_end_time.push(endTime);
+            time_gaps_start_time.push(startTime);
+            time_gaps_end_time.push(endTime);
 
             // Insert in db as inline at ocr_timestamp[i] as start time
                 await updateOCRTableAudioType(vid_id, ocr_id[i], startTime, 'inline');
@@ -529,7 +529,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         const request = {
             input: {text: inputText},
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
-            audioConfig: {audioEncoding: 'MP3'},
+            audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
         };
         const [response] = await client.synthesizeSpeech(request);
         const writeFile = util.promisify(fse.outputFile);
