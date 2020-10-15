@@ -31,14 +31,22 @@ function isKeyPress(event) {
     case 73:
     case 105:
       x.innerHTML = "The I Key was pressed!";
-      tutorialSteps[currentInstruction].recurringSpeech();
+      if (tutorialStarted) {
+        tutorialSteps[currentInstruction].recurringSpeech();
+      } else {
+        tutorialStarted = true;
+        setInterval(tutorialProgress, 500);
+      }
+
       console.log("The I Key was pressed!");
       break;
 
     case 32:
       x.innerHTML = "The space Key was pressed!";
+
       if (player.getPlayerState() == YT.PlayerState.PLAYING) pauseVideo();
       else playVideo();
+
       break;
   }
 }

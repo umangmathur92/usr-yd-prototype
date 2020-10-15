@@ -12,7 +12,7 @@ let tutorialSteps = [];
 let step1 = new Step(
   function() {
     speak(
-      "If you are unsure what to do at any point, press the I key to hear a reminder on the current task. Let's start. Pressing the p key will control video playback. Try this now"
+      "If you are unsure what to do at any point, press the I key to hear a reminder on the current task. Let's start. Pressing the spacebar will control video playback. Try this now"
     );
     this.init = null;
   },
@@ -71,8 +71,33 @@ let step3 = new Step(
     if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
   },
   function() {
+    if (questionsAsked >= 1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+);
+
+let step4 = new Step(
+  function() {
+    speak(
+      "Great Question. Continue watching the video and request more information to get familiar with the interface. At the end of the video, a button will appear to take you back to the home page."
+    );
+    this.init = null;
+  },
+
+  function() {
+    speak(
+      "Remember to press the Q key to ask a question, or the D key to get a description"
+    );
+  },
+  function() {
+    if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
+  },
+  function() {
     return false;
   }
 );
 
-tutorialSteps.push(step1, step2, step3);
+tutorialSteps.push(step1, step2, step3, step4);

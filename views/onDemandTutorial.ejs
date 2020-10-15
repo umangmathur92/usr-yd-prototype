@@ -46,23 +46,21 @@
       <div class="row" style="position: absolute;top: 60px;">
         <div class="col-md-3">
           <div style="background-color: #1a4b6e; padding: 16px; height: 100%;">
-            <div tabindex="0">
-              <h6 style="color: white; text-align:justify;" ;="">
+            <div>
+              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">
                 This tutorial will help you become acquainted with the Visual
-                Chatbot controls. <br /><br />
-                Press enter on the button below to get started
+                Chatbot controls. Please make sure to use the chrome browser
+                before continuing, and allow microphone access if asked.<br /><br />
+
                 <br />
               </h6>
+              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">
+                If you are using a screen reader, please use form mode or scan
+                mode to avoid key press conflicts. Press the I key to get
+                started.
+              </h6>
             </div>
-            <div>
-              <button
-                id="btn"
-                type="submit"
-                onclick="setInterval(tutorialProgress, 500);"
-              >
-                Start
-              </button>
-            </div>
+            <div></div>
           </div>
         </div>
         <div class="col-md-6">
@@ -76,9 +74,7 @@
               style="margin:15px; font-size:15px; align-content: center; text-align: center;"
               font-size:
               15px;
-            >
-              <b tabindex="0"><span id="txtVidtitle">Video Title Here</span></b>
-            </div>
+            ></div>
             <div style="align-content: center; text-align: center;">
               <div class="overlay" id="player" tabindex="-1"></div>
             </div>

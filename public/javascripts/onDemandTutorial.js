@@ -82,11 +82,11 @@ $(document).ready(function() {
 });
 
 function tutorialProgress() {
-  tutorialStarted = true;
   if (tutorialSteps[currentInstruction].init) {
     tutorialSteps[currentInstruction].init();
     tutorialSteps[currentInstruction].recurringSpeech();
   }
+
   if (tutorialSteps[currentInstruction].check()) {
     currentInstruction += 1;
   }
