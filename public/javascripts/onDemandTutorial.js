@@ -4,7 +4,7 @@ let videotime = 0;
 let timeupdater = null;
 let sceneIdToListPositionMap = new Map();
 let sceneToBlockMap = new Map();
-let userId = "d8fcfd52-b0b3-4969-bf03-1dc54b681b5d";
+let userId = "c833874d-e2f1-45b3-afd1-16ac6d7fa0b4";
 let volunteerId;
 let prevSceneNum = -1;
 let timeAtWhichLastPaused = -1;
@@ -203,7 +203,7 @@ function onYouTubeIframeAPIReady() {
       enablejsapi: 1,
       cc_load_policy: 1,
       controls: 0,
-      diasblekb: 1,
+      disablekb: 1,
       fs: 0,
       iv_load_policy: 3,
       modestbranding: 1,
@@ -325,13 +325,13 @@ async function onProgress(currentTime) {
   currentTime = currentTime.toFixed(3);
   // let currScene = getSceneFromTime(currentTime);
   let currScene = getIndexFromExtended(currentTime);
-  // console.log(allSceneArr);
+//   console.log(currScene);
   // let sceneNum = currScene.sc_num;
   let sceneNum = currScene;
 
   if (prevSceneNum == -1 && first_extend_flag) {
     first_extend_flag = false;
-  } else if (prevSceneNum != -1 && sceneNum != prevSceneNum) {
+  } else if ((sceneNum != -1 && sceneNum != prevSceneNum)) {
     if (true || scene_audio_extend_set.has(prevSceneNum)) {
       STATE = 1;
       pauseVideo();
@@ -341,7 +341,7 @@ async function onProgress(currentTime) {
       YT_FLAG = true;
       if (flag && currAudio == null) {
         // currAudio = sentenceAudioMap[prevSceneNum][0];
-        currAudio = allSentenceExtendedAudioArr[currScene + 1];
+        currAudio = allSentenceExtendedAudioArr[currScene];
         player.setVolume(15);
         currAudio.play();
         currAudio.onended = function() {
@@ -369,7 +369,7 @@ async function onProgress(currentTime) {
       prevSceneNum = sceneNum;
     }
     prevSceneNum = sceneNum;
-  } else if (prevSceneNum == -1) prevSceneNum = sceneNum;
+  } //else if (prevSceneNum == -1) prevSceneNum = sceneNum;
   else if (currAudio !== null && !isPlaying(currAudio)) currAudio.play();
   // logic for inline
   else {
@@ -486,7 +486,7 @@ function getIndexFromExtended(currentTime) {
     allSentenceExtendedArr
   );
   console.log(index);
-  return index - 1;
+  return index;
 }
 
 //Returns index of array item whose value is equal-to or lesser-than(also nearest-in-value) the target (binary search algorithm)
