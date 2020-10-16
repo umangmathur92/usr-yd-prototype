@@ -124,8 +124,8 @@ function startChatbot() {
 
 function WebSocketTest() {
   if ("WebSocket" in window) {
-    // ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
-    ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
+    ws = new WebSocket("wss://dev-api.youdescribe.org/chat/");
+    // ws = new WebSocket("ws://13.59.47.124:8001/chat/"); //to test from local
     ws.onopen = function() {
       ws.send(ws_id);
       console.log("Websocket opened");
@@ -205,8 +205,8 @@ function submitQuestion(question) {
     formData.append("question", question);
     formData.append("job_id", job_id);
     formData.append("image_key", imageKey);
-    // var URL = "https://dev-api.youdescribe.org/";
-    var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
+    var URL = "https://dev-api.youdescribe.org/";
+    // var URL = "https://cors-anywhere.herokuapp.com/http://13.59.47.124:8001/"; // to test from local
 
     $.ajax({
       type: "POST",
