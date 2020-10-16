@@ -15,8 +15,8 @@ function isKeyPress(event) {
       x.innerHTML = "The Q Key was pressed!";
       console.log("The Q Key was pressed!");
       askQuestion()
-        .then((questionsAsked += 1))
-        .then(console.log(questionsAsked));
+        // .then((questionsAsked += 1))
+        // .then(console.log(questionsAsked));
       // startChatbot();
       break;
     case 69:
@@ -24,13 +24,15 @@ function isKeyPress(event) {
       x.innerHTML = "The D Key was pressed!";
       console.log("The D Key was pressed!");
       fetchImageCaption()
-        .then((captionsRequested += 1))
-        .then(console.log(captionsRequested));
+        // .then((captionsRequested += 1))
+        // .then(console.log(captionsRequested));
       break;
 
     case 73:
     case 105:
       x.innerHTML = "The I Key was pressed!";
+      if(isTutorial){
+      if (player.getPlayerState() == YT.PlayerState.PLAYING) {pauseVideo();}
       if (tutorialStarted) {
         tutorialSteps[currentInstruction].recurringSpeech();
       } else {
@@ -39,13 +41,29 @@ function isKeyPress(event) {
       }
 
       console.log("The I Key was pressed!");
+    }
       break;
 
     case 32:
       x.innerHTML = "The space Key was pressed!";
-
-      if (player.getPlayerState() == YT.PlayerState.PLAYING) pauseVideo();
-      else playVideo();
+      
+      if (player.getPlayerState() == YT.PlayerState.PLAYING) {
+        if (isTutorial && tutorialStarted) {
+          //speak("Video Play");
+          playPause += 1;
+          console.log("This is the file");
+          // player.pauseVideo();
+        }        
+        pauseVideo();}
+      else {
+        if(isTutorial){
+        if (tutorialStarted) {
+          //speak("Video Play");
+          player.playVideo();
+        }
+      }
+      else playVideo();        
+      }
 
       break;
   }

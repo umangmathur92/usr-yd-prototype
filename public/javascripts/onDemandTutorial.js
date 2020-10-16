@@ -51,6 +51,7 @@ let noOfQuestionsAsked = 0;
 let playQuestionAudio = new Audio("../audio/tutorial_question.mp3");
 // let audio_clip = document.getElementById("myAudio");
 
+let isTutorial = true;
 let tutorialStarted = false;
 let currentInstruction = 0;
 let playPause = 0;
@@ -447,19 +448,19 @@ function onPlayerStateChange(event) {
 }
 
 function playVideo() {
-  if (tutorialStarted) {
+//   if (tutorialStarted) {
     //speak("Video Play");
     player.playVideo();
-  }
+//   }
 }
 
 function pauseVideo() {
-  if (tutorialStarted) {
+//   if (tutorialStarted) {
     //speak("Video Play");
-    playPause += 1;
-    console.log("This is the file");
+    // playPause += 1;
+    // console.log("This is the file");
     player.pauseVideo();
-  }
+//   }
 }
 
 function stopVideo() {
