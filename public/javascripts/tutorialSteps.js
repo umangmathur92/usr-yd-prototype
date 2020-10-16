@@ -12,6 +12,8 @@ let tutorialSteps = [];
 let step1 = new Step(
   function() {
     //tutorial_1_1.mp3
+    console.log("tutorial 1 1");
+    // if ((player.getPlayerState == YT.PlayerState.PLAYING)) pauseVideo();
     audio_clip.src = "../audio/tutorial_1_1.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
@@ -22,11 +24,15 @@ let step1 = new Step(
     this.init = null;
   },
   function() {
-    
+    audio_clip.src = "../audio/tutorial_1_1.mp3";
+      audio_clip.onended = function() {
+        // audio_clip.src = null;
+      
     audio_clip.src = "../audio/tutorial_1_2.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
       }
+    }
   //   //tutorial_1_2.mp3
   //   speak("Press the space key twice to play and pause the video");
   },
@@ -44,6 +50,7 @@ let step1 = new Step(
 
 let step2 = new Step(
   function() {
+    // if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
     //tutorial_2_1.mp3
     // let randomNum = Math.random();
       audio_clip.src = "../audio/tutorial_2_1.mp3";
@@ -58,10 +65,15 @@ let step2 = new Step(
 
   function() {
     //tutorial_2_2.mp3
+    audio_clip.src = "../audio/tutorial_2_1.mp3";
+      audio_clip.onended = function() {
+        // audio_clip.src = null;
+      
     audio_clip.src = "../audio/tutorial_2_2.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
       }
+    }
     // speak(
     //   "Press the spacebar to continue and then press D at any time to get a caption of the current image."
     // );
@@ -79,6 +91,8 @@ let step2 = new Step(
 let step3 = new Step(
   function() {
     //tutorial_3_1.mp3
+    // if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
+    console.log("tutorial 3 1");
     audio_clip.src = "../audio/tutorial_3_1.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
@@ -91,10 +105,14 @@ let step3 = new Step(
 
   function() {
     //tutorial_3_2.mp3
+    audio_clip.src = "../audio/tutorial_3_1.mp3";
+      audio_clip.onended = function() {
+        // audio_clip.src = null;
     audio_clip.src = "../audio/tutorial_3_2.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
       }
+    }
     // speak(
     //   "Press the Q key to ask a question. After the beep, ask your question. "
     // );
@@ -114,6 +132,7 @@ let step3 = new Step(
 let step4 = new Step(
   //tutorial_4_1.mp3
   function() {
+    // if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
     audio_clip.src = "../audio/tutorial_4_1.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
@@ -126,10 +145,15 @@ let step4 = new Step(
 
   function() {
     //tutorial_4_2.mp3
+    audio_clip.src = "../audio/tutorial_4_1.mp3";
+      audio_clip.onended = function() {
+        // audio_clip.src = null;
+      
     audio_clip.src = "../audio/tutorial_4_2.mp3";
       audio_clip.onended = function() {
         audio_clip.src = null;
       }
+    }
     // speak(
     //   "Remember to press the Q key to ask a question, or the D key to get a description"
     // );
