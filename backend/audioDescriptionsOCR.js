@@ -557,6 +557,9 @@ async function mergeOCRExtendedAudio(vid_id, vol_id){
         let ocrAudioPath = currOCR.audio_path;
     
         let sceneObj = await fetchSceneDetails(ocrAudioStartTime, vid_id, vol_id);
+        console.log({ocrId});
+        // ocrText = 'Test';
+        ocrText = ocrText.replace("'", "''");
         try {
             await db.query(`INSERT INTO descriptions_new_sentence (sentence_id, video_id, volunteer_id, scene_num, start_time, end_time, description, sentence, audio_type, audio_start_time, audio_length, audio_path) 
                     VALUES ('${ocrId}', '${vid_id}', '${vol_id}', ${sceneObj.sceneNum}, ${sceneObj.startTime}, ${sceneObj.endTime}, '${ocrText}', '${ocrText}', '${ocrAudioType}', ${ocrAudioStartTime}, ${ocrAudioDur}, '${ocrAudioPath}');`);
