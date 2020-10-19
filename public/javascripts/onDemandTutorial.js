@@ -343,6 +343,7 @@ async function onProgress(currentTime) {
       if (flag && currAudio == null) {
         // currAudio = sentenceAudioMap[prevSceneNum][0];
         currAudio = allSentenceExtendedAudioArr[currScene];
+        currAudio.currentTime=0;
         player.setVolume(15);
         currAudio.play();
         currAudio.onended = function() {

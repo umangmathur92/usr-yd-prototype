@@ -358,7 +358,7 @@ async function generateTimestampsForOCR(vid_id, vol_id){
             let endTime = resObj['start_time'] + ocr_time_duration[i];
 
             time_gaps_start_time.push(startTime);
-            time_gaps_end_time.push(endTime);
+            time_gaps_end_time.push(endTime + 0.5);
 
             // Insert in db as inline at ocr_timestamp[i] as start time
                 await updateOCRTableAudioType(vid_id, ocr_id[i], startTime, 'inline');
@@ -557,9 +557,13 @@ async function mergeOCRExtendedAudio(vid_id, vol_id){
         let ocrAudioPath = currOCR.audio_path;
     
         let sceneObj = await fetchSceneDetails(ocrAudioStartTime, vid_id, vol_id);
-
-                await db.query(`INSERT INTO descriptions_new_sentence (sentence_id, video_id, volunteer_id, scene_num, start_time, end_time, description, sentence, audio_type, audio_start_time, audio_length, audio_path) 
-                    VALUES ('${ocrId}', '${vid_id}', '${vol_id}', ${sceneObj.sceneNum}, ${sceneObj.startTime}, ${sceneObj.endTime}, '${ocrText}', '${ocrText}', '${ocrAudioType}', ${ocrAudioStartTime}, ${ocrAudioDur}, '${ocrAudioPath}');`)
+        try {
+            await db.query(`INSERT INTO descriptions_new_sentence (sentence_id, video_id, volunteer_id, scene_num, start_time, end_time, description, sentence, audio_type, audio_start_time, audio_length, audio_path) 
+                    VALUES ('${ocrId}', '${vid_id}', '${vol_id}', ${sceneObj.sceneNum}, ${sceneObj.startTime}, ${sceneObj.endTime}, '${ocrText}', '${ocrText}', '${ocrAudioType}', ${ocrAudioStartTime}, ${ocrAudioDur}, '${ocrAudioPath}');`);
+        } catch (error) {
+            console.log(error);
+        }
+                
     }
 }
 

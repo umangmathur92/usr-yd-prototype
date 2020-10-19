@@ -44,6 +44,10 @@ function isKeyPress(event) {
     }
       break;
 
+    case 82:
+    case 114:
+      seekBackward(1);
+      break;
     case 32:
       x.innerHTML = "The space Key was pressed!";
       
@@ -124,14 +128,14 @@ function isCtrlKeyUp(event) {
   x.innerHTML = "The key is up now";
 }
 
-function seekBackward() {
+function seekBackward(newTime=5) {
   let isStatePlaying = false;
   if (player.getPlayerState() == YT.PlayerState.PLAYING) isStatePlaying = true;
 
   pauseVideo();
   let currentTime = player.getCurrentTime();
 
-  if (currentTime > 5) player.seekTo(currentTime - 5);
+  if (currentTime > 5) player.seekTo(currentTime - newTime);
   else player.seekTo(0);
 
   if (isStatePlaying) playVideo();

@@ -156,6 +156,8 @@ async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
                 descriptionText += '.';
             let finalText = descriptionText + ocrText;
             let descType = hasAi ? 'ai' : 'non_ai';
+            if(finalText.length == 0)
+                continue;
             sentences = finalText.replace(/([.?!\n])\s*(?=[A-Za-z])/g, "$1|").split("|")
             let sentence_id_key = 0;
             let ocr_flag = true;
@@ -578,8 +580,8 @@ async function fetchSceneNum(timestamp, videoId, sentence_id){
     let newstr = sentence_id.split('_');
     let volunteerId = newstr[0];
 
-    let sceneStartTimesArr = await db.query(`SELECT start_time FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
-    let sceneNumArr = await db.query(`SELECT scene_num FROM descriptions_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
+    let sceneStartTimesArr = await db.query(`SELECT start_time FROM descriptions WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
+    let sceneNumArr = await db.query(`SELECT scene_num FROM descriptions WHERE video_id = '${videoId}' AND volunteer_id = '${volunteerId}' ORDER BY scene_num`);
     // console.log('Scene timestamps: '+sceneStartTimesArr+'  and '+sceneNumArr);
     if(timestamp < 0)
         return -1;
