@@ -32,6 +32,7 @@ recognition.onresult = event => {
   const speechToText = event.results[0][0].transcript;
   console.log("Recording stpped!");
   if (speechToText.length > 0) {
+    audio_clip.src = '../audio/earcons/ting.wav';
     let data = {
       userId: volunteerId,
       question: speechToText,
