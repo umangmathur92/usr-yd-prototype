@@ -929,5 +929,6 @@ module.exports = {
     generateAudioDescriptionsInDbWithInfo: generateAudioDescriptionsInDbWithInfo,
     generateTimestampsforScene: generateTimestampsforScene,
     generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo,
-    mergeSentenceAudios: mergeSentenceAudios 
+    mergeSentenceAudios: mergeSentenceAudios,
+    getResponse: getResponse
 }
