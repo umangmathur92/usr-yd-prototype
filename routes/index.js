@@ -725,6 +725,16 @@ res.send({'result': result});
 });
 });
 
+router.get('/getAudioDescriptionMp3', function(req, res, next){
+  let videoId= req.query.videoId;
+  let volunteerId = req.query.volunteerId;
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.getResponse(videoId,volunteerId, res);
+task.then(result => {
+res.send({'result': result});
+});
+});
+
 router.get('/generateAudioDescriptionMp3ForScene', function(req, res, next){
   let videoId= req.query.videoId;
   let volunteerId = req.query.volunteerId;
