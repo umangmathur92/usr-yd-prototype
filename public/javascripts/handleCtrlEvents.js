@@ -82,19 +82,19 @@ $(window).keypress(function(e) {
   }
 });
 
-function isKeyDown(event) {
-  let x = document.getElementById("demo");
+// function isKeyDown(event) {
+//   let x = document.getElementById("demo");
 
-  if (event.ctrlKey) {
-    x.innerHTML = "The CTRL Key was pressed!";
-  } else if (event.keyCode == "37") {
-    x.innerHTML = "The Left Arrow Key was pressed!";
-    seekBackward();
-  } else if (event.keyCode == "39") {
-    x.innerHTML = "The Right Arrow Key was pressed!";
-    seekForward();
-  }
-}
+//   if (event.ctrlKey) {
+//     x.innerHTML = "The CTRL Key was pressed!";
+//   } else if (event.keyCode == "37") {
+//     x.innerHTML = "The Left Arrow Key was pressed!";
+//     seekBackward();
+//   } else if (event.keyCode == "39") {
+//     x.innerHTML = "The Right Arrow Key was pressed!";
+//     seekForward();
+//   }
+// }
 
 /** Ctrl + key events variables and functions */
 

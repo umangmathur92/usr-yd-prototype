@@ -552,7 +552,7 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         const client = new textToSpeech.TextToSpeechClient();
         const request = {
             input: {text: inputText},
-            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            voice: {languageCode: 'en-US', name: 'en-US-Wavenet-C', ssmlGender: 'NEUTRAL'},
             audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
         };
         const [response] = await client.synthesizeSpeech(request);
