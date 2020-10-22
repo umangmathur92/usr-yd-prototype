@@ -8,7 +8,8 @@ const rimraf = require("rimraf");
 
 
 async function generateAudioDescriptionsForOCRInDbWithInfo(vid_id, vol_id, res) {
-        
+    
+    //await collisionCheck() // To check the collisions of OCR timetamps and scene endtimes with 1 sec threshold
     await generateMp3ForOCR(vid_id, vol_id);
     await generateTimestampsForOCR(vid_id, vol_id);
 }
@@ -56,7 +57,7 @@ async function updateOCRTable(duration, vid_id, vol_id, ocrId, relativePath){
 
 }
 
-async function generateTimeGaps(vid_id,vol_id){
+async function generateTimeGaps(vid_id,vol_id,isInitial=true,dialogStartTimeArr=[],dialogEndTimeArr=[]){
 
     try{
 
@@ -92,8 +93,19 @@ for(let i=0; i<descriptionListArr.length; i++) {
 
     scenes[currDescription.scene_num] = times;    
 }
+let video_dialogs = [];
+    if(isInitial)
+        video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
 
-let video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
+    else
+    {
+        for(let i=0; i<dialogStartTimeArr.length; i++){
+            let newObj = {};
+            newObj['start_time'] = dialogStartTimeArr[i];
+            newObj['end_time'] =  dialogEndTimeArr[i];
+            video_dialogs.push(newObj);
+        }
+    }
 
 for(let i=0; i<video_dialogs.length; i++) {
     let currDialog = video_dialogs[i];
@@ -349,8 +361,12 @@ async function generateTimestampsForOCR(vid_id, vol_id){
         time_gaps_start_time.sort(function(a, b){return a - b});
         time_gaps_end_time.sort(function(a, b){return a - b});
 
-        let sceneEndTime = await fetchSceneEndtime(ocr_timestamp[i], vid_id, vol_id);
-        resObj = await fetchNearestDialogInfo(ocr_timestamp[i], ocr_time_duration[i], time_gaps_start_time, time_gaps_end_time, video_end_time, sceneEndTime);
+        // let sceneEndTime1 = await fetchSceneEndtime(ocr_timestamp[i], vid_id, vol_id);
+        let sceneInfo = await fetchSceneDetails(ocr_timestamp[i], vid_id, vol_id)
+        let sceneEndTime1 = sceneInfo.startTime;
+        let sceneEndTime2 = sceneInfo.endTime;
+
+        resObj = await fetchNearestDialogInfo(ocr_timestamp[i], ocr_time_duration[i], time_gaps_start_time, time_gaps_end_time, video_end_time, sceneEndTime1, sceneEndTime2);
 
         if (resObj['isInline']){
             
@@ -417,7 +433,7 @@ async function insertIntoVideoDialogsAndOCR(vid_id, vol_id, inline_times){
     }
 }
         /** Add new dialog times in array as well and sort them */
-async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTimesArr, videoEndTime, sceneEndTime){ 
+async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTimesArr, videoEndTime, sceneEndTime1, sceneEndTime2){ 
 
     let i =0, l=startTimesArr.length;
     let result = {}
@@ -432,8 +448,10 @@ async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTim
 
     let startTime2 = i==l ? videoEndTime : startTimesArr[i]; // 15
     let endTime2 = i==l ? videoEndTime : endTimesArr[i]; //19
- 
-    let gap = startTime2-endTime1;
+    
+    startTime2 = Math.min(startTime2,sceneEndTime2);
+    endTime1 = Math.max(endTime1,sceneEndTime1);
+    let gap = startTime2 - endTime1;
 
         //TODO:
         /**
@@ -441,12 +459,12 @@ async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTim
         //Steps - 1. gap >= duration
         //          => Start time of audio, a. timestamp b. starttime2 - duration
         //      2.  gap < duration
-        //          => Play as extended at timestamp
+        //          => Play as extended at timestamp (check timestamp & starttime2 collision)
                 3. not in gap
                     => set a threshold of m sec
                     a. endTime1 - timesatmp < m 
                         i.  gap > duration, play inline
-                        ii. else extended at endtime1
+                        ii. else extended at endtime1 (endtime1 == sceneEndTime2 ? endtime1+1 : endTime1)
                     b. endTime1 - timesatmp > m 
                         i. (optional) if timestamp - startTime1  < m, play extended at startTime1
                         ii. all other cases, play as extended at timestamp
@@ -474,6 +492,10 @@ async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTim
         }
         //2.  gap < duration
         else{
+            // (check timestamp & starttime2 collision)
+            if(startTime2 == sceneEndTime2 && startTime2 - timestamp < 1)
+                timestamp = startTime2 + 1;
+            
             result['isInline'] = false;
             result['start_time'] = timestamp;
             return result;
@@ -493,6 +515,8 @@ async function fetchNearestDialogInfo(timestamp, duration, startTimesArr, endTim
                 }
                 //     ii. else extended at endtime1
                 else{
+                    // (endtime1 == sceneEndTime2 ? endtime1+1 : endTime1)
+                    endTime1 = (endTime1 == sceneEndTime2) ? endTime1+1 : endTime1;
                     result['isInline'] = false;
                     result['start_time'] = endTime1; // or scene_end time
                     return result;
@@ -541,6 +565,15 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
         return false;
     }
 }
+
+async function checkOcrAndInlineAudioCollision(vid_id, vol_id){
+    
+    let OCRListArr = await db.any(`SELECT * FROM descriptions_ocr WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by timestamp`);
+    let OCRListArr = await db.any(`SELECT * FROM descriptions_ocr WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}' order by timestamp`);
+
+}
+
+
     /** To merge the extended audio clips into descriptions_new_sentence table */
 async function mergeOCRExtendedAudio(vid_id, vol_id){
     

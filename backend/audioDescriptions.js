@@ -391,8 +391,11 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
         time_gaps_scene_num.push(time_gaps_data.scene_num);
         time_gaps_is_overlap.push(time_gaps_data.is_overlap);
     }
-    let i = 0, j = 0;
+    let i = 0, j = 0, k=0;
     let currScene = sentence_scene[0];
+        /** Fetch All OCR extended timestamps */
+        let ocrExtendedTimestamps = await db.query(`SELECT audio_start_time FROM descriptions_ocr WHERE video_id='${dbVideoId}' AND audio_type='extended' ORDER BY audio_start_time`);
+        let ocrExtendedTimestampsLen = ocrExtendedTimestamps.length;
 
     while(i < sentences.length && j < time_gaps_info.length){
 
@@ -426,6 +429,21 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
 
         while(i < sentences.length  && time_gap > sentence_duration[i] && currScene == sentence_scene[i] && time_gaps_scene_num[j] == sentence_scene[i]){
 
+            while(k < ocrExtendedTimestampsLen && time_start > ocrExtendedTimestamps[k]['audio_start_time']){
+                k++;
+            }
+            let ocrCollisionEndTime = time_start + sentence_duration[i];
+            let ocrCollisionCheckRes = await checkOcrAndInlineCollision(time_start, ocrCollisionEndTime, ocrExtendedTimestamps, k);
+
+            // if( time_start < ocrExtendedTimestamps[k]['audio_start_time'] && ocrExtendedTimestamps[k]['audio_start_time'] < time_start + sentence_duration[i])
+            if (ocrCollisionCheckRes['isCollision'])
+            {
+                // time_start = ocrExtendedTimestamp[k]['audio_start_time'] + 0.1;
+                time_gap -= (ocrCollisionCheckRes['newTimestamp'] - time_start);
+                time_start = ocrCollisionCheckRes['newTimestamp'];
+                continue;
+            }
+
             await updateSentenceStartTime(sentence_id[i], time_start, 'inline');
             time_gap -= (sentence_duration[i] + 0.1);
             i++;
@@ -451,6 +469,25 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
         console.log(error);
         return false;
     }
+
+}
+
+async function checkOcrAndInlineCollision(startTime, endTime, ocrExtendedTimestampsArr, k){
+
+    let isCollision = false;
+    let newTimestamp = startTime;
+    let len = ocrExtendedTimestampsArr.length;
+
+    for(let i=k; i<len; i++){
+        if( startTime < ocrExtendedTimestampsArr[i]['audio_start_time'] && ocrExtendedTimestampsArr[i]['audio_start_time'] < endTime){            
+            
+            isCollision = true;
+            newTimestamp = ocrExtendedTimestampsArr[i]['audio_start_time'] + 0.1;
+            break;
+        }
+    }
+
+    return {'isCollision' : isCollision, 'newTimestamp' : newTimestamp};
 
 }
 
@@ -480,6 +517,7 @@ async function generateTimeGaps(vid_id,vol_id){
 let descriptionListArr = await db.any(`SELECT * FROM descriptions WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}'order by scene_num`);
 
 let scenes = {};
+let newStartTimes = [];
 
 for(let i=0; i<descriptionListArr.length; i++) {
     let currDescription = descriptionListArr[i];
@@ -487,9 +525,15 @@ for(let i=0; i<descriptionListArr.length; i++) {
     times["start_time"] = currDescription.start_time;
     times["end_time"] = currDescription.end_time;
     times["video_dialogs"] = [];
-
-    scenes[currDescription.scene_num] = times;    
+    newStartTimes.push(currDescription.start_time);
+    scenes[currDescription.scene_num] = times;  
+    // scenes.push(times);
 }
+
+// let descriptionOcrListArr = await db.any(`SELECT * FROM descriptions_ocr WHERE video_id = '${vid_id}' AND volunteer_id = '${vol_id}'order by timestamp`);
+// Combine OCR extended audio_timestamps with scene details and fetch video time gaps from the new list
+// newStartTimes.push(currOcrDescription.audio_start_time);
+
 
 let video_dialogs = await db.any(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${vid_id}' order by start_time`);
 
