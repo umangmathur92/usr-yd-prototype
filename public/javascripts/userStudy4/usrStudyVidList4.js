@@ -102,12 +102,6 @@ function updateUI(vidArr) {
         console.log(aiSupportStr);
         surveyLink =
           "https://sfsu.co1.qualtrics.com/jfe/form/SV_3vHQEYhWIdUAyb3"; //ai baseline
-
-        generatedHtml += `<b><a href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
-                <input type="checkbox" style="margin-right: 8px;">
-                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
-                Video ${i +
-                  1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
       } else
         surveyLink =
           "https://sfsu.co1.qualtrics.com/jfe/form/SV_2iBERH5Z4aqR5aZ"; //no tools
