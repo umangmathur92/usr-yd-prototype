@@ -281,6 +281,10 @@ async function generateTimestampsforScene(dbVideoId, dbVolId, sceneId, descripti
         let scene_num = sceneInfo[0].scene_num;
 
         let dialog_timestamps = await db.query(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${dbVideoId}' ORDER BY start_time`);
+        if(dialog_timestamps.length == 0){
+            dialog_timestamps = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${dbVideoId}' order by start_time`);
+        }
+        
         let currDialogStartTimes = [];
         let currDialogEndTimes = [];
         let len = dialog_timestamps.length - 1;
@@ -536,6 +540,10 @@ for(let i=0; i<descriptionListArr.length; i++) {
 
 
 let video_dialogs = await db.any(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${vid_id}' order by start_time`);
+
+if(video_dialogs.length == 0){
+    video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
+}
 
 for(let i=0; i<video_dialogs.length; i++) {
     let currDialog = video_dialogs[i];
@@ -923,6 +931,37 @@ async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneN
     }
 
 }
+        /** API for saving Audio Description timeline for a single sentence  - 10/22/2020 */
+async function saveAudioDescriptionTimelineForSentence(videoId,volunteerId, sentenceId, audioType, audioStartTime, res){
+
+    try {
+        
+        await db.query(`UPDATE descriptions_new_sentence(audio_type, audio_start_time) VALUES('${audioType}', ${audioStartTime}) WHERE video_id='${videoId}' AND volunteer_id='${volunteerId}' AND  sentence_id='${sentenceId}'`);
+        res.send({status:true});
+
+    } catch (error) {
+        res.send({error});
+    }
+}
+
+        /** API for saving Audio Description timeline for scene - 10/22/2020 */
+async function saveAudioDescriptionTimelineForScene(videoId,volunteerId, sentences, audioType, audioStartTime, res){
+
+    // sentences is an array of sentence ids in a scene
+
+    try {
+        
+        for(let i=0; i< sentences.length; i++){
+            await db.query(`UPDATE descriptions_new_sentence(audio_type, audio_start_time) VALUES('${audioType}', ${audioStartTime}) WHERE video_id='${videoId}' AND volunteer_id='${volunteerId}' AND  sentence_id='${sentences[i]}'`);
+        }
+        res.send({status:true});
+
+    } catch (error) {
+        res.send({error});
+    }
+
+
+}
 
 module.exports = {
     generateMp3ForText: generateMp3ForText,
@@ -930,5 +969,7 @@ module.exports = {
     generateTimestampsforScene: generateTimestampsforScene,
     generateTimestampsforSentencesInDbWithInfo: generateTimestampsforSentencesInDbWithInfo,
     mergeSentenceAudios: mergeSentenceAudios,
-    getResponse: getResponse
+    getResponse: getResponse,
+    saveAudioDescriptionTimelineForScene: saveAudioDescriptionTimelineForScene,
+    saveAudioDescriptionTimelineForSentence: saveAudioDescriptionTimelineForSentence
 }

@@ -735,6 +735,28 @@ res.send({'result': result});
 });
 });
 
+router.post('/saveAudioDescriptionTimelineForScene', function(req, res, next){
+  let videoId= req.body.videoId;
+  let volunteerId = req.body.volunteerId;
+  let sentenceId = req.body.sentenceId;
+  let audioType = req.body.audioType;
+  let audioStartTime = req.body.audioStartTime;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.saveAudioDescriptionTimelineForScene(videoId,volunteerId, sentenceId, audioType, audioStartTime, res);
+});
+
+router.post('/saveAudioDescriptionTimelineForSentence', function(req, res, next){
+  let videoId= req.body.videoId;
+  let volunteerId = req.body.volunteerId;
+  let sentences = req.body.sentences;
+  let audioType = req.body.audioType;
+  let audioStartTime = req.body.audioStartTime;
+
+  console.log('vid: '+videoId+' vol: '+volunteerId);
+let task = audioDescription.saveAudioDescriptionTimelineForScene(videoId,volunteerId, sentences, audioType, audioStartTime, res);
+});
+
 router.get('/generateAudioDescriptionMp3ForScene', function(req, res, next){
   let videoId= req.query.videoId;
   let volunteerId = req.query.volunteerId;
