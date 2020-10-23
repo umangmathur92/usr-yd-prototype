@@ -280,7 +280,7 @@ async function generateTimestampsforScene(dbVideoId, dbVolId, sceneId, descripti
         let scene_end_time = sceneInfo[0].end_time;
         let scene_num = sceneInfo[0].scene_num;
 
-        let dialog_timestamps = await db.query(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${dbVideoId}' ORDER BY start_time`);
+        let dialog_timestamps = await db.query(`SELECT * FROM video_dialogs WHERE video_id = '${dbVideoId}' ORDER BY start_time`);
         if(dialog_timestamps.length == 0){
             dialog_timestamps = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${dbVideoId}' order by start_time`);
         }
