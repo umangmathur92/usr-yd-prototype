@@ -735,7 +735,7 @@ res.send({'result': result});
 });
 });
 
-router.post('/saveAudioDescriptionTimelineForScene', function(req, res, next){
+router.post('/saveAudioDescriptionTimelineForSentence', function(req, res, next){
   let videoId= req.body.videoId;
   let volunteerId = req.body.volunteerId;
   let sentenceId = req.body.sentenceId;
@@ -743,10 +743,10 @@ router.post('/saveAudioDescriptionTimelineForScene', function(req, res, next){
   let audioStartTime = req.body.audioStartTime;
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
-let task = audioDescription.saveAudioDescriptionTimelineForScene(videoId,volunteerId, sentenceId, audioType, audioStartTime, res);
+let task = audioDescription.saveAudioDescriptionTimelineForSentence(videoId,volunteerId, sentenceId, audioType, audioStartTime, res);
 });
 
-router.post('/saveAudioDescriptionTimelineForSentence', function(req, res, next){
+router.post('/saveAudioDescriptionTimelineForScene', function(req, res, next){
   let videoId= req.body.videoId;
   let volunteerId = req.body.volunteerId;
   let sentences = req.body.sentences;
