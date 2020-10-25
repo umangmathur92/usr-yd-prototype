@@ -44,6 +44,27 @@ function isKeyPress(event) {
     }
       break;
 
+    case 74:
+    case 106:
+      x.innerHTML = "The J Key was pressed!";
+    //Add earcon
+      if(isVote){
+        updateUserVote(true);
+      }
+
+      console.log("The J Key was pressed!");
+      break;
+
+    case 75:
+    case 107:
+      x.innerHTML = "The K Key was pressed!";
+      if(isVote){
+        updateUserVote(false);
+      }
+
+      console.log("The K Key was pressed!");
+      break;
+
     case 82:
     case 114:
       seekBackward(1);
@@ -82,8 +103,8 @@ $(window).keypress(function(e) {
   }
 });
 
-// function isKeyDown(event) {
-//   let x = document.getElementById("demo");
+function isKeyDown(event) {
+  let x = document.getElementById("demo");
 
 //   if (event.ctrlKey) {
 //     x.innerHTML = "The CTRL Key was pressed!";
@@ -94,7 +115,7 @@ $(window).keypress(function(e) {
 //     x.innerHTML = "The Right Arrow Key was pressed!";
 //     seekForward();
 //   }
-// }
+}
 
 /** Ctrl + key events variables and functions */
 
@@ -152,4 +173,27 @@ function seekForward() {
   else player.seekTo(player.getDuration());
 
   if (isStatePlaying) playVideo();
+}
+
+function updateUserVote(isUpvote){
+  
+  let currentTime = -1;
+  if (player){
+    currentTime = player.getCurrentTime();
+    currentTime = currentTime.toFixed(2);
+  }
+
+  let data = {
+    userId: volunteerId,
+    videoId: youtubeId,
+    isUpvote,
+    youtubeTimestamp: currentTime,
+    conditionType: 'enableAi'
+  };
+
+  $.post("/userStudy4/addVote", data, function(res) {
+    console.log("Vote Added");
+    console.log(res);
+  });
+
 }

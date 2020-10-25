@@ -51,6 +51,7 @@ let desc_flag = false;
 let audio_flag = false;
 let noOfQuestionsAsked = 0;
 let isTutorial = false;
+let isVote = true;
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
