@@ -57,7 +57,18 @@ let questionUserStudy4 = {
                      COMMIT;`;
         // console.log({sql});
          return db.query(sql, callback);
-    }
+    },
+
+    addVote: function(data, callback) {
+        
+        let voteId = uuidv1();
+        let todayDate = new Date();
+
+        const sql = `START TRANSACTION; 
+        INSERT into votes_us4 (vote_id, user_id, youtube_timestamp, timestamp, is_upvote, condition_type) VALUES ('${voteId}','${data.userId}', ${data.youtubeTimestamp}, '${todayDate.toLocaleString()}', ${data.isUpvote}, '${data.conditionType}'); 
+        COMMIT;`;
+        return db.query(sql, callback);
+    }, 
 
 };
 

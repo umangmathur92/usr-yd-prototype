@@ -270,6 +270,16 @@ router.delete('/deleteQuestion', function(req, res, next) {
   });
 });
 
+router.post('/addVote', function(req, res, next) {
+  let queryResult = questionUserStudy4.addVote(req.body);
+  queryResult.then(result => {
+    res.send('Vote inserted successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
 module.exports = router;
 
 
