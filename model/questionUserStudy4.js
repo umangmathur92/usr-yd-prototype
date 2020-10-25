@@ -65,7 +65,7 @@ let questionUserStudy4 = {
         let todayDate = new Date();
 
         const sql = `START TRANSACTION; 
-        INSERT into votes_us4 (vote_id, user_id, youtube_timestamp, timestamp, is_upvote, condition_type) VALUES ('${voteId}','${data.userId}', ${data.youtubeTimestamp}, '${todayDate.toLocaleString()}', ${data.isUpvote}, '${data.conditionType}'); 
+        INSERT into votes_us4 (vote_id, user_id, video_id, youtube_timestamp, timestamp, is_upvote, condition_type) VALUES ('${voteId}','${data.userId}', '${data.videoId}', ${data.youtubeTimestamp}, '${todayDate.toLocaleString()}', ${data.isUpvote}, '${data.conditionType}'); 
         COMMIT;`;
         return db.query(sql, callback);
     }, 
