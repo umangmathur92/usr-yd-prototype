@@ -251,7 +251,7 @@ router.post('/addCaption', function(req, res, next) {
 });
 
 router.post('/addAnswer', function(req, res, next) {
-  let queryResult = questionUserStudy4.addAnswer(req.body);
+  let queryResult = questionUserStudy4.addAnswerToQuestion(req.body);
   queryResult.then(result => {
     res.send('Answer inserted successfully');  
   }).catch((err) => {
