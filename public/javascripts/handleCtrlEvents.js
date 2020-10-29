@@ -48,9 +48,9 @@ function isKeyPress(event) {
     case 106:
       x.innerHTML = "The J Key was pressed!";
     //Add earcon
-      if(isVote){
-        updateUserVote(true);
-      }
+      // if(isVote){
+      //   updateUserVote(true);
+      // }
 
       console.log("The J Key was pressed!");
       break;
@@ -58,9 +58,9 @@ function isKeyPress(event) {
     case 75:
     case 107:
       x.innerHTML = "The K Key was pressed!";
-      if(isVote){
-        updateUserVote(false);
-      }
+      // if(isVote){
+      //   updateUserVote(false);
+      // }
 
       console.log("The K Key was pressed!");
       break;
@@ -105,6 +105,18 @@ $(window).keypress(function(e) {
 
 function isKeyDown(event) {
   let x = document.getElementById("demo");
+
+  if (event.keyCode == "38") {
+        x.innerHTML = "The Up Arrow Key was pressed!";
+        if(isVote){
+          updateUserVote(true);
+        }
+      } else if (event.keyCode == "40") {
+        x.innerHTML = "The Down Arrow Key was pressed!";
+        if(isVote){
+          updateUserVote(false);
+        }
+      }
 
 //   if (event.ctrlKey) {
 //     x.innerHTML = "The CTRL Key was pressed!";
@@ -180,7 +192,7 @@ function updateUserVote(isUpvote){
   if (isUpvote)
       audioVote.src = "../audio/earcons/vote-up.wav";
   else
-      audioVote.src = "../audio/earcons/vote-down.wav";
+      audioVote.src = "../audio/earcons/vote-down2.wav";
 
   let currentTime = -1;
   if (player){
