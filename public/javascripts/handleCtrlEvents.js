@@ -177,6 +177,11 @@ function seekForward() {
 
 function updateUserVote(isUpvote){
   
+  if (isUpvote)
+      audioVote.src = "../audio/earcons/vote-up.wav";
+  else
+      audioVote.src = "../audio/earcons/vote-down.wav";
+
   let currentTime = -1;
   if (player){
     currentTime = player.getCurrentTime();
@@ -188,7 +193,7 @@ function updateUserVote(isUpvote){
     videoId: youtubeId,
     isUpvote,
     youtubeTimestamp: currentTime,
-    conditionType: 'enableAi'
+    conditionType
   };
 
   $.post("/userStudy4/addVote", data, function(res) {

@@ -52,6 +52,8 @@ let audio_flag = false;
 let noOfQuestionsAsked = 0;
 let isTutorial = false;
 let isVote = true;
+let conditionType = '';
+var audioVote = document.getElementById("voteAudio");
 
 $(document).ready(function() {
     $('#btn-video-breakpoint-toggle').prop("checked", true);
@@ -63,6 +65,10 @@ $(document).ready(function() {
     if(!enableAi){
         userId = '';
         baselineDesc = 'Descriptions';
+        conditionType = 'Only on-demand';
+    }
+    else{
+        conditionType = 'Baseline and on-demand';
     }
     document.getElementById("page-title").innerHTML = "On Demand " + baselineDesc;
 
