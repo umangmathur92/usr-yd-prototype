@@ -715,11 +715,14 @@ router.get('/generateAudioDescriptionMp3', function(req, res, next){
   let videoId= req.query.videoId;
   let volunteerId = req.query.volunteerId;
   let merge = false;
+  let hasOcr = false;
   if(req.query.merge != null)
       merge = true;
+  if(req.query.hasOcr != null)
+      hasOcr = true;
 
   console.log('vid: '+videoId+' vol: '+volunteerId);
-let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId,merge, res);
+let task = audioDescription.generateAudioDescriptionsInDbWithInfo(videoId,volunteerId,merge,hasOcr, res);
 task.then(result => {
 res.send({'result': result});
 });

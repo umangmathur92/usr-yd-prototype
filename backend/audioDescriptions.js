@@ -83,12 +83,12 @@ async function generateMp3ForText(inputText) {
     }
 }
 
-async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
+async function generateMp3ForTextInFileystem(fileNamePath, inputText, voiceName='en-US-Wavenet-D') {
     try {
         const client = new textToSpeech.TextToSpeechClient();
         const request = {
             input: {text: inputText},
-            voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
+            voice: {languageCode: 'en-US', name: voiceName, ssmlGender: 'NEUTRAL'},
             audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
         };
         const [response] = await client.synthesizeSpeech(request);
@@ -102,7 +102,35 @@ async function generateMp3ForTextInFileystem(fileNamePath, inputText) {
     }
 }
 
-async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, merge=false, res) {
+async function generateMp3ForTextInFileystemWithDifferentVoices(fileNamePath, sentence, sentenceOcr){
+    try {
+        const client = new textToSpeech.TextToSpeechClient();
+        const request1 = {
+            input: {text: sentence},
+            voice: {languageCode: 'en-US', name: 'en-US-Wavenet-D', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
+        };
+
+        const request2 = {
+            input: {text: sentenceOcr},
+            voice: {languageCode: 'en-US', name: 'en-US-Wavenet-C', ssmlGender: 'NEUTRAL'},
+            audioConfig: {audioEncoding: 'MP3', "speakingRate": 1.5},
+        };
+
+        const [response1] = await client.synthesizeSpeech(request1);
+        const [response2] = await client.synthesizeSpeech(request2);
+
+        const writeFile = util.promisify(fse.outputFile);
+        await writeFile(fileNamePath, Buffer.concat([response1.audioContent, response2.audioContent]), 'binary');
+        console.log(`Audio content written to file: ${fileNamePath}`);
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, merge=false, hasOcr=false, res) {
         
             /** Create sentences from the scene description */
         let res1 = await generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id);
@@ -111,7 +139,7 @@ async function generateAudioDescriptionsInDbWithInfo(vid_id, vol_id, merge=false
         let res2 = await generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge);
 
             /** Insert inline/extended audio descriptions in the video */
-        let res3 = await generateTimestampsforSentencesInDbWithInfo(vid_id, vol_id);
+        let res3 = await generateTimestampsforSentencesInDbWithInfo(vid_id, vol_id, hasOcr);
         if(!merge){
         await getResponse(vid_id, vol_id, res);
         }
@@ -168,6 +196,9 @@ async function generateSentencesForDescriptionsInDbWithInfo(vid_id, vol_id) {
                 if(ocr_flag && s.length > 18 && s.substring(0,17) == "Text on screen : "){
                     is_ocr = true;
                     ocr_flag = false;
+                    console.log('s -> ',s);
+                    s = s.substring(17,s.length);
+                    console.log('new s -> ',s);
                 }
                 let sentence_id = currDescriptionId + '_' + sentence_id_key;
                 await insertDescriptionSentencesTable(currDescriptionId,currVideoId,currSceneId,
@@ -231,6 +262,7 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge = false
             let hasAi = currSentence.has_ai;
             let descriptionText = currSentence.description;
             let ocrText = currSentence.ocr;
+            let isOcr = currSentence.is_ocr;
             let sceneNum = currSentence.scene_num;
             ocrText = (hasAi && ocrText && ocrText.trim().length>0) ? "\nText on screen : " + ocrText : "";
             let lastChar = descriptionText[descriptionText.length - 1];
@@ -249,8 +281,10 @@ async function generateMp3ForSentencesInDbWithInfo(vid_id, vol_id, merge = false
                 fileNamePath = `public/audio/${currVideoId}/${descType}/${volunteerId}/${sceneNum}/${sentNum}.mp3`;
 
             let relativePath = fileNamePath.replace('public', '..');
-
-            await generateMp3ForTextInFileystem(fileNamePath, sent);
+            if(isOcr)
+                await generateMp3ForTextInFileystem(fileNamePath, sent, 'en-US-Wavenet-C');
+            else
+                await generateMp3ForTextInFileystem(fileNamePath, sent);
             let duration = await getAudioDurationInSeconds(fileNamePath);
             console.log(duration);
             await updateSentencesDescriptionTable(duration, currVideoId, volunteerId, hasAi, sceneNum, relativePath, str);
@@ -354,7 +388,7 @@ async function generateTimestampsforScene(dbVideoId, dbVolId, sceneId, descripti
 }
 
     /** Step 3: Insert audio descriptions inline/extended in the video for a particular user and video*/
-async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
+async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId, hasOcr){
     try{
         console.log("Video_id is: "+dbVideoId);
     let sentences = await db.query(`SELECT * FROM descriptions_sentence WHERE video_id='${dbVideoId}' and volunteer_id='${dbVolId}' ORDER BY scene_num, sentence_id`);
@@ -378,7 +412,7 @@ async function generateTimestampsforSentencesInDbWithInfo(dbVideoId, dbVolId){
     }
 
     // Call fn for generating time gaps
-    await generateTimeGaps(dbVideoId,dbVolId);
+    await generateTimeGaps(dbVideoId,dbVolId,hasOcr);
     
     let time_gaps_info = await db.query(`SELECT * FROM video_time_gaps WHERE video_id = '${dbVideoId}' and volunteer_id = '${dbVolId}'`);
 
@@ -495,7 +529,7 @@ async function checkOcrAndInlineCollision(startTime, endTime, ocrExtendedTimesta
 
 }
 
-async function generateTimeGaps(vid_id,vol_id){
+async function generateTimeGaps(vid_id,vol_id,hasOcr){
 
     try{
 
@@ -539,10 +573,10 @@ for(let i=0; i<descriptionListArr.length; i++) {
 // newStartTimes.push(currOcrDescription.audio_start_time);
 
 
-let video_dialogs = await db.any(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${vid_id}' order by start_time`);
+let video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
 
-if(video_dialogs.length == 0){
-    video_dialogs = await db.any(`SELECT * FROM video_dialogs WHERE video_id = '${vid_id}' order by start_time`);
+if(hasOcr){
+    video_dialogs = await db.any(`SELECT * FROM video_dialogs_ocr WHERE video_id = '${vid_id}' order by start_time`);
 }
 
 for(let i=0; i<video_dialogs.length; i++) {
@@ -694,6 +728,7 @@ async function mergeSentenceAudios(video_id, vol_id){
     let sentence_id = [];
     let sentence_desc = [];
     let sentence_ocr = [];
+    let sentence_is_ocr = [];
     let sentence_duration = [];
     let scene_start_time = [];
     let scene_end_time = [];
@@ -710,6 +745,7 @@ async function mergeSentenceAudios(video_id, vol_id){
         sentence_id.push(currSentence.sentence_id); 
         sentence_desc.push(currSentence.description);
         sentence_ocr.push(currSentence.ocr);
+        sentence_is_ocr.push(currSentence.is_ocr);
         sentence_duration.push( currSentence.audio_length);
         scene_start_time.push(currSentence.start_time);
         scene_end_time.push(currSentence.end_time);
@@ -727,7 +763,13 @@ async function mergeSentenceAudios(video_id, vol_id){
     let path_val = 0;
 
     while(i < l){
-        let new_sentence = sentence[i];
+        let new_sentence = '';
+        let new_sentence_ocr = '';
+        if (sentence_is_ocr[i])
+            new_sentence_ocr = sentence[i];
+        else
+            new_sentence = sentence[i];
+        
         let currSceneNum = sentence_scene[i];
         let currSceneStartTime = scene_start_time[i];
         let currSceneEndTime = scene_end_time[i];
@@ -741,9 +783,13 @@ async function mergeSentenceAudios(video_id, vol_id){
         let currAudioPath = sentence_audio_path[i];
         let sentence_id_first = sentence_id[i];
         let sentence_id_last = sentence_id[i];
+        let isOcr = sentence_is_ocr[i];
 
         if(new_sentence.length>0 && new_sentence[new_sentence.length-1] == `\n`)
             new_sentence=new_sentence.replace('\n','.');
+        
+        if(new_sentence_ocr.length>0 && new_sentence_ocr[new_sentence_ocr.length-1] == `\n`)
+            new_sentence_ocr=new_sentence_ocr.replace('\n','.');
 
         i++;
 
@@ -754,8 +800,17 @@ async function mergeSentenceAudios(video_id, vol_id){
             
             if(sentence[i].length>0 && sentence[i][sentence[i].length-1] == `\n`)
                     sentence[i]=sentence[i].replace('\n','.');
+            
+            if(isOcr)
+                new_sentence_ocr += (' ' + sentence[i]);
+            else if(!isOcr && !sentence_is_ocr[i])
+                new_sentence += (' ' + sentence[i]);
+            else{
+                new_sentence_ocr = sentence[i];
+                isOcr = true;
+            }
 
-            new_sentence += (' ' + sentence[i]);
+            
             oldAudioStartTime = sentence_audio_start_time[i];
             oldAudioDur = sentence_duration[i];
             totalAudioDur += oldAudioDur;
@@ -765,7 +820,7 @@ async function mergeSentenceAudios(video_id, vol_id){
         }
         await updateNewSentence(sentence_id_first, sentence_id_last,
              currSceneNum, currSceneStartTime, currSceneEndTime, currSceneDesc,
-              currAudioType, audioStartTime, totalAudioDur, currAudioPath,  new_sentence, path_val);
+              currAudioType, audioStartTime, totalAudioDur, currAudioPath,  new_sentence, new_sentence_ocr, path_val);
 
         if(currSceneNum == sentence_scene[i] && currAudioType == sentence_audio_type[i] && i < l)
             path_val += 1;
@@ -874,7 +929,7 @@ async function getResponse(vid_id, vol_id, res){
     
 }
 
-async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneNum, currSceneStartTime, currSceneEndTime, currSceneDesc, currAudioType, audioStartTime, totalAudioDur, currAudioPath, sentence, path_val){
+async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneNum, currSceneStartTime, currSceneEndTime, currSceneDesc, currAudioType, audioStartTime, totalAudioDur, currAudioPath, sentence, sentenceOcr, path_val){
     
     let newstr = sentence_id_last.split('_');
     let sentence_id = sentence_id_first + '_' + newstr[newstr.length - 1];
@@ -910,7 +965,7 @@ async function updateNewSentence(sentence_id_first, sentence_id_last, currSceneN
     
     // console.log('currAudioType: ' + currAudioType);
     // console.log('audioStartTime: ' + audioStartTime);
-    await generateMp3ForTextInFileystem(file_path, sentence);
+    await generateMp3ForTextInFileystemWithDifferentVoices(file_path, sentence, sentenceOcr);
     let duration = await getAudioDurationInSeconds(file_path);
     console.log('duration ' + duration);
     console.log('totalAudioDur: ' + totalAudioDur);
