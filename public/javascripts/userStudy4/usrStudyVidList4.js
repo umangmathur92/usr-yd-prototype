@@ -24,8 +24,8 @@ function fetchTutorialVideo() {
         ? "With Baseline Descriptions"
         : "Without Baseline Descriptions";
       let onDemandSupportStr = isOnDemandSupported
-        ? "With On Demand"
-        : "Without On Demand";
+        ? "With InfoBot"
+        : "Without InfoBot";
       let aiParam = vid.ai_support === true ? "yes" : "no";
       let surveyLink = "#";
 
@@ -74,8 +74,8 @@ function updateUI(vidArr) {
       ? "With Baseline Descriptions"
       : "Without Baseline Descriptions";
     let onDemandSupportStr = isOnDemandSupported
-      ? "With On Demand"
-      : "Without On Demand";
+      ? "With InfoBot"
+      : "Without InfoBot";
     let aiParam = vid.ai_support === true ? "yes" : "no";
     let surveyLink = "#";
     // if (isAiSupported) {
@@ -129,7 +129,7 @@ function updateUI(vidArr) {
         <img src="../images/survey.png" class="img-survey">User Survey for Video ${i +
           1} (Qualtrics Survey)</a></b><br>`;
   }
-  generatedHtml += `<b><a target="_self" href="" class="list-group-item" target="_blank">
+  generatedHtml += `<b><a target="_self" href="https://sfsu.co1.qualtrics.com/jfe/form/SV_9MRb5RSi7FNRaIt?userId=${userId}" class="list-group-item" target="_blank">
     <input type="checkbox" style="margin-right: 8px;">
     <img src="../images/survey.png" class="img-survey">General Survey (Qualtrics)</a></b>`;
   $(".list-group").append(generatedHtml);

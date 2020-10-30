@@ -15,30 +15,30 @@ class Step {
 let tutorialSteps = [];
 
 let step1 = new Step(
-  function () {
+  function() {
     this.init = null;
   },
-  function () {
+  function() {
     if (isFirstStep1) {
       audio_clip.src = "../audio/tutorial_1_1.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = "../audio/tutorial_1_2.mp3";
-        audio_clip.onended = function () {
+        audio_clip.onended = function() {
           audio_clip.src = null;
         };
       };
       isFirstStep1 = false;
     } else {
       audio_clip.src = "../audio/tutorial_1_2.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = null;
       };
     }
   },
-  function () {
+  function() {
     if (player.getPlayerState == YT.PlayerState.PLAYING) pauseVideo();
   },
-  function () {
+  function() {
     if (playPause >= 1) {
       return true;
     } else {
@@ -48,107 +48,114 @@ let step1 = new Step(
 );
 
 let step2 = new Step(
-  function () {
+  function() {
     this.init = null;
+    this.count = 0;
   },
 
-  function () {
+  function() {
     if (isFirstStep2) {
       audio_clip.src = "../audio/tutorial_2_1.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = "../audio/tutorial_2_2.mp3";
-        audio_clip.onended = function () {
+        audio_clip.onended = function() {
           audio_clip.src = null;
         };
       };
       isFirstStep2 = false;
     } else {
       audio_clip.src = "../audio/tutorial_2_2.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = null;
       };
     }
   },
-  function () {
+  function() {
     if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
   },
-  function () {
-    if (captionsRequested >= 1) {
+  function() {
+    if (this.count < 50) {
+      this.count += 1;
+      return false;
+    } else {
+      pauseVideo();
       return true;
     }
   }
 );
 
 let step3 = new Step(
-  function () {
+  function() {
     console.log("tutorial 3 1");
     audio_clip.src = "../audio/tutorial_3_1.mp3";
-    audio_clip.onended = function () {
+    audio_clip.onended = function() {
       audio_clip.src = null;
     };
     this.init = null;
   },
 
-  function () {
+  function() {
     if (isFirstStep3) {
       audio_clip.src = "../audio/tutorial_3_1.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = "../audio/tutorial_3_2.mp3";
-        audio_clip.onended = function () {
+        audio_clip.onended = function() {
           audio_clip.src = null;
         };
       };
       isFirstStep3 = false;
     } else {
       audio_clip.src = "../audio/tutorial_3_2.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = null;
       };
     }
   },
-  function () {
+  function() {
     if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
   },
-  function () {
-    if (questionsAsked >= 1) {
+  function() {
+    if (captionsRequested >= 1) {
       return true;
-    } else {
-      return false;
     }
   }
 );
 
 let step4 = new Step(
-  function () {
+  function() {
     audio_clip.src = "../audio/tutorial_4_1.mp3";
-    audio_clip.onended = function () {
+    audio_clip.onended = function() {
       audio_clip.src = null;
     };
     this.init = null;
   },
 
-  function () {
+  function() {
     if (isFirstStep4) {
       audio_clip.src = "../audio/tutorial_4_1.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = "../audio/tutorial_4_2.mp3";
-        audio_clip.onended = function () {
+        audio_clip.onended = function() {
           audio_clip.src = null;
         };
       };
       isFirstStep4 = false;
     } else {
       audio_clip.src = "../audio/tutorial_4_2.mp3";
-      audio_clip.onended = function () {
+      audio_clip.onended = function() {
         audio_clip.src = null;
       };
     }
   },
-  function () {
+  function() {
     if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
   },
-  function () {
-    return false;
+  function() {
+    if (questionsAsked >= 1) {
+      return true;
+    } else {
+      return false;
+    }
   }
 );
 

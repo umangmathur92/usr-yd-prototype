@@ -58,7 +58,7 @@ let playPause = 0;
 let captionsRequested = 0;
 let questionsAsked = 0;
 let isVote = true;
-let conditionType = 'A';
+let conditionType = "A";
 var audioVote = document.getElementById("voteAudio");
 
 $(document).ready(function() {
@@ -329,13 +329,13 @@ async function onProgress(currentTime) {
   currentTime = currentTime.toFixed(3);
   // let currScene = getSceneFromTime(currentTime);
   let currScene = getIndexFromExtended(currentTime);
-//   console.log(currScene);
+  //   console.log(currScene);
   // let sceneNum = currScene.sc_num;
   let sceneNum = currScene;
 
   if (prevSceneNum == -1 && first_extend_flag) {
     first_extend_flag = false;
-  } else if ((sceneNum != -1 && sceneNum != prevSceneNum)) {
+  } else if (sceneNum != -1 && sceneNum != prevSceneNum) {
     if (true || scene_audio_extend_set.has(prevSceneNum)) {
       STATE = 1;
       pauseVideo();
@@ -346,7 +346,7 @@ async function onProgress(currentTime) {
       if (flag && currAudio == null) {
         // currAudio = sentenceAudioMap[prevSceneNum][0];
         currAudio = allSentenceExtendedAudioArr[currScene];
-        currAudio.currentTime=0;
+        currAudio.currentTime = 0;
         player.setVolume(15);
         currAudio.play();
         currAudio.onended = function() {
@@ -452,19 +452,19 @@ function onPlayerStateChange(event) {
 }
 
 function playVideo() {
-//   if (tutorialStarted) {
-    //speak("Video Play");
-    player.playVideo();
-//   }
+  //   if (tutorialStarted) {
+  //speak("Video Play");
+  player.playVideo();
+  //   }
 }
 
 function pauseVideo() {
-//   if (tutorialStarted) {
-    //speak("Video Play");
-    // playPause += 1;
-    // console.log("This is the file");
-    player.pauseVideo();
-//   }
+  //   if (tutorialStarted) {
+  //speak("Video Play");
+  // playPause += 1;
+  // console.log("This is the file");
+  player.pauseVideo();
+  //   }
 }
 
 function stopVideo() {
