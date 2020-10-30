@@ -57,6 +57,8 @@ let currentInstruction = 0;
 let playPause = 0;
 let captionsRequested = 0;
 let questionsAsked = 0;
+let isVote = true;
+let conditionType = 'A';
 
 $(document).ready(function() {
   $("#btn-video-breakpoint-toggle").prop("checked", true);
