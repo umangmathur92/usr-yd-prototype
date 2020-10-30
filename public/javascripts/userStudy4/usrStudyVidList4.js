@@ -32,7 +32,7 @@ function fetchTutorialVideo() {
       tutorialHtml += `<b><a href="/onDemandTutorial/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
                 <input type="checkbox" style="margin-right: 8px;">
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
-                Tutorial Video :(${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+                Tutorial Video: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
 
       tutorialHtml += `</b><br>`;
     }
@@ -74,8 +74,8 @@ function updateUI(vidArr) {
       ? "With Baseline Descriptions"
       : "Without Baseline Descriptions";
     let onDemandSupportStr = isOnDemandSupported
-      ? "With InfoBot"
-      : "Without InfoBot";
+      ? "with InfoBot"
+      : "without InfoBot";
     let aiParam = vid.ai_support === true ? "yes" : "no";
     let surveyLink = "#";
     // if (isAiSupported) {
@@ -101,7 +101,7 @@ function updateUI(vidArr) {
       <input type="checkbox" style="margin-right: 8px;">
       
       <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
-      Video ${i + 1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+      Video ${i + 1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
     } else {
       if (isAiSupported) {
         if (describerId == 2) {
@@ -114,14 +114,14 @@ function updateUI(vidArr) {
               <input type="checkbox" style="margin-right: 8px;">
               <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
               Video ${i +
-                1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+                1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
       } else {
         surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_2iBERH5Z4aqR5aZ?userId=${userId}&video=${videoId}`; //no tools
         generatedHtml += `<b><a  href="/playvideoaudio/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
                 <input type="checkbox" style="margin-right: 8px;">
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
                 Video ${i +
-                  1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+                  1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
       }
     }
     generatedHtml += `<b><a target="_self" href="${surveyLink}" class="list-group-item" target="_blank" >
