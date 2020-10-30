@@ -54,6 +54,11 @@ let questionUserStudy4 = {
         return db.query(`UPDATE question_us4 SET answer = $1 WHERE question_id= $2 AND user_id=$3`, [data.answer, data.questionId, data.userId], callback);
     }, 
 
+    updateQuestion: function (data, callback) {
+        // console.log({'IINSIE US': data});
+        return db.query(`UPDATE question_us4 SET keyframe = $1, dialog_id = $2 WHERE question_id= $3 AND user_id=$4`, [data.keyframe, data.dialogId, data.questionId, data.userId], callback);
+    },
+
     getQuestionByUserId: function (userId, callback) {
         return db.query(`SELECT * FROM question_us4 where user_id = ${userId}`, callback);
     },

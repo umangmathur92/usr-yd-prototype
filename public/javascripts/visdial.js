@@ -15,6 +15,8 @@ let question_id = "";
 let keyframeMap = {};
 let pythiaCaption = "";
 let imageKey = "";
+let imagePath = "";
+let dialogId = "";
 let ws_id = uuidv4();
 
 async function fetchImageCaption() {
@@ -76,6 +78,7 @@ async function fetchKeyFrames(speech = "") {
   pauseVideo();
   if (chatbotTimeStamp == videotime) {
     submitQuestion(speech);
+    updateQuestionInfo(imagePath, question_id);
     return;
   }
 
@@ -95,13 +98,13 @@ async function fetchKeyFrames(speech = "") {
       pythiaCaption = KeyFramesArr[0].pythia_caption;
       imageKey = youtubeId + "_frame_" + KeyFramesArr[0].keyframe_num;
       console.log({ imageKey });
-      path = KeyFramesArr[0].keyframe_url;
+      imagePath = KeyFramesArr[0].keyframe_url;
       dialogId = question_id;
       prev_history = { caption: [pythiaCaption] };
       prev_history = JSON.stringify(prev_history);
       submitQuestion(speech);
-      updateQuestionInfo();
-      keyframeMap[ws_id] = path;
+      updateQuestionInfo(imagePath, question_id);
+      keyframeMap[ws_id] = imagePath;
     });
     return true;
   } catch (error) {
@@ -228,6 +231,21 @@ function uuidv4() {
       v = c == "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+function updateQuestionInfo(imagePath, question_id){
+    
+    let updateInfo = {
+      userId : volunteerId,
+      questionId : question_id,
+      keyframe : imagePath,
+      dialogId
+    }
+
+    $.post("/userStudy4/updateQuestion", updateInfo, function(res) {
+      console.log("Question Updated");
+      console.log(res);
+    });
 }
 
 async function checkQuestion() {

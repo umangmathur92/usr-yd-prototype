@@ -260,6 +260,16 @@ router.post('/addAnswer', function(req, res, next) {
   });
 });
 
+router.post('/updateQuestion', function(req, res, next) {
+  let queryResult = questionUserStudy4.updateQuestion(req.body);
+  queryResult.then(result => {
+    res.send('Question updated successfully');  
+  }).catch((err) => {
+    res.send(err);
+    console.log(err)
+  });
+});
+
 router.delete('/deleteQuestion', function(req, res, next) {
   let queryResult = questionUserStudy4.deleteAllQuestionsByUserId(req.body.userId);
   queryResult.then(result => {
