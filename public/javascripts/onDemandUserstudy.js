@@ -611,14 +611,10 @@ var baseLineChatBotText =
   "                description or in response to a question." +
   "              </h6>" +
   '              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">' +
-  "                Press “D” at any time to pause the video and get an image description of the current scene. The video will" +
-  "                automatically resume playing after the description is given." +
+  "            Press “D” at any time to pause the video and get an image description of the current scene. Click the up or down arrow to give the description a thumbs up (a chime will sound) or thumbs down (a buzzer will sound).. The video will automatically resume playing." +
   "              </h6>" +
   '              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">' +
-  "                Press “Q” at any time to pause the video and ask questions about the current scene. Press “Q”, then wait for a short" +
-  "                beep before asking a question about the current scene. You should receive an answer within 5 seconds. You may ask" +
-  "                multiple questions by pressing “Q” and asking a question after the beep - Only one question per beep, please! Press" +
-  "                spacebar when you are finished asking questions and want to resume video playback." +
+  "              Press “Q” at any time to pause the video and ask questions about the current scene. Press “Q”, then wait for a short beep before asking a question about the current scene. You should receive an answer within 5 seconds. Click the up or down arrow to give the description a thumbs up (a chime will sound) or thumbs down (a buzzer will sound). Ask as many questions as you like by pressing “Q” and asking a question after the beep - Only one question per beep, please! " +
   "              </h6>" +
   "              " +
   "              " +
@@ -636,14 +632,10 @@ var chatBotText =
   "                description or in response to a question." +
   "              </h6>" +
   '              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">' +
-  "                Press “D” at any time to pause the video and get an image description of the current scene. The video will" +
-  "                automatically resume playing after the description is given." +
+  "               Press “D” at any time to pause the video and get an image description of the current scene. Click the up or down arrow to give the description a thumbs up (a chime will sound) or thumbs down (a buzzer will sound). The video will automatically resume playing." +
   "              </h6>" +
   '              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">' +
-  "                Press “Q” at any time to pause the video and ask questions about the current scene. Press “Q”, then wait for a short" +
-  "                beep before asking a question about the current scene. You should receive an answer within 5 seconds. You may ask" +
-  "                multiple questions by pressing “Q” and asking a question after the beep - Only one question per beep, please! Press" +
-  "                spacebar when you are finished asking questions and want to resume video playback." +
+  "               Press “Q” at any time to pause the video and ask questions about the current scene. Press “Q”, then wait for a short beep before asking a question about the current scene. You should receive an answer within 5 seconds. Click the up or down arrow to give the description a thumbs up (a chime will sound) or thumbs down (a buzzer will sound). Ask as many questions as you like by pressing “Q” and asking a question after the beep - Only one question per beep, please! " +
   "              </h6>" +
   "              " +
   "              " +
