@@ -71,8 +71,8 @@ function updateUI(vidArr) {
     let describerId =
       volunteerId == "f03cb948-474b-4084-9192-650ba62d396b" ? 1 : 2;
     let aiSupportStr = isAiSupported
-      ? "With Baseline Descriptions"
-      : "Without Baseline Descriptions";
+      ? "With baseline descriptions"
+      : "Without baseline descriptions";
     let onDemandSupportStr = isOnDemandSupported
       ? "with InfoBot"
       : "without InfoBot";

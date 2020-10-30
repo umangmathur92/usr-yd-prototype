@@ -603,7 +603,7 @@ var baseLineChatBotText =
   "                When you watch this video, you will have access to baseline descriptions and the InfoBot. Press the spacebar to start" +
   "                and stop the video." +
   "                Baseline descriptions play automatically, provide general information about a scene, and read any onscreen text out" +
-  "                loud. Onscreen text will be read in a higher-pitched voice." +
+  "                loud. Onscreen text will be read in a female voice." +
   "              </h6>" +
   "              " +
   '              <h6 style="color: white; text-align:justify;" ;="" tabindex="0">' +
