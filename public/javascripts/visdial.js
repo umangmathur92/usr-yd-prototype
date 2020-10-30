@@ -159,7 +159,7 @@ function WebSocketTest() {
       let dbData = {
         userId: volunteerId,
         answer: answer,
-        question_id: question_id
+        questionId: question_id
       };
 
       $.post("/userStudy4/addAnswer", dbData, function(res) {
