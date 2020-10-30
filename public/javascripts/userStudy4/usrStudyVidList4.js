@@ -110,7 +110,7 @@ function updateUI(vidArr) {
         } else {
           surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_0qhAkLfjQ5cQCKV?userId=${userId}&video=${videoId}`; //human baseline
         }
-        generatedHtml += `<b><a  href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
+        generatedHtml += `<b><a  href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ml=${aiParam}&did=${describerId}" class="list-group-item" >
               <input type="checkbox" style="margin-right: 8px;">
               <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
               Video ${i +
