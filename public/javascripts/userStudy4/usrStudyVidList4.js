@@ -62,6 +62,7 @@ function updateUI(vidArr) {
   let userName = vidArr[0].name;
   for (let i = 0; i < vidArr.length; i++) {
     let vid = vidArr[i];
+    console.log(vid);
     let videoId = vid.video_id;
     let videoTitle = vid.title;
     let volunteerId = vid.volunteer_id; // on-demand Describer
@@ -82,34 +83,46 @@ function updateUI(vidArr) {
     // } else {
     //   surveyLink = "https://forms.gle/vkyExP3UqeNkNKiE9";
     // }
-    surveyLink = "https://sfsu.co1.qualtrics.com/jfe/form/SV_8tX3yXA6hte1I3j";
     console.log(vid);
     if (isOnDemandSupported) {
-      surveylink = "https://sfsu.co1.qualtrics.com/jfe/form/SV_097bW81QeNaAAzb";
-      generatedHtml += `
-            <b>
+      if (isAiSupported) {
+        if (describerId == 1) {
+          surveylink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_1Gn9oBUjTKWWOVf?userId=${userId}&video=${videoId}`; //on demand, human baseline
+        } else {
+          surveylink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_8tX3yXA6hte1I3j?userId=${userId}&video=${videoId}`; //on demand, ai baseline
+        }
+      } else {
+        surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_097bW81QeNaAAzb?userId=${userId}&video=${videoId}`; //chatbot only
+      }
+      generatedHtml += ` <b>
             
-            <a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
-            
-            <input type="checkbox" style="margin-right: 8px;">
-            
-            <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
-            Video ${i +
-              1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+      <a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
+      
+      <input type="checkbox" style="margin-right: 8px;">
+      
+      <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
+      Video ${i + 1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
     } else {
       if (isAiSupported) {
-        //surveyLink = "https://sfsu.co1.qualtrics.com/jfe/form/SV_0qhAkLfjQ5cQCKV"; // HITL Baseline
-        console.log(aiSupportStr);
-        surveyLink =
-          "https://sfsu.co1.qualtrics.com/jfe/form/SV_3vHQEYhWIdUAyb3"; //ai baseline
-      } else
-        surveyLink =
-          "https://sfsu.co1.qualtrics.com/jfe/form/SV_2iBERH5Z4aqR5aZ"; //no tools
-      generatedHtml += `<b><a  href="/playvideoaudio/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
+        if (describerId == 2) {
+          console.log(aiSupportStr);
+          surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_3vHQEYhWIdUAyb3?userId=${userId}&video=${videoId}`; //ai baseline
+        } else {
+          surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_0qhAkLfjQ5cQCKV?userId=${userId}&video=${videoId}`; //human baseline
+        }
+        generatedHtml += `<b><a  href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
+              <input type="checkbox" style="margin-right: 8px;">
+              <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
+              Video ${i +
+                1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+      } else {
+        surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_2iBERH5Z4aqR5aZ?userId=${userId}&video=${videoId}`; //no tools
+        generatedHtml += `<b><a  href="/playvideoaudio/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
                 <input type="checkbox" style="margin-right: 8px;">
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
                 Video ${i +
                   1}: (${aiSupportStr} and ${onDemandSupportStr})</a></b>`;
+      }
     }
     generatedHtml += `<b><a target="_self" href="${surveyLink}" class="list-group-item" target="_blank" >
         <input type="checkbox" style="margin-right: 8px;">
