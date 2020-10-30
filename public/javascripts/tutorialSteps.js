@@ -2,6 +2,7 @@ let isFirstStep1 = true;
 let isFirstStep2 = true;
 let isFirstStep3 = true;
 let isFirstStep4 = true;
+let isFirstStep5 = true;
 
 class Step {
   constructor(init, recurringSpeech, action, check) {
@@ -159,4 +160,32 @@ let step4 = new Step(
   }
 );
 
-tutorialSteps.push(step1, step2, step3, step4);
+let step5 = new Step(
+  function() {
+    this.init = null;
+  },
+
+  function() {
+    if (isFirstStep4) {
+      audio_clip.src = "../audio/tutorial_5_1.mp3";
+      audio_clip.onended = function() {
+        audio_clip.src = "../audio/tutorial_5_2.mp3";
+        audio_clip.onended = function() {
+          audio_clip.src = null;
+        };
+      };
+      isFirstStep4 = false;
+    } else {
+      audio_clip.src = "../audio/tutorial_5_2.mp3";
+      audio_clip.onended = function() {
+        audio_clip.src = null;
+      };
+    }
+  },
+  function() {
+    if ((player.getPlayerState = YT.PlayerState.PLAYING)) pauseVideo();
+  },
+  function() {}
+);
+
+tutorialSteps.push(step1, step2, step3, step4, step5);
