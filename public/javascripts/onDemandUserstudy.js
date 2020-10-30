@@ -65,10 +65,10 @@ $(document).ready(function() {
     if(!enableAi){
         userId = '';
         baselineDesc = 'Descriptions';
-        conditionType = 'Only on-demand';
+        conditionType = 'C';
     }
     else{
-        conditionType = 'Baseline and on-demand';
+        conditionType = describerId=="1" ? 'B' : 'A';
     }
     document.getElementById("page-title").innerHTML = "On Demand " + baselineDesc;
 

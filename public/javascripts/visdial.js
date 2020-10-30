@@ -47,7 +47,7 @@ async function fetchImageCaption() {
       audio_clip.onended = function() {
         audio_clip.src = null;
         audio_path == "0" ? "1" : "0";
-        if(isTutorial){
+        if(isTutorial && !isFirstStep1 && captionsRequested <= 1){
           captionsRequested += 1;
         }else{
           playVideo();
@@ -59,9 +59,11 @@ async function fetchImageCaption() {
 
     let dbData2 = {
       userId: volunteerId,
+      videoId: youtubeId,
       caption: caption,
-      youtube_timestamp: captionTimeStamp.toFixed(3),
-      key_frame: keyframeUrl
+      youtubeTimestamp: captionTimeStamp.toFixed(3),
+      keyFrame: keyframeUrl,
+      conditionType
     };
 
     $.post("/userStudy4/addCaption", dbData2, function(res) {
@@ -94,9 +96,11 @@ async function fetchKeyFrames(speech = "") {
       imageKey = youtubeId + "_frame_" + KeyFramesArr[0].keyframe_num;
       console.log({ imageKey });
       path = KeyFramesArr[0].keyframe_url;
+      dialogId = question_id;
       prev_history = { caption: [pythiaCaption] };
       prev_history = JSON.stringify(prev_history);
       submitQuestion(speech);
+      updateQuestionInfo();
       keyframeMap[ws_id] = path;
     });
     return true;
@@ -152,9 +156,7 @@ function WebSocketTest() {
       let dbData = {
         userId: volunteerId,
         answer: answer,
-        question_id: question_id,
-        youtube_timestamp: chatbotTimeStamp.toFixed(3),
-        key_frame: keyframeMap[socket_id]
+        question_id: question_id
       };
 
       $.post("/userStudy4/addAnswer", dbData, function(res) {
@@ -181,7 +183,7 @@ function WebSocketTest() {
             audio_clip.src = null;
             audio_path == "0" ? "1" : "0";
             console.log("On demand Audio ended");
-            if(isTutorial){
+            if(isTutorial && !isFirstStep2){
               questionsAsked += 1;
             }
             // alert("The audio has ended");

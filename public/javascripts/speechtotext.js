@@ -1,4 +1,5 @@
 let recordButton = document.getElementById("record-button");
+let questionTimestamp = -1;
 
 window.SpeechRecognition =
   window.webkitSpeechRecognition || window.SpeechRecognition;
@@ -17,6 +18,7 @@ async function askQuestion() {
   console.log("Record button clicked..Recording....");
   player.pauseVideo();
   beep();
+  questionTimestamp = videotime.toFixed(3);
   recognition.start();
 }
 
@@ -35,8 +37,10 @@ recognition.onresult = event => {
     audio_clip.src = '../audio/earcons/ting.wav';
     let data = {
       userId: volunteerId,
+      videoId: youtubeId,
       question: speechToText,
-      youtube_timestamp: chatbotTimeStamp.toFixed(3)
+      youtubeTimestamp: questionTimestamp,
+      conditionType
     };
 
     $.post("/userStudy4/addQuestion", data, function(res) {
