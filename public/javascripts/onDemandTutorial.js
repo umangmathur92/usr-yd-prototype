@@ -59,6 +59,7 @@ let captionsRequested = 0;
 let questionsAsked = 0;
 let isVote = true;
 let conditionType = 'A';
+var audioVote = document.getElementById("voteAudio");
 
 $(document).ready(function() {
   $("#btn-video-breakpoint-toggle").prop("checked", true);
