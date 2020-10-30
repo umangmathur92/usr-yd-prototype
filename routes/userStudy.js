@@ -20,7 +20,7 @@ let accountId = '5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b';
 let apiKey = 'dbbd2d92a19749759576466ed9cd61fa'; 
 
 
-router.get('/', function (req, res) {
+router.get('/key=ceb60ef5-cb4f-432c-bb19-f0e26530a3ca', function (req, res) {
     res.render('homeUserStudy', { title: 'User Study' });
   });
   

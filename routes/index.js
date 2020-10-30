@@ -39,7 +39,7 @@ router.use(bodyParser.json());
 // console.log({sceneModification: sceneModification.addModifiedScene})
 
 
-router.get('/', function(req, res, next) {
+router.get('/key=ceb60ef5-cb4f-432c-bb19-f0e26530a3ca', function(req, res, next) {
   //res.render('homeUserStudy', { title: 'Express' });
   //res.render('home', { title: 'Express' });
   res.render('homeUserStudy2', { title: 'User Study 2' });
