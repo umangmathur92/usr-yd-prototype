@@ -111,7 +111,7 @@ function updateUI(vidArr) {
               Video ${i +
                 1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
       } else {
-        surveyLink = `https://sfsu.co1.qualtr           ics.com/jfe/form/SV_2iBERH5Z4aqR5aZ?userId=${userId}&video=${videoId}`; //no tools
+        surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_2iBERH5Z4aqR5aZ?userId=${userId}&video=${videoId}`; //no tools
         generatedHtml += `<b><a  href="/playvideoaudio/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
             
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
