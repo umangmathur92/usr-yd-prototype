@@ -21,17 +21,16 @@ function fetchTutorialVideo() {
       let isAiSupported = vid.ai_support;
       let isOnDemandSupported = vid.on_demand_support;
       let aiSupportStr = isAiSupported
-        ? "With Baseline Descriptions"
-        : "Without Baseline Descriptions";
+        ? "With baseline descriptions"
+        : "Without baseline descriptions";
       let onDemandSupportStr = isOnDemandSupported
-        ? "With InfoBot"
-        : "Without InfoBot";
+        ? "with InfoBot"
+        : "without InfoBot";
       let aiParam = vid.ai_support === true ? "yes" : "no";
       let surveyLink = "#";
 
       tutorialHtml += `<b><a href="/onDemandTutorial/${videoId}?u=${userId}&ai=${aiParam}" class="list-group-item" >
-                <input type="checkbox" style="margin-right: 8px;">
-                <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
+
                 Tutorial Video: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
 
       tutorialHtml += `</b><br>`;
@@ -78,18 +77,14 @@ function updateUI(vidArr) {
       : "without InfoBot";
     let aiParam = vid.ai_support === true ? "yes" : "no";
     let surveyLink = "#";
-    // if (isAiSupported) {
-    //   surveyLink = "https://forms.gle/vkyExP3UqeNkNKiE9";
-    // } else {
-    //   surveyLink = "https://forms.gle/vkyExP3UqeNkNKiE9";
-    // }
+
     console.log(vid);
     if (isOnDemandSupported) {
       if (isAiSupported) {
         if (describerId == 1) {
-          surveylink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_1Gn9oBUjTKWWOVf?userId=${userId}&video=${videoId}`; //on demand, human baseline
+          surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_1Gn9oBUjTKWWOVf?userId=${userId}&video=${videoId}`; //on demand, human baseline
         } else {
-          surveylink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_8tX3yXA6hte1I3j?userId=${userId}&video=${videoId}`; //on demand, ai baseline
+          surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_8tX3yXA6hte1I3j?userId=${userId}&video=${videoId}`; //on demand, ai baseline
         }
       } else {
         surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_097bW81QeNaAAzb?userId=${userId}&video=${videoId}`; //chatbot only
@@ -98,7 +93,7 @@ function updateUI(vidArr) {
             
       <a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
       
-      <input type="checkbox" style="margin-right: 8px;">
+      
       
       <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
       Video ${i + 1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
@@ -111,26 +106,26 @@ function updateUI(vidArr) {
           surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_0qhAkLfjQ5cQCKV?userId=${userId}&video=${videoId}`; //human baseline
         }
         generatedHtml += `<b><a  href="/audioDescriptionUserStudy/${videoId}?u=${userId}&ml=${aiParam}&did=${describerId}" class="list-group-item" >
-              <input type="checkbox" style="margin-right: 8px;">
+            
               <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
               Video ${i +
                 1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
       } else {
-        surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_2iBERH5Z4aqR5aZ?userId=${userId}&video=${videoId}`; //no tools
+        surveyLink = `https://sfsu.co1.qualtr           ics.com/jfe/form/SV_2iBERH5Z4aqR5aZ?userId=${userId}&video=${videoId}`; //no tools
         generatedHtml += `<b><a  href="/playvideoaudio/${videoId}?u=${userId}&ml=${aiParam}" class="list-group-item" >
-                <input type="checkbox" style="margin-right: 8px;">
+            
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
                 Video ${i +
                   1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
       }
     }
     generatedHtml += `<b><a target="_self" href="${surveyLink}" class="list-group-item" target="_blank" >
-        <input type="checkbox" style="margin-right: 8px;">
+       
         <img src="../images/survey.png" class="img-survey">User Survey for Video ${i +
-          1} (Qualtrics Survey)</a></b><br>`;
+          1} </a></b><br>`;
   }
   generatedHtml += `<b><a target="_self" href="https://sfsu.co1.qualtrics.com/jfe/form/SV_9MRb5RSi7FNRaIt?userId=${userId}" class="list-group-item" target="_blank">
-    <input type="checkbox" style="margin-right: 8px;">
-    <img src="../images/survey.png" class="img-survey">General Survey (Qualtrics)</a></b>`;
+   
+    <img src="../images/survey.png" class="img-survey">General Survey</a></b>`;
   $(".list-group").append(generatedHtml);
 }
