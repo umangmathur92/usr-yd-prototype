@@ -89,12 +89,8 @@ function updateUI(vidArr) {
       } else {
         surveyLink = `https://sfsu.co1.qualtrics.com/jfe/form/SV_097bW81QeNaAAzb?userId=${userId}&video=${videoId}`; //chatbot only
       }
-      generatedHtml += ` <b>
-            
+      generatedHtml += ` <b>            
       <a href="/onDemandUserStudy/${videoId}?u=${userId}&ai=${aiParam}&did=${describerId}" class="list-group-item" >
-      
-      
-      
       <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg">
       Video ${i + 1}: ${aiSupportStr} and ${onDemandSupportStr}</a></b>`;
     } else {
