@@ -190,10 +190,13 @@ function millisToMinutesAndSeconds(secs) {
 }  
 
 function onYouTubeIframeAPIReady() {
+    let href = location.href;
+    const youtubeIframeId = new URL(href).pathname.split("/").pop();
+
     player = new YT.Player('player', {
         height: '270',
         width: '480',
-        videoId: youtubeId,
+        videoId: youtubeIframeId,
         playerVars: {
             autoplay: 1,
             enablejsapi: 1,
