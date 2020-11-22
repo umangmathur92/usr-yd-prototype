@@ -4,7 +4,8 @@ const uuidv1 = require('uuid/v1');
 let conditionTypes = {
     'A' : 'AI baseline and on-demand',
     'B' : 'Human baseline and on-demand',
-    'C' : 'Only on-demand'
+    'C' : 'Only on-demand',
+    'D' : 'AI baseline and on-demand (Tutorial)'
 }
 
 
@@ -17,6 +18,10 @@ let questionUserStudy4 = {
         let condition = conditionTypes[data.conditionType];
         console.log(data);
         console.log({condition});
+        const search = "'";
+        const replaceWith = "''";
+        data.question = data.question.split(search).join(replaceWith);
+        
         const sql = `START TRANSACTION; 
         INSERT into question_us4 (question_id, question, user_id, video_id, video_timestamp, timestamp, condition_type) VALUES ('${data.questionId}','${data.question}','${data.userId}', '${data.videoId}', ${data.youtubeTimestamp}, '${todayDate.toLocaleString()}', '${condition}'); 
         COMMIT;`;
