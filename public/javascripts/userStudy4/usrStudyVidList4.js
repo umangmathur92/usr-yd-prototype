@@ -58,7 +58,8 @@ function updateUI(vidArr) {
   console.log(vidArr);
   // let generatedHtml = '';
   let generatedHtml = tutorialHtml;
-  let userName = vidArr[0].name;
+  //unused variable
+  // let userName = vidArr[0].name;
   for (let i = 0; i < vidArr.length; i++) {
     let vid = vidArr[i];
     console.log(vid);
