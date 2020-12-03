@@ -75,7 +75,7 @@ $(document).ready(function() {
     document.getElementById("sidebar-text").innerHTML = baseLineChatBotText;
   }
 
-  document.getElementById("page-title").innerHTML = "On Demand " + baselineDesc;
+  document.getElementById("page-title").innerHTML = "InfoBot " + baselineDesc;
 
   let href = location.href;
   const lastPathSegment = new URL(href).pathname.split("/").pop();
@@ -200,7 +200,7 @@ function millisToMinutesAndSeconds(secs) {
 function onYouTubeIframeAPIReady() {
   let href = location.href;
   const youtubeIframeId = new URL(href).pathname.split("/").pop();
-  
+
   player = new YT.Player("player", {
     height: "270",
     width: "480",
@@ -213,7 +213,6 @@ function onYouTubeIframeAPIReady() {
       disablekb: 1,
       fs: 0,
       iv_load_policy: 3,
-      modestbranding: 1,
       rel: 0,
       showinfo: 0,
       wmode: "opaque"
@@ -230,6 +229,7 @@ async function onPlayerReady(event) {
   player.setVolume(75);
   $("#total_time").text(formatTime(player.getDuration()));
   updateTime();
+  document.getElementById("player").tabIndex = -1;
 }
 
 async function updateTime() {

@@ -1,147 +1,166 @@
-const socket = io('http://localhost:5001');
+const socket = io("http://localhost:5001");
 
 let url = location.search.substring(1);
-const roomName = new URLSearchParams(url).get('name');
-const name = new URLSearchParams(url).get('user');
-const userType = new URLSearchParams(url).get('type');
-const videoId =  new URLSearchParams(url).get('videoId');
-console.log('START PAGE');
-console.log({url});
-console.log({roomName});
-console.log({userName: name});
-const ANSWER = 'answer';
-const QUESTION = 'question';
-const INFO = 'info';
-
+const roomName = new URLSearchParams(url).get("name");
+const name = new URLSearchParams(url).get("user");
+const userType = new URLSearchParams(url).get("type");
+const videoId = new URLSearchParams(url).get("videoId");
+console.log("START PAGE");
+console.log({ url });
+console.log({ roomName });
+console.log({ userName: name });
+const ANSWER = "answer";
+const QUESTION = "question";
+const INFO = "info";
 
 let questions = {};
 
-let messageForm = document.getElementById('send-container');
-let messageInput = document.getElementById('message-input');
-let messageContainer = document.getElementById('message-container');
-let recordButton = document.getElementById('record-button');
-let heading = document.getElementById('heading');
-let submitButton = document.getElementById('submit-button');
+let messageForm = document.getElementById("send-container");
+let messageInput = document.getElementById("message-input");
+let messageContainer = document.getElementById("message-container");
+let recordButton = document.getElementById("record-button");
+let heading = document.getElementById("heading");
+let submitButton = document.getElementById("submit-button");
 let totalQuestions = 0;
 
-
-if(userType === 'admin'){
-    recordButton.style.display = "none";
-    submitButton.style.display = "none";
+if (userType === "admin") {
+  recordButton.style.display = "none";
+  submitButton.style.display = "none";
 }
 
 //Video
-var tag = document.createElement('script');
+var tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')[0];
+var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 firstScriptTag.append(`<p> hello </p>`);
 
 var player;
 function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-    height: '390',
-    width: '640',
+  player = new YT.Player("player", {
+    height: "390",
+    width: "640",
     videoId: videoId,
     events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange
     }
-    });
+  });
 }
 
 function onPlayerReady(event) {
-    event.target.playVideo();
+  event.target.playVideo();
+  document.getElementById("player").tabIndex = -1;
 }
 
-if(name){
-    appendMessage('You joined');
-    socket.emit('new-user', roomName, name);
+if (name) {
+  appendMessage("You joined");
+  socket.emit("new-user", roomName, name);
 }
 
-socket.on('chat-message', data=>{
-   console.log(data);
-   if(data.type == QUESTION){
-        // speak(data.message);
-        appendQnA(data);
-   }else if(userType === 'admin' && data.type == INFO){
-        appendMessage(data.userId + ':'+ data.message);
-   }else if(data.type == ANSWER){
-       let message =  data.name + ' said ' + data.message;
-       speak(message);
-       updateAnswer(data);
-       speak('  Please rate the response');
-   }
-})
+socket.on("chat-message", data => {
+  console.log(data);
+  if (data.type == QUESTION) {
+    // speak(data.message);
+    appendQnA(data);
+  } else if (userType === "admin" && data.type == INFO) {
+    appendMessage(data.userId + ":" + data.message);
+  } else if (data.type == ANSWER) {
+    let message = data.name + " said " + data.message;
+    speak(message);
+    updateAnswer(data);
+    speak("  Please rate the response");
+  }
+});
 
-socket.on('user-connected', name=>{
-    appendMessage(`${name} joined`);
-})     
+socket.on("user-connected", name => {
+  appendMessage(`${name} joined`);
+});
 
-socket.on('user-disconnected', name=>{
-    appendMessage(`${name} disconnected`);
-})        
-submitButton.addEventListener('click', (e)=>{
-    console.log({event: e.target.id});
-    if(totalQuestions < 5){
-        console.log('inside submit-button');
-        speak('Please submit atleast 5 questions');
-    }else{
-        speak('Thank you for completing the session');
-    }
-    e.stopPropagation();
-})
+socket.on("user-disconnected", name => {
+  appendMessage(`${name} disconnected`);
+});
+submitButton.addEventListener("click", e => {
+  console.log({ event: e.target.id });
+  if (totalQuestions < 5) {
+    console.log("inside submit-button");
+    speak("Please submit atleast 5 questions");
+  } else {
+    speak("Thank you for completing the session");
+  }
+  e.stopPropagation();
+});
 
-messageContainer.addEventListener('click', (e)=>{
-    console.log({event: e.target.id});
-    if(e.target.id.includes('sendButton:')){
-        console.log('inside send button');
-        let index = e.target.id.indexOf(':')+1;
-        let textDescArea = e.target.id.substring(index);
-        console.log({textDescArea});
-        let answerElement = document.getElementById(`answer:${textDescArea}`);
-        console.log('ansElement: ', answerElement.value);
-        socket.emit('send-chat-message', roomName, answerElement.value, textDescArea, name, ANSWER);
-    }
-    e.stopPropagation();
-})
+messageContainer.addEventListener("click", e => {
+  console.log({ event: e.target.id });
+  if (e.target.id.includes("sendButton:")) {
+    console.log("inside send button");
+    let index = e.target.id.indexOf(":") + 1;
+    let textDescArea = e.target.id.substring(index);
+    console.log({ textDescArea });
+    let answerElement = document.getElementById(`answer:${textDescArea}`);
+    console.log("ansElement: ", answerElement.value);
+    socket.emit(
+      "send-chat-message",
+      roomName,
+      answerElement.value,
+      textDescArea,
+      name,
+      ANSWER
+    );
+  }
+  e.stopPropagation();
+});
 
-function appendQnA(data){
-    totalQuestions++;
-    let messageElement = document.createElement('div');
-    // messageElement.innerText = message;
-    // <label class="qnALabel" ${ratingVisibility}>Rating(between 1 and 5):</label> 
-    messageElement.innerHTML = `<div class="qNaContainer" id= qna:${data.questionId} style="border:0px">
+function appendQnA(data) {
+  totalQuestions++;
+  let messageElement = document.createElement("div");
+  // messageElement.innerText = message;
+  // <label class="qnALabel" ${ratingVisibility}>Rating(between 1 and 5):</label>
+  messageElement.innerHTML = `<div class="qNaContainer" id= qna:${
+    data.questionId
+  } style="border:0px">
                                     <label class="qnALabel">Question:</label> 
-                                    <textarea class='qnATextArea' id=question:${data.questionId}>${data.message || ''}</textarea>
+                                    <textarea class='qnATextArea' id=question:${
+                                      data.questionId
+                                    }>${data.message || ""}</textarea>
                                     <label class="qnALabel">Answer:</label> 
-                                    <textarea class='qnATextArea' id=answer:${data.questionId}></textarea>
-                                    ${userType == 'admin' ? `<button id="sendButton:${data.questionId}" class="btn btn-success" >Send</button>` : '' }
-                                    ${userType == 'participant' ? `Rating: <input type="number" name="rating" 
-                                        id=rating:${data.questionId} min="1" max="5"></input>` : ''}
+                                    <textarea class='qnATextArea' id=answer:${
+                                      data.questionId
+                                    }></textarea>
+                                    ${
+                                      userType == "admin"
+                                        ? `<button id="sendButton:${data.questionId}" class="btn btn-success" >Send</button>`
+                                        : ""
+                                    }
+                                    ${
+                                      userType == "participant"
+                                        ? `Rating: <input type="number" name="rating" 
+                                        id=rating:${data.questionId} min="1" max="5"></input>`
+                                        : ""
+                                    }
                                 </div>`;
-   messageContainer.append(messageElement);
+  messageContainer.append(messageElement);
 }
 
-function appendMessage(message){
-    let messageElement = document.createElement('div');
-    messageElement.innerText = message;
-    messageContainer.append(messageElement);
+function appendMessage(message) {
+  let messageElement = document.createElement("div");
+  messageElement.innerText = message;
+  messageContainer.append(messageElement);
 }
 
-
-function updateAnswer(data){
-    console.log('inside updateAnswer:', data);
-    let answerId = 'answer:' + data.questionId;
-    document.getElementById(answerId).innerText = data.message;
+function updateAnswer(data) {
+  console.log("inside updateAnswer:", data);
+  let answerId = "answer:" + data.questionId;
+  document.getElementById(answerId).innerText = data.message;
 }
 
 // let supportMsg = document.getElementById('msg');
 
-
 //Speech Recognition
-window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+window.SpeechRecognition =
+  window.webkitSpeechRecognition || window.SpeechRecognition;
 // if ('SpeechRecognition' in window) {
 //     supportMsg.innerHTML = 'Your browser <strong>supports</strong> speech recognition.'; // speech recognition API supported
 // } else {
@@ -149,36 +168,39 @@ window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecogn
 // }
 
 const recognition = new window.SpeechRecognition();
-recognition.lang = 'en-US';
+recognition.lang = "en-US";
 recognition.interimResults = false;
 
-recordButton.addEventListener('click', (e) => {
-    e.preventDefault();
-   // player.pauseVideo();
-   console.log('Record button clicked..Recording....');
-   player.pauseVideo();
-   recognition.start();
-   e.stopPropagation();
+recordButton.addEventListener("click", e => {
+  e.preventDefault();
+  // player.pauseVideo();
+  console.log("Record button clicked..Recording....");
+  player.pauseVideo();
+  recognition.start();
+  e.stopPropagation();
 });
 
-recognition.onresult = (event) => {
-    const speechToText = event.results[0][0].transcript;
-    if(speechToText.length > 0){
-        let questionId = create_UUID();
-        let data = {    name: roomName,
-                        message: speechToText ,
-                        questionId, 
-                        QUESTION
-                    };
+recognition.onresult = event => {
+  const speechToText = event.results[0][0].transcript;
+  if (speechToText.length > 0) {
+    let questionId = create_UUID();
+    let data = { name: roomName, message: speechToText, questionId, QUESTION };
 
-        appendQnA(data);
-        socket.emit('send-chat-message', roomName, speechToText, questionId, name, QUESTION);
-        console.log({speechToText});
-        // console.log('Confidence: ' + event.results[0][0].confidence);
-    }else{
-        console.log({speechToText});
-    }
-}
+    appendQnA(data);
+    socket.emit(
+      "send-chat-message",
+      roomName,
+      speechToText,
+      questionId,
+      name,
+      QUESTION
+    );
+    console.log({ speechToText });
+    // console.log('Confidence: ' + event.results[0][0].confidence);
+  } else {
+    console.log({ speechToText });
+  }
+};
 // let supportMsg = document.getElementById('supportMsg');
 // //SPeech Synthesis
 // if ('speechSynthesis' in window) {
@@ -189,53 +211,56 @@ recognition.onresult = (event) => {
 // 	supportMsg.classList.add('not-supported');
 // }
 
-let button = document.getElementById('speak');
+let button = document.getElementById("speak");
 
 function speak(text) {
-    // Create a new instance of SpeechSynthesisUtterance.
-    var msg = new SpeechSynthesisUtterance();
-    msg.text = text;
-    msg.volume = 1;
-    msg.rate = 1;
-    msg.pitch = 1;
-    msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == 'Alex' })[0];
-    window.speechSynthesis.speak(msg);
-    console.log('speech synthesis called:', text );
+  // Create a new instance of SpeechSynthesisUtterance.
+  var msg = new SpeechSynthesisUtterance();
+  msg.text = text;
+  msg.volume = 1;
+  msg.rate = 1;
+  msg.pitch = 1;
+  msg.voice = speechSynthesis.getVoices().filter(function(voice) {
+    return voice.name == "Alex";
+  })[0];
+  window.speechSynthesis.speak(msg);
+  console.log("speech synthesis called:", text);
 }
 
 var done = false;
 function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.PLAYING && !done) {
+  if (event.data == YT.PlayerState.PLAYING && !done) {
     // setTimeout(stopVideo, 6000);
     done = true;
-    }else if(event.data == YT.PlayerState.PAUSED){
-        console.log({'data': event.target.getCurrentTime()});
-        let currentTime = formatTime(event.target.getCurrentTime());
-        let message = `Paused the video at ${currentTime} minutes`;
-        socket.emit('send-chat-message', roomName, message, '', name ,INFO);
-    }
+  } else if (event.data == YT.PlayerState.PAUSED) {
+    console.log({ data: event.target.getCurrentTime() });
+    let currentTime = formatTime(event.target.getCurrentTime());
+    let message = `Paused the video at ${currentTime} minutes`;
+    socket.emit("send-chat-message", roomName, message, "", name, INFO);
+  }
 }
 
 function formatTime(time) {
-    // console.log(time);
-    var minutes = Math.floor(time / 60);
-    var seconds = time - minutes * 60;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    var s = parseFloat(seconds).toFixed(0);
-    return minutes + ":" + s;
+  // console.log(time);
+  var minutes = Math.floor(time / 60);
+  var seconds = time - minutes * 60;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+  var s = parseFloat(seconds).toFixed(0);
+  return minutes + ":" + s;
 }
 
 function stopVideo() {
-    player.stopVideo();
+  player.stopVideo();
 }
 
-function create_UUID(){
-    var dt = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (dt + Math.random()*16)%16 | 0;
-        dt = Math.floor(dt/16);
-        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
-    });
-    return uuid;
+function create_UUID() {
+  var dt = new Date().getTime();
+  var uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
+    c
+  ) {
+    var r = (dt + Math.random() * 16) % 16 | 0;
+    dt = Math.floor(dt / 16);
+    return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+  return uuid;
 }
-

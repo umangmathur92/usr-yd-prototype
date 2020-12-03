@@ -43,7 +43,7 @@ let first_extend_flag = true;
 let desc_flag = false;
 let audio_flag = false;
 
-$(document).ready(function () {
+$(document).ready(function() {
   $("#btn-video-breakpoint-toggle").prop("checked", true);
   userId = getUrlVars()["u"];
   enableAi = getUrlVars()["ai"] == "yes" ? true : false;
@@ -52,27 +52,27 @@ $(document).ready(function () {
   youtubeId = lastPathSegment;
   fetchVideoInfo(youtubeId);
 
-  $("#btnScroll").click(function () {
+  $("#btnScroll").click(function() {
     resetVidModifiedTableData();
   });
-  $("#btnSubmit").click(async function () {
+  $("#btnSubmit").click(async function() {
     let shoudShowAlert = true;
     updateAll(shoudShowAlert);
   });
-  $("#btnTemp").click(async function () {
+  $("#btnTemp").click(async function() {
     updateMainTables();
   });
-  $("#btn-video-breakpoint-toggle").change(function () {
+  $("#btn-video-breakpoint-toggle").change(function() {
     if ($(this).is(":checked")) {
       autoPauseAtEachScene = true;
     } else {
       autoPauseAtEachScene = false;
     }
   });
-  $("#btn-play-pause").click(function () {
+  $("#btn-play-pause").click(function() {
     onPlayPauseButtonClick();
   });
-  $("#btn-timer").click(function () {
+  $("#btn-timer").click(function() {
     isTimerPaused = !isTimerPaused;
     if (isTimerPaused) {
       $("#btn-timer").attr("src", "/images/play_white.png");
@@ -94,18 +94,18 @@ function fetchVideoInfo(youtubeId) {
   console.log(userId);
   // let targetUrl = '/fetchVideoData' + '?videoid=' + youtubeId;
   let targetUrl = `/fetchVideoData?videoid=${youtubeId}&userId=${userId}`;
-  $.get(targetUrl, function (response) {
+  $.get(targetUrl, function(response) {
     let vidJson = response;
     let vidTitle = vidJson.title;
     let vidLength = vidJson.duration;
     let blocksJsonArr = vidJson.info;
 
     overrideData = vidJson.overrideData || [];
-    overrideData = overrideData.map((over) => {
+    overrideData = overrideData.map(over => {
       let { deletedScene = "[]", ...rest } = over;
       return {
         deletedScene: JSON.parse(deletedScene),
-        ...rest,
+        ...rest
       };
     });
 
@@ -147,7 +147,7 @@ function fetchVideoInfo(youtubeId) {
   });
 
   let target_url = "/getDialogTimeStamps" + "?videoId=" + youtubeId;
-  $.get(target_url, function (response) {
+  $.get(target_url, function(response) {
     // KeyFramesArr = response;
     // debugger;
     console.log("Dialog timestamps" + response[0]);
@@ -161,7 +161,7 @@ function fetchVideoInfo(youtubeId) {
 
   let target_url_sentence =
     "/getSentences" + "?videoId=" + youtubeId + "&userId=" + userId;
-  $.get(target_url_sentence, function (response) {
+  $.get(target_url_sentence, function(response) {
     // KeyFramesArr = response;
     // debugger;
     console.log("sentence start times" + response[0]);
@@ -239,7 +239,7 @@ function initializeDescriptionsUI() {
   }
 
   $("#ul-scene-list").html(outputHtml);
-  $("textarea").each(function () {
+  $("textarea").each(function() {
     auto_grow(this);
   });
 }
@@ -294,8 +294,8 @@ function renderScenes(currScene, scene_num) {
   return outputHtml;
 }
 
-const renderQnaList = (qnaList) => {
-  qnaList.forEach((qa) => {
+const renderQnaList = qnaList => {
+  qnaList.forEach(qa => {
     let { answerId, sceneId, questionId, question, answer } = qa;
     let currentContainer = `qna_container:${sceneId}`;
     let cont = document.getElementById(currentContainer);
@@ -315,13 +315,11 @@ function getNewQnA(ques, ans, quesId, ansId) {
   let del = `<button onclick="$(this).parent().parent().remove()" id="delBtn:${quesId}:${ansId}"> Delete </button>`;
   qa.innerHTML = `<div>
                     <label class="qnALabel">Question:</label> 
-                    <textarea class='qnATextArea' onkeyup="auto_grow(this)" >${
-                      ques || ""
-                    }</textarea>
+                    <textarea class='qnATextArea' onkeyup="auto_grow(this)" >${ques ||
+                      ""}</textarea>
                     <label class="qnALabel">Answer:</label> 
-                    <textarea class='qnATextArea' onkeyup="auto_grow(this)">${
-                      ans || ""
-                    }</textarea>
+                    <textarea class='qnATextArea' onkeyup="auto_grow(this)">${ans ||
+                      ""}</textarea>
                     ${del}
                    </div>`;
   return qa;
@@ -331,7 +329,7 @@ function getNewQnA(ques, ans, quesId, ansId) {
 created by Vaishali 
 adding eventListener on add question btn click, get question click
 */
-document.getElementById("ul-scene-list").addEventListener("click", (e) => {
+document.getElementById("ul-scene-list").addEventListener("click", e => {
   console.log("click event TARGET: ", e.target);
 
   if (e.target.id.includes("create_question:")) {
@@ -352,11 +350,11 @@ document.getElementById("ul-scene-list").addEventListener("click", (e) => {
       console.log("ROWS:", rows[i]);
     }
     let postJson = {
-      sentence: rows,
+      sentence: rows
     };
 
     let questionArr = [];
-    $.post("/us3/question/generate", postJson, function (res) {
+    $.post("/us3/question/generate", postJson, function(res) {
       rows = res.result;
       for (let i = 0; i < rows.length; i++) {
         if (rows[i].response.status === "success") {
@@ -379,7 +377,7 @@ document.getElementById("ul-scene-list").addEventListener("click", (e) => {
     let [txt, questionId, answerId] = e.target.id.split(":");
     let jsonBody = {
       questionId: questionId,
-      answerId: answerId,
+      answerId: answerId
     };
     console.log("DELETEJSON ", jsonBody);
     $.ajax({
@@ -388,12 +386,12 @@ document.getElementById("ul-scene-list").addEventListener("click", (e) => {
       dataType: "json",
       async: true,
       data: jsonBody,
-      success: function (response) {
+      success: function(response) {
         console.log("SUCCESS:", response);
       },
-      error: function (response, textStatus, errorThrown) {
+      error: function(response, textStatus, errorThrown) {
         console.log(errorThrown);
-      },
+      }
     });
   } else if (e.target.id === "doneSceneBtn") {
     playVideo();
@@ -418,11 +416,9 @@ document.getElementById("ul-scene-list").addEventListener("click", (e) => {
       let indexNextSib = nextSiblingSceneId.indexOf(":") + 1;
       nextSiblingSceneId = nextSiblingSceneId.substring(indexNextSib);
       let nextSceneData = sceneDetails.filter(
-        (el) => el.sc_id === nextSiblingSceneId
+        el => el.sc_id === nextSiblingSceneId
       )[0];
-      let currSceneData = sceneDetails.filter(
-        (el) => el.sc_id === curSceneId
-      )[0];
+      let currSceneData = sceneDetails.filter(el => el.sc_id === curSceneId)[0];
 
       if (!currSceneData.deletedScene) {
         let deletedSceneArr = [];
@@ -459,7 +455,7 @@ document.getElementById("ul-scene-list").addEventListener("click", (e) => {
       nextSibling.remove();
       //delete next scene
       let jsonBody = {
-        sceneId: nextSiblingSceneId,
+        sceneId: nextSiblingSceneId
       };
 
       console.log(e.target.id);
@@ -485,13 +481,13 @@ function scrollToPosition(position) {
     {
       scrollTop:
         $("#ul-scene-list>.newscene-list:eq(" + position + ")").position().top -
-        $("#ul-scene-list>.newscene-list:eq(0)").position().top,
+        $("#ul-scene-list>.newscene-list:eq(0)").position().top
     },
     "slow"
   );
   let newSceneList = document.querySelectorAll(".newscene-list");
 
-  newSceneList.forEach((sceneItem) => {
+  newSceneList.forEach(sceneItem => {
     sceneItem.firstChild.classList.remove("highlight");
   });
 
@@ -521,12 +517,12 @@ function onYouTubeIframeAPIReady() {
       modestbranding: 1,
       rel: 0,
       showinfo: 0,
-      wmode: "opaque",
+      wmode: "opaque"
     },
     events: {
       onReady: onPlayerReady,
-      onStateChange: onPlayerStateChange,
-    },
+      onStateChange: onPlayerStateChange
+    }
   });
 }
 
@@ -540,62 +536,49 @@ async function onPlayerReady(event) {
   player.setVolume(75);
   $("#total_time").text(formatTime(player.getDuration()));
   updateTime();
+  document.getElementById("player").tabIndex = -1;
 }
 
 async function updateTime() {
-  
-    while (true) {
+  while (true) {
     if (desc_flag) {
-      
-        let oldTime = videotime;
-        if (player && player.getCurrentTime) 
-            videotime = player.getCurrentTime();
+      let oldTime = videotime;
+      if (player && player.getCurrentTime) videotime = player.getCurrentTime();
 
-        if (prevSceneNum >= 0 && videotime - oldTime > 0.3) {
-            console.log("Forward");
-            STATE = 0;
-            await updateProgress(videotime); // S1 Different func
+      if (prevSceneNum >= 0 && videotime - oldTime > 0.3) {
+        console.log("Forward");
+        STATE = 0;
+        await updateProgress(videotime); // S1 Different func
       } else if (oldTime - videotime > 0.3) {
-            console.log("Rewind");
-            STATE = 0;
-            await updateProgress(videotime); //  S1 Different func
-      } else if (YT_FLAG) 
-            YT_FLAG = false;
-      
-    else if (videotime !== oldTime) {
-    
+        console.log("Rewind");
+        STATE = 0;
+        await updateProgress(videotime); //  S1 Different func
+      } else if (YT_FLAG) YT_FLAG = false;
+      else if (videotime !== oldTime) {
         if (STATE == 0) {
-              await onProgress(videotime);
-        } 
-        else if (STATE == 1) {
-
-            if (YT_FLAG_EXT) 
-            {
-                YT_FLAG_EXT = false;
-                continue;
-            } 
+          await onProgress(videotime);
+        } else if (STATE == 1) {
+          if (YT_FLAG_EXT) {
+            YT_FLAG_EXT = false;
+            continue;
+          }
           pauseVideo();
           YT.currentTime = STATE_TIME;
           YT_FLAG = true;
           console.log("Extended fault");
-          
-          if (currAudio && currAudio !== null) 
-            currAudio.pause();
-          
+
+          if (currAudio && currAudio !== null) currAudio.pause();
+
           STATE = 2;
-        } 
-        else if (STATE == 2) 
-        {
-            pauseVideo();
-            YT.currentTime = STATE_TIME;
-            YT_FLAG = true;
-            videotime = player.getCurrentTime();
-            if (currAudio && currAudio !== null) 
-                currAudio.play();
-            STATE = 1;
+        } else if (STATE == 2) {
+          pauseVideo();
+          YT.currentTime = STATE_TIME;
+          YT_FLAG = true;
+          videotime = player.getCurrentTime();
+          if (currAudio && currAudio !== null) currAudio.play();
+          STATE = 1;
         }
       } else {
-        
         if (
           STATE == 0 &&
           currAudio &&
@@ -607,21 +590,19 @@ async function updateTime() {
       $("#elapsed_time").text(formatTime(player.getCurrentTime()));
       console.log("Time event");
     }
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 100));
   }
 }
 
 // when the time changes, this will be called.
 
 async function updateProgress(currentTime) {
-  
   currentTime = currentTime.toFixed(3);
   let currScene = getSceneFromTime(currentTime, allSceneArr);
   let sceneNum = currScene.sc_num;
   prevSceneNum = sceneNum;
-  if (currAudio !== null && isPlaying(currAudio)) 
-    currAudio.pause();
-  
+  if (currAudio !== null && isPlaying(currAudio)) currAudio.pause();
+
   currAudio = null;
   player.setVolume(75);
 }
@@ -634,26 +615,21 @@ async function onProgress(currentTime) {
   console.log(allSceneArr);
   let sceneNum = currScene.sc_num;
   let sceneEndTime = currScene.finish_time;
-  
-  if (prevSceneNum == -1 && first_extend_flag)
-      first_extend_flag = false;
-  else if (prevSceneNum != -1 && sceneNum != prevSceneNum) 
-  {
-    if (scene_audio_extend_set.has(prevSceneNum)) 
-    {
+
+  if (prevSceneNum == -1 && first_extend_flag) first_extend_flag = false;
+  else if (prevSceneNum != -1 && sceneNum != prevSceneNum) {
+    if (scene_audio_extend_set.has(prevSceneNum)) {
       STATE = 1;
       pauseVideo();
       let totalAudios = sentenceAudioMap[prevSceneNum];
       let flag = true;
       let i = 0;
       YT_FLAG = true;
-      if (flag && currAudio == null) 
-      {
+      if (flag && currAudio == null) {
         currAudio = sentenceAudioMap[prevSceneNum][0];
         player.setVolume(15);
         currAudio.play();
-        currAudio.onended = function () {
-
+        currAudio.onended = function() {
           if (player.getPlayerState() == YT.PlayerState.PAUSED) {
             STATE = 0;
             STATE_TIME = -1;
@@ -697,23 +673,19 @@ async function onProgress(currentTime) {
       prevSceneNum = sceneNum;
     }
     prevSceneNum = sceneNum;
-  } else if (prevSceneNum == -1) 
-        prevSceneNum = sceneNum;
-  else if (currAudio !== null && !isPlaying(currAudio)) 
-        currAudio.play();
-
+  } else if (prevSceneNum == -1) prevSceneNum = sceneNum;
+  else if (currAudio !== null && !isPlaying(currAudio)) currAudio.play();
   // logic for inline
   else {
     let res = isInlineAudio(currentTime);
     let index = res[1];
-    if (res[0] && currAudio == null && index >= 0) 
-    {
+    if (res[0] && currAudio == null && index >= 0) {
       currAudio = allSentenceInlineArr[index];
       let diff = res[2];
       currAudio.currentTime = diff;
       player.setVolume(15);
       currAudio.play();
-      currAudio.onended = function () {
+      currAudio.onended = function() {
         currAudio = null;
         player.setVolume(75);
       };
@@ -789,7 +761,7 @@ const getNewQnAData = () => {
           question,
           answer,
           answerId: tempData.answerId,
-          questionId: tempData.questionId,
+          questionId: tempData.questionId
         });
       } else {
         qnaData[sceneId].push({ videoId: youtubeId, question, answer }); //pushing only questio and answer value to the exisiting qnA.
@@ -806,7 +778,7 @@ async function updateAll(shoudShowAlert) {
   postJson.videoId = youtubeId;
   console.log({ HERE: postJson });
   try {
-    await $.post("/saveAiDescription", postJson, function (response) {
+    await $.post("/saveAiDescription", postJson, function(response) {
       if (shoudShowAlert) {
         if (response.success) {
           alert(
@@ -845,7 +817,9 @@ function fetchJsonBodyForAllTextFields(userId) {
     let csTestbox = $(currSceneDescTextId);
     if (csTestbox && csTestbox.val()) {
       sceneJsonObj.modified_description = csTestbox.val().trim();
-      sceneJsonObj.modified_ocr = $(currSceneOcrTextId).val().trim();
+      sceneJsonObj.modified_ocr = $(currSceneOcrTextId)
+        .val()
+        .trim();
       sceneJsonObj.start_time = currScene.start_time;
       sceneJsonObj.end_time = currScene.finish_time;
       sceneJsonObj.has_ai = enableAi;
@@ -866,7 +840,7 @@ async function updateMainTables() {
   let postJson = fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr);
 
   console.log({ postJson });
-  await $.post("/updateBlockAndScene", postJson, function (response) {
+  await $.post("/updateBlockAndScene", postJson, function(response) {
     if (response.success) {
       window.alert("Updated Successfully");
     } else {
@@ -886,8 +860,12 @@ function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
     let currSceneOcrTextId = "#s_o_" + currSceneId;
     let sceneJsonObj = {};
     sceneJsonObj.scene_id = currSceneId;
-    sceneJsonObj.original_description = $(currSceneDescTextId).val().trim();
-    sceneJsonObj.original_ocr = $(currSceneOcrTextId).val().trim();
+    sceneJsonObj.original_description = $(currSceneDescTextId)
+      .val()
+      .trim();
+    sceneJsonObj.original_ocr = $(currSceneOcrTextId)
+      .val()
+      .trim();
     sceneArrJson.push(sceneJsonObj);
   }
   for (let i = 0; i < allBlockArr.length; i++) {
@@ -896,7 +874,9 @@ function fetchJsonBodyForAllTextFields2(allSceneArr, allBlockArr, userId) {
     let currBlockDescTextId = "#b_d_" + currBlockId;
     let blockJsonObj = {};
     blockJsonObj.block_id = currBlockId;
-    blockJsonObj.original_description = $(currBlockDescTextId).val().trim();
+    blockJsonObj.original_description = $(currBlockDescTextId)
+      .val()
+      .trim();
     blockArrJson.push(blockJsonObj);
   }
   parentJsonBody.scene_arr = sceneArrJson;
@@ -1040,7 +1020,7 @@ function isInlineAudio(target) {
 
 function getUrlVars() {
   var vars = {};
-  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (
+  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(
     m,
     key,
     value

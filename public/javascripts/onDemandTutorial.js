@@ -230,6 +230,7 @@ async function onPlayerReady(event) {
   player.setVolume(75);
   $("#total_time").text(formatTime(player.getDuration()));
   updateTime();
+  document.getElementById("player").tabIndex = -1;
 }
 
 async function updateTime() {
