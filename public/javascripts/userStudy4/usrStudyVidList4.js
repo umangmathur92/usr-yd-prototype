@@ -1,5 +1,6 @@
 let userId = "";
 let tutorialHtml = "";
+let isOnlyTutorial = true;
 
 $(document).ready(function() {
   let url = location.search.substring(1);
@@ -61,6 +62,7 @@ function updateUI(vidArr) {
   //unused variable
   // let userName = vidArr[0].name;
   for (let i = 0; i < vidArr.length; i++) {
+    isOnlyTutorial = false;
     let vid = vidArr[i];
     console.log(vid);
     let videoId = vid.video_id;
@@ -121,8 +123,10 @@ function updateUI(vidArr) {
         <img src="../images/survey.png" class="img-survey">User Survey for Video ${i +
           1} </a></b><br>`;
   }
+  if(!isOnlyTutorial){
   generatedHtml += `<b><a target="_self" href="https://sfsu.co1.qualtrics.com/jfe/form/SV_9MRb5RSi7FNRaIt?userId=${userId}" class="list-group-item" target="_blank">
    
     <img src="../images/survey.png" class="img-survey">General Survey</a></b>`;
+  }
   $(".list-group").append(generatedHtml);
 }
