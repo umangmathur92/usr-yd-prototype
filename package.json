@@ -21,7 +21,7 @@
     "express": "~4.16.0",
     "fetch": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
-    "form-data": "^2.5.1",
+    "form-data": "^2.5.5",
     "fs": "0.0.1-security",
     "fs-extra": "^8.1.0",
     "get-audio-duration": "^1.0.0",
