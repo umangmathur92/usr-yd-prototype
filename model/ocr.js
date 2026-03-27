@@ -53,6 +53,20 @@ class Ocr {
             throw e;
         }
     }
+
+    static async updateShotTableWithFilteredOcr(concatenatedOcrTextArr) {
+        console.log('DB Operation: Updating Shot table with Filtered OCR');
+        try {
+            return await db.tx(t => {
+                var queries = concatenatedOcrTextArr.map(ocrObj => {
+                    return t.one('UPDATE shot SET filtered_ocr = ${text} WHERE shot_id = ${shot_id} RETURNING id', ocrObj, a => + a.id);
+                });
+                return t.batch(queries);
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
 }
 
 module.exports = Ocr;

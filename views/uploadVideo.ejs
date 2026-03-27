@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head>
+    <title>User Study</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   <script src="https://code.jquery.com/jquery-3.4.1.js"   integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="   crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>  
+    <link rel="stylesheet" href="stylesheets/uploadVideo.css">    
+    <script src="javascripts/uploadVideo.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">You Describe</a>
+</nav>
+<div id="container1">
+    
+    <form id="downloadForm">
+        <div class="form-group">
+            <label for="url">Video Url</label>
+            <input type="text" class="form-control" id="url" placeholder="Please provide the url of the youtube video">
+            <button id="btnDownload" class="btn btn-primary">Download</button><br>
+            <div id = "alertDownload"></div>
+        </div>
+    </form>
+
+    <form id="uploadVideoForm">
+        <div class="form-group">
+            <label for="youtubeId">Youtube Id</label>
+            <input type="text" class="form-control" id="youtubeId" placeholder="Please enter the youtube id">
+            <small class="form-text text-muted">Please provide the youtube id of the video. This id will be used to play the video from the youtube</small>
+        </div>
+        <div class="form-group">
+            <label for="VideoName">Name of the Video</label>
+            <input type="text" class="form-control" id="videoName" placeholder="Please enter name of the video">
+        </div>
+        <div class="form-group">
+            <label for="upload">Upload video file</label>
+            <input type="file" class="form-control-file" id="file" name="file">
+            <button id="submitVideo" type="submit" class="btn btn-primary">Upload Video</button><br>
+            <div id = "alertUpload"></div>
+        </div>
+        <div class="form-group">
+            <label for="videoId">Video Id</label>
+            <input type="text" class="form-control" id="videoId" placeholder="Id returned by the Video Indexer">
+            <!-- <small class="form-text text-muted"> Id returned by the Video Indexer.</small> -->
+            
+        </div>
+    </form>
+
+    <form id="videoInsightForm">
+        <div class="form-group">
+            <label for="Insight">Video Insight</label>
+            <textarea class="form-control" rows="5" id="insight"></textarea>
+            <button id="btnInsight" type="submit" class="btn btn-primary">Get Insight</button>
+            <hr>
+            <p>Insert the video Insight into Database</p>
+            <button id="btnInsertVideo" class="btn btn-warning">Insert into Database</button>
+        </div>
+    </form>
+    <hr>
+    <br>
+    <form id="audioUploadForm">
+        <div class="form-group">
+            Audio File: <input type="file" name="audiofile"><br>
+            Your Callback Url: <input type="text" id="callbackText" name="callbackurl" value=""><br>
+            <input type="hidden" name="appkey" value="yAOzHAy9LQBJQGtshcIGJX368IbC4Enx">
+            <button id="submitAudio" type="submit" class="btn btn-primary">Upload Audio</button>
+            <div id = "alertUploadAudio"></div>
+        </div>
+    </form>
+
+    <form id="audioInsightForm">
+        <div class="form-group">
+            <label for="Insight">Audio Insight</label>
+            <input type="text" name="orderid" id="orderid" value="EAFGNH20200414123341">
+            <button id="btnAudioInsight" type="submit" class="btn btn-primary">Get Audio Insight</button>
+            <textarea class="form-control" rows="5" id="audioInsight"></textarea>
+        </div>
+    </form>
+    <hr>
+    <p>Merge scenes based on audio timestamps</p>
+    <button id="btnMerge" class="btn btn-warning"> Merge Scenes</button> 
+    <hr>   
+</div>
+
+
+
+
+</body>
+</html>

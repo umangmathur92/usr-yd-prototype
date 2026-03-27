@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html onkeypress="isKeyPress(event)" onkeydown="isKeyDown(event)">
+<head>
+  <title><%= title %></title>
+  <script src="https://use.fontawesome.com/8a92be1af5.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body background="/images/bg.jpg" style="background-repeat: no-repeat; background-size: cover;">
+    <div>
+  <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+    <!--img src="../images/yd.jpg" class="img-header"-->
+    <div class="container">
+      <a class="navbar-brand" href="#" style="margin:0px auto; font-weight: bold;">Video Description User Study Tutorial</a>
+    </div>
+    <img id="btn-timer" src="/images/pause_white.png" style="height: 20px; width:20px; color: white; margin-right: 10px;">
+    <b><span style="color: white">Time Elapsed:&nbsp;</span>
+      <span style="color: white" id="txt-timeElaspsed">00:00</span></b>
+    </nav>
+    <!-- <nav class="navbar navbar-dark" style="background-color: #1a4b6e;">
+        <b><span style="color: white">To verify that you can use the virtual chat bot properly, you need to ask at least 4 questions during this 2 minute video. If you don't ask any questions during 30 second, then the video will pause and let you ask a question</span>
+            </b>    </nav> -->
+    </div>
+    <br>
+    <div class="container-fluid" style="margin-top:32px;">
+    <div class="row" style="position: absolute;top: 60px;">
+      <div class="col-md-3">
+        <div style="background-color: #1a4b6e; padding: 16px; height: 100%;"> 
+            <div>
+                <h1 style="color: white; text-align: center;">Instructions</h1>
+                <br>
+                <!-- This tutorial will help you become acquainted with the Visual Chatbot controls.
+When you first land on a video page, the video will initially be paused. Pressing the space bar will begin playback. Using the right and left arrow keys will scan forward and backward, respectively. Pressing the space bar again will pause playback.
+To ask a question, press the Q key. After the description is read, you will hear a short beep, then you may ask your question. You may ask multiple questions while the video is paused. Please try to ask questions every 30 seconds during the tutorial to help calibrate the Visual Chatbot. -->
+                <h6 style="color: white; text-align:justify;" ;="">This tutorial will help you become acquainted with the Visual Chatbot controls. <br><br>
+                  When you first land on a video page, the video will initially be paused. Pressing the space bar will begin playback. Using the right and left arrow keys will scan forward and backward, respectively. Pressing the space bar again will pause playback.
+                  <br><br>
+                  To ask a question, press the Q key. After the description is read, you will hear a short beep, then you may ask your question. You may ask multiple questions while the video is paused. Please try to ask questions every 30 seconds during the tutorial to help calibrate the Visual Chatbot.
+
+                </h6>
+            </div>
+        </div>
+    </div>
+      <div class="col-md-6">
+        <h6 style="text-align:center; visibility: hidden; color: red !important; font-weight: bolder;">Press Space Bar or Click Play Button to Start the Video</h6>
+        <div >
+          <div style="margin:15px; font-size:15px; align-content: center; text-align: center;" font-size: 15px;"><b><span id="txtVidtitle">Video Title Here</span></b></div>
+          <div style="align-content: center; text-align: center;">
+          <div class="overlay" id="player" ></div>
+        </div>
+          <br>
+          <div style="width: 100%;">
+            <div style="width: 480px; height: 30px; padding:2px; margin: auto; border:0px solid black; background-color: darkgrey;">
+              <div style="float: left;">
+                <span id="btn-play-pause" style="visibility: visible;"></span>
+                <b><span id="elapsed_time">0:00</span>/<span id="total_time">0:00</span></b>
+              </div>
+              <div style="float: right; margin: auto; align-content: center; text-align: center;">
+                <span style="visibility: hidden;">
+                <span><b>Auto-Pause at each scene: </b></span>
+                <span>
+                  <label class="switch">
+                    <input type="checkbox" id="btn-video-breakpoint-toggle">
+                    <span class="slider round"></span>
+                  </label>
+                </span>   
+            </span>
+                
+                <div style="text-align:center;visibility: hidden;">
+                      <audio id="myAudio" style="visibility: hidden;" controls autoplay>
+                                    Your browser doesnot support Audio.
+                                </audio> 
+
+            </div>
+          </div>
+          <div style="align-content: center; text-align: center;">
+          
+            <!-- <div id= "vischat"><button onclick="fetchKeyFrames()" style="visibility: visible;" class="btn btn-danger btn-l" id="btnDoubleTap">Click to Start the Visual Chatbot </button></div> -->
+            <div id= "record" style="visibility: hidden;"><button id="record-button" class="btn btn-danger btn-l" style= "margin:10px;width:300px" >Ask Question</button></div>
+            <div id="question" type="text" style="visibility: visible;text-align: center;" placeholder="Start typing question here ..." autocomplete="off"></div>
+            <p id="demo" style="visibility: hidden;"></p>  
+        </div>
+        </div>
+        <div style="visibility: hidden;">
+          
+          <div style="height:80%; background-color:#fff;">
+            <div class="list-container" data-scene-details="" style="height: 100%">      
+              <ul id="ul-scene-list" class="scene-list">
+                
+              </ul>
+            </div>
+          </div>
+          <div style="background-color: #1a4b6e;color:#fff;"> _ </div>
+          <br>
+          <button class="btn btn-danger btn-l" id="btnSubmit">Save &amp; Close Window</button>
+        </div>
+      </div>
+    </div>
+    
+    </div>
+    
+  </div>
+</div>
+    <script src="/javascripts/onDemandTutorial.js"></script>
+    <script src="/javascripts/visdial.js"> </script>
+    <script src="/javascripts/speechtotext.js"> </script>
+    <script src="/javascripts/handleCtrlEvents.js"> </script>
+    <script src="https://www.youtube.com/iframe_api" async></script>
+
+  </body>
+  </html>
+  

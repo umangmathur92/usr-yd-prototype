@@ -58,7 +58,6 @@ let url = location.search.substring(1);
 let pid = new URLSearchParams(url).get('pid');
 let num_videos = (pid % 2 == 0) ? 20 : 22;
 let num_describers = (pid % 2 == 0) ? 10 : 11;
-
 let intro = `Thank you for participating in this user study. Please answer the questions below, and then watch the videos, and answer the questions about each video. 
             There are ${num_videos} videos, and each video is about 2 minutes long. The ${num_videos} videos are in fact only 2 different videos described by ${num_describers} different describers. 
             Even though they are repetitive, please listen to each description, rate the description quality, and leave comments for each video. 
@@ -69,27 +68,21 @@ $("#intro").append(intro);
 
 
 <script>
-
   //get parameters from query string
 //let url = location.search.substring(1);
 let urlParams = new URLSearchParams(url);
 let userId = urlParams.get('userId');
 let targetUrl = '/userStudy/helper/video?userId=' + userId;
 // console.log('target URL:' +  targetUrl);
-
-
 $(document).ready(function () {
     // getDateTime();
     fetchVideo();
     getAllVIUsers(userId);
 });
-
-
 function getDateTime(){
     let date = new Date(Date.now()).toLocaleString();
      document.getElementById('date').innerHTML = `Current time: ${date}`;
 }
-
 function getAllVIUsers(userId){
     let url = '/userStudy/getUserHelper?userId='+ userId;
     $.get(url , function (body) {
@@ -106,7 +99,6 @@ function getAllVIUsers(userId){
             $(`[name="rating_access"][value="${val.access_preference||" "}"]`).prop("checked", true);
             $('#other').val(val.access_pref_other)
         }
-
         let access = $(`[name="rating_access"]`)
         access.each(function(sel, el) {
             console.log({sel, el});
@@ -117,7 +109,6 @@ function getAllVIUsers(userId){
         //  $('[name="freq"]').val(rows[0].vid_desc_frequency);
     });
 }
-
 function submitVideoData(userId, status, email, frequency,access_preference) {
     let jsonBody = {
         "id": userId,
@@ -138,8 +129,6 @@ function submitVideoData(userId, status, email, frequency,access_preference) {
         }
       });
 }
-
-
 function submitUserInfo(userId, email, frequency,access_preference, access_pref_other) {
     let jsonBody = {
         "id": userId,
@@ -163,7 +152,6 @@ function submitUserInfo(userId, email, frequency,access_preference, access_pref_
         }
       });
 }
-
 function getVideoData1(userId, num_videos){
     if($("#email").val()){
         let url = "/userStudy/helperStatus?userId="+ userId;
@@ -179,10 +167,6 @@ function getVideoData1(userId, num_videos){
         window.alert(`Please provide the email address`);
     }
 }
-
-
-
-
 function fetchVideo() {
     $.get(targetUrl, function (rows) {
         let videos = '';
@@ -197,20 +181,16 @@ function fetchVideo() {
             let vi_understanding = vid.video_understanding;
             let vi_ai_support = vid.ai_support.toString();
             // console.log({vi_ai_support});
-
             let aiSupportStr = vid.ai_support == 'true' ? 'With AI support' : 'Start from scratch';
             let aiParam = vid.ai_support ? 'yes' : 'no';
             let formid = ""+videoId + volunteerId + aiParam
             const stepperMsg = 'Please rate the description of this video on a scale of 1 to 5, with 1 being the poorest and 5 being the best';
             const understanding = 'I feel I have a good understanding of the topic covered in this video due to the video.';
-
             videos += `<b><a href="/playvideoaudio/${videoId}?u=${volunteerId}&ml=${aiParam}" class="list-group-item" >
-
                 <img class="vid-thumbnail" src="https://i1.ytimg.com/vi/${videoId}/hqdefault.jpg" alt=${videoTitle} style="width:100px;height:100px;">
                 Video ${i+1}: ${videoTitle}</a></b>
                   
                 <form data-viuserid="${vi_userId}" data-videoid="${videoId}" data-volunteer_id="${volunteerId}" data-vi_ai_support="${vi_ai_support}"  class="video-form" method="POST">
-
                 <label id="label_rating_${i+1}" for="rating_${i+1}"> ${stepperMsg}:</label> 
                 <fieldset class='rating' id="group1_${i+1}" name="rating">
                     <input type="radio" name="rating" aria-labelledby="r1" ${vi_rating==5?"checked":""} value="5" name="group1_${i+1}"> <label id="r1"> 5 - Excellent</label><br>
@@ -220,7 +200,6 @@ function fetchVideo() {
                     <input type="radio" name="rating" aria-labelledby="r5" ${vi_rating==1?"checked":""} value="1" name="group1_${i+1}"> <label id="r5"> 1 - Poor</label><br>
                 </fieldset>
                 <br>
-
                 <label id="label_video_understanding_${i+1}" for="video_understanding${i+1}"> ${understanding}:</label> 
                 <fieldset class='video_understanding' id="group2_${i+1}" name="video_understanding">
                     <input type="radio" name="video_understanding" aria-labelledby="v1" ${vi_understanding==5?"checked":""} value="5" name="group2_${i+1}"> <label id="v1">Strongly Agree</label><br>
@@ -246,8 +225,6 @@ function fetchVideo() {
             var a = $('.active_status:checked').val();
             alert(a);
         });
-
-
         $(".video-form").bind('focusout',function() {
             //$( "#rating", "#comment" ).blur();
            // $( "#input" ).blur();
@@ -257,16 +234,13 @@ function fetchVideo() {
             let volunteerId = $(this).data("volunteer_id")
             let vi_ai_support = $(this).data("vi_ai_support")
             let vi_userId = $(this).data("viuserid")
-
             var values ={}
             $.each($(this).serializeArray(), function(i, field) {
                 values[field.name] = field.value;
             })
-
             if (values["rating"] == '') {
                 values["rating"] = 0;
             }
-
             $.ajax({
                 type: "POST",
                 url:"/updatefeedback",
@@ -291,40 +265,33 @@ function fetchVideo() {
                 },
                 dataType: "json"
             })
-
             return false;
         })
     });
-
     $('#userInfo').change(function(e){
         let email = $('#email');
         let frequency = $('[name="freq"]:checked');
         let ratingAccess = $('[name="rating_access"]:checked');
         let otherText= '';
-
         let emailVal = '';
         let frequencyVal = '';
         let ratingAccessVal = '';
         if(frequency.length === 1) {
             frequencyVal = frequency[0].value;
         }
-
         if(email.length === 1) {
             emailVal = email[0].value;
         }
-
         if(ratingAccess.length === 1) {
             ratingAccessVal = ratingAccess[0].value;
             if(ratingAccessVal === 'Other') {
                 otherText = $('#other')[0].value || '';
             }
         }
-
         console.log({ email, frequency: frequency, ratingAccess })
         console.log({  emailVal,  frequencyVal, ratingAccessVal})
         submitUserInfo(userId, emailVal, frequencyVal,ratingAccessVal, otherText);
     });
-
     
 }
 </script>
@@ -333,4 +300,3 @@ function fetchVideo() {
 </html>
 
           
-        

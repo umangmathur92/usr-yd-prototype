@@ -57,6 +57,84 @@ async function fetchAllVideos() {
     return await db.any('SELECT id, youtube_id, title, duration FROM video');
 }
 
+async function fetchScene(videoId) {
+    return await db.query('SELECT * FROM scene where video_id=$1 order by scene_num', [videoId]);
+}
+
+async function fetchAllKeyFrames(videoId) {
+
+    let match = videoId; //sceneId.split('_')[0];
+    console.log('match: ',match);
+    match += '%';
+    console.log('match: ',match);
+    result = await db.any(`SELECT thumbnail_url, caption, pythia_caption from keyframe where keyframe_id::text LIKE '${match}'`);
+    return result;
+}
+
+    /** Fetch last 5 keyframes irrespective of scene numbers */
+async function fetchKeyFrames(videoId,videoTime) {
+
+    // result = await db.any(`SELECT keyframe_url, pythia_caption, keyframe_num from keyframe_revised where keyframe_id::text LIKE '${match}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
+    result = await db.any(`SELECT keyframe_url, pythia_caption, keyframe_num from keyframe_revised where video_id = '${videoId}' AND timestamp < ${videoTime} ORDER BY timestamp DESC LIMIT 1`);
+    console.log('res: ',result);
+    return result.reverse();
+}
+
+async function fetchRevisedKeyFrames(vidId, videoTime){
+    if (videoTime==null){
+        result = await db.any(`SELECT * from keyframe_revised where video_id = '${vidId}' ORDER BY timestamp`);
+    console.log('res: ',result);
+    return result;
+    }
+    return [];
+}
+
+async function fetchDialogTimeStamps(videoId) {
+    console.log("Ent: testking");
+    return await db.any(`SELECT start_time, end_time FROM video_dialogs_timestamps WHERE video_id = '${videoId}' ORDER BY start_time`);
+    // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
+}
+
+async function fetchVideoData(videoId, userId) {
+
+    try {
+        let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
+
+        let queryResult = await db.query(`select scene_id as sc_id, scene_num as sc_num, start_time, end_time, 
+                                        original_ocr, pythia_caption_bleu as original_description from scene where video_id= $1 ORDER BY scene_num`, [videoId]);
+        queryResult.forEach(scene => {
+                scene.deletedScene = [];
+                scene.note = '';
+            });
+
+        let mergeSceneResult = await db.query('SELECT scene_id as sc_id, merged FROM merge_scene WHERE video_id = $1 order by scene_num', [videoId]);
+        
+        let modifiedData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
+                                        start_time, end_time, ocr as original_ocr,
+                                        description as original_description, merged_scene as "deletedScene", note
+                                        from descriptions where volunteer_id = $1 and
+                                        has_ai=true and 
+                                        video_id= $2 ORDER BY scene_num` 
+                                        , [userId , videoId])
+        // console.log('over data', JSON.stringify(modifiedData));
+        vidQueryResult.originalData = queryResult;
+        vidQueryResult.modifiedData = modifiedData;
+        vidQueryResult.mergeSceneRecommendation = mergeSceneResult;
+        console.log({vidQueryResult});
+        // console.log('vidQueryResult ===>>', JSON.stringify(vidQueryResult));
+        return vidQueryResult;
+    } catch(e) {
+        throw e;
+    }
+}
+
+async function fetchSentences(videoId, userId) {
+    console.log("Now: testking");
+    return await db.any(`SELECT * FROM descriptions_new_sentence WHERE video_id = '${videoId}' AND volunteer_id = '${userId}' ORDER BY scene_num, audio_start_time`);
+    // return await db.any("SELECT shot_id FROM shot where scene_id = 'nqXz8hhAYGo_3_5' ");
+}
+
+
 async function fetchVideoDataFromDb(videoId, userId) {
     try {
         let vidQueryResult = await db.one('SELECT youtube_id, indexer_video_id, title, duration FROM video WHERE youtube_id = $1', [videoId]);
@@ -65,11 +143,12 @@ async function fetchVideoDataFromDb(videoId, userId) {
           'block_num', block_num, 'start_time', start_time, 'finish_time', end_time, 
          'baseline_des', original_description, 'child_scenes',
           jsonb_agg(scene) ) js_object FROM ( select b.*, jsonb_build_object( 'sc_id', s.scene_id, 'sc_num',
-           s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.original_description,
+           s.scene_num, 'start_time', s.start_time, 'finish_time', s.end_time, 'original_description', s.pythia_caption,
             'original_ocr', s.original_ocr ) scene FROM block b JOIN scene s ON
              s.block_id = b.block_id AND b.video_id = $1 ORDER BY scene_num ) s 
              GROUP BY start_time, end_time, block_id, original_description, block_num,
               video_id ORDER BY block_num ASC ) s`, [videoId]);
+              
         let overrideData = await db.query(`select scene_id as sc_id, scene_num as sc_num,
         start_time, end_time as finish_time, ocr as original_ocr,
         description as original_description, merged_scene as "deletedScene"
@@ -164,8 +243,22 @@ async function replicateSceneDataInModifiedSceneTable(userId, videoId) {
     }
 }
 
+
+function filterOCR(ocrArr, duration, confidenceScore, topLimit){
+    for (const ocrObj of ocrArr) {
+        let diff = ocrObj.end_time - ocrObj.start_time;
+        if(diff >= duration && ocrObj.confidence >= confidenceScore && ocrObj.top >= topLimit){
+            
+        }else{
+            ocrObj.text = '';
+        }
+    }
+    return ocrArr;
+}
+
 //Parse and insert all JSON data from the videoindexer into the database
 async function addVideoDataToDb(inputJson) {
+    // console.log({addVideoDataToDb: inputJson});
     try {
         // //Parse and insert Video
         let video = Video.parseVideoFromIndexerJson(inputJson);
@@ -195,7 +288,7 @@ async function addVideoDataToDb(inputJson) {
         // await Block.insertIntoBlockTable(blockArr);
         //Parse Scenes
         let sceneJsonArr = video.insights_json.scenes;
-        let sceneArr = Scene.parseSceneArr(sceneJsonArr);
+        let sceneArr = Scene.parseSceneArr(sceneJsonArr, video.youtube_id);
         //Generate blocks from scenes using logic - TODO: change this
         //let blockArr = generateBlocksFromScenes(sceneArr, video.youtube_id);
         //await Block.insertIntoBlockTable(blockArr);
@@ -217,35 +310,62 @@ async function addVideoDataToDb(inputJson) {
         await Keyframe.insertIntoKeyframeTable(allKeyframesArr);
         //Parse, Sort, Process and insert OCR data into the shot table
         let ocrJsonArr = video.insights_json.ocr;
-        let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
-        ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
-        ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
-        ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
-        let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
-        await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
-        //Aggregate OCR data from the Shot table and insert it into the scene table
-        for(let i=0; i<sceneArr.length; i++) {
-            try {
-                let currScene = sceneArr[i];
-                let currSceneId = currScene.scene_id;
-                let shotsOcrJsonArr = await db.any('SELECT original_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
-                let ocrArrForScene = [];
-                for(let j=0; j<shotsOcrJsonArr.length; j++) {
-                    ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
-                }
-                ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
-                let finalSceneOcr = '';
-                for (let j=0; j<ocrArrForScene.length; j++) {
-                    if(ocrArrForScene[j] != '' || ocrArrForScene[j] != undefined || ocrArrForScene[j] != ' ' || ocrArrForScene[j] != '\n') {
-                        finalSceneOcr = finalSceneOcr + '\n' + ocrArrForScene[j];
+        if(ocrJsonArr){
+            let ocrArr = Ocr.parseOcrJsonArr(ocrJsonArr);
+            ocrArr.sort((ocr1, ocr2) => (ocr1.start_time > ocr2.start_time) ? 1 : (ocr1.start_time == ocr2.start_time) ? ((ocr1.top > ocr2.top) ? 1 : (ocr1.top == ocr2.top) ? ((ocr1.left > ocr2.left) ? 1 : -1) : -1 ): -1);
+            ocrArr = setShotIdForAllOcrDetections(ocrArr, shotArr);
+            ocrArr = cleanUpOcrDataWithinEachShot(ocrArr);
+        //---------
+            // filter_OCRArr = filterOCR(ocrArr, 1, 0.56, 50);
+            // let concatFilterOcrArr = concatOcrWithinSameShot(filter_OCRArr);
+            // await Ocr.updateShotTableWithFilteredOcr(concatFilterOcrArr);
+        //-----
+            let concatenatedOcrTextArr = concatOcrWithinSameShot(ocrArr);
+            await Ocr.updateShotTableWithOcrData(concatenatedOcrTextArr);
+            console.log({concatenatedOcrTextArr});
+            //Aggregate OCR data from the Shot table and insert it into the scene table
+            for(let i=0; i<sceneArr.length; i++) {
+                try {
+                    let currScene = sceneArr[i];
+                    let currSceneId = currScene.scene_id;
+                    let shotsOcrJsonArr = await db.any('SELECT original_ocr, filtered_ocr FROM shot WHERE scene_id = $1 ORDER BY shot_num ASC', [currSceneId]);
+                    let ocrArrForScene = [];
+                    let filteredOCRArr = [];
+                    for(let j=0; j<shotsOcrJsonArr.length; j++) {
+                        ocrArrForScene.push(shotsOcrJsonArr[j].original_ocr);
+                        // if(shotsOcrJsonArr[j].filtered_ocr){
+                        //     // console.log('FILTERSCENE:', shotsOcrJsonArr[j].filtered_ocr);
+                        //     filteredOCRArr.push(shotsOcrJsonArr[j].filtered_ocr.trim());
+                        // }
                     }
+                    ocrArrForScene = Utils.removeDuplicatesFromStringArr(ocrArrForScene);
+                    // filteredOCRArr = Utils.removeDuplicatesFromStringArr(filteredOCRArr);
+                    
+                    let finalSceneOcr = '';
+                    for (let j=0; j<ocrArrForScene.length; j++) {
+                        if(ocrArrForScene[j] != '' || ocrArrForScene[j] != undefined || ocrArrForScene[j] != ' ' || ocrArrForScene[j] != '\n') {
+                            finalSceneOcr = finalSceneOcr + '\n' + ocrArrForScene[j];
+                        }
+                    }
+                    finalSceneOcr = finalSceneOcr.trim();
+
+                    // let finalFilteredSceneOcr = '';
+                    // for (let j=0; j<filteredOCRArr.length; j++) {
+                    //     if(filteredOCRArr[j] != '' || filteredOCRArr[j] != undefined || filteredOCRArr[j] != ' ' || filteredOCRArr[j] != '\n') {
+                    //         finalFilteredSceneOcr = finalFilteredSceneOcr + '\n' + filteredOCRArr[j];
+                    //     }
+                    // }
+                    // finalFilteredSceneOcr = finalFilteredSceneOcr.trim();
+
+                    await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
+                    // await db.one("UPDATE scene SET original_ocr = $1, filtered_ocr = $2  WHERE scene_id = $3 RETURNING id", [finalSceneOcr, finalFilteredSceneOcr, currSceneId], a => + a.id);
+
+                }catch(e) {
+                    console.log(e);
                 }
-                finalSceneOcr = finalSceneOcr.trim();
-                await db.one("UPDATE scene SET original_ocr = $1 WHERE scene_id = $2 RETURNING id", [finalSceneOcr, currSceneId], a => + a.id);
-            }catch(e) {
-                console.log(e);
             }
         }
+ 
         //await Scene.aggregateShotOcrIntoSceneOcr(video);
         
         //Fetch captions for all keyframes and update the keyframes table
@@ -281,7 +401,7 @@ async function addVideoDataToDb(inputJson) {
         return true;
     } catch(e) {
         console.log(e);
-        return false;
+        return e;
     }
 }
 
@@ -554,12 +674,19 @@ async function clearDb() {
 module.exports = {
     addVideoDataToDb: addVideoDataToDb,
     clearDb: clearDb,
+    fetchDialogTimeStamps: fetchDialogTimeStamps,
+    fetchSentences: fetchSentences,
     fetchVideoDataFromDb: fetchVideoDataFromDb,
     fetchAllVideos: fetchAllVideos,
+    fetchKeyFrames: fetchKeyFrames,
+    fetchAllKeyFrames: fetchAllKeyFrames,
     updateBlockDescription: updateBlockDescription,
     updateSceneDescription: updateSceneDescription,
     updateSceneOcr: updateSceneOcr,
     replicateSceneDataInModifiedSceneTable: replicateSceneDataInModifiedSceneTable,
     updateMultipleScenesAndBlocksForUser: updateMultipleScenesAndBlocksForUser,
-    updateBlockAndScene: updateBlockAndScene
+    updateBlockAndScene: updateBlockAndScene,
+    fetchVideoData: fetchVideoData,
+    fetchScene: fetchScene,
+    fetchRevisedKeyFrames: fetchRevisedKeyFrames
 }

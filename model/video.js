@@ -14,11 +14,13 @@ class Video {
     }   
     
     static parseVideoFromIndexerJson(requestBody) {
-        let inputJson = JSON.parse(requestBody.inputJson);  
+        // console.log({parseVideoFromIndexerJson : requestBody});
+        // console.log({inputJson: requestBody.inputJson});
+        let inputJson = requestBody.inputJson;  
         let id = -1;
         let youtube_id = requestBody.youtubeId;
         let indexer_video_id = inputJson.id;
-        let title = requestBody.title;
+        let title = inputJson.name;
         let duration = Utils.parseSecondsFromString(inputJson.summarizedInsights.duration.time);
         let summarised_insights_json = inputJson.summarizedInsights;
         let insights_json = inputJson.videos[0].insights;
@@ -35,6 +37,86 @@ class Video {
             throw e;
         }
     }
+
+    static async insertIntoVideoAudioTable(newVid) {
+        console.log('DB Operation: Inserting into video_audio:', newVid);
+        let query = `INSERT INTO video_audio (youtube_id, video_id, video_title, video_state) VALUES ( $1, $2, $3, $4)
+                     ON CONFLICT(youtube_id) DO UPDATE
+                     SET video_id = $2 , video_title = $3, video_state = $4`
+        try {
+            return await db.query(query, [newVid.youtubeId, newVid.video_id, newVid.title, newVid.videoState]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async fetchVideoAudioTable(newVid) {
+        try {
+            return await db.query( `Select * from video_audio where youtube_id= $1`, [newVid.youtubeId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async updateVideoAudio_videoState(data) {
+        console.log('DB Operation: Updating audio_id in table video_audio');
+        try {
+             return await db.query('UPDATE video_audio set video_state=$1 where youtube_id=$2', [data.state, data.youtubeId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async updateAudioId_VideoAudio(data) {
+        console.log('DB Operation: Updating audio_id in table video_audio');
+        try {
+             return await db.query('UPDATE video_audio set audio_id=$1 where youtube_id=$2', [data.audioId, data.youtubeId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async updateAudioId(data) {
+        console.log('DB Operation: Updating Audio');
+        try {
+             return await db.query('UPDATE video set audio_id=$1 where youtube_id=$2', [data.audioId, data.videoId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+    static async getSceneByAudioId(audioId) {
+        console.log('get scene data by audio Id:', audioId);
+        try {
+
+            let query = `select s.video_id, s.id, s.scene_id, s.block_id, s.scene_num, s.start_time, s.end_time, s.original_description, s.original_ocr
+                         from video v, scene s
+                         where v.youtube_id = s.video_id and v.audio_id = $1
+                         order by scene_num`;
+
+             return await db.query(query, [audioId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+
+
+    static async getVideoAudioByVideoId(videoId) {
+        console.log('get video data from video_audio table by video Id:', videoId);
+        try {
+            return await db.query(`select * from video_audio where video_id = $1`, [videoId]);
+        } catch(e) {
+            console.log({'error': e});
+            throw e;
+        }
+    }
+    
 
 }
 

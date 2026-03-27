@@ -1,0 +1,202 @@
+<button onclick="WebSocketTest()"> Start Chatbot</button>
+<input type="search" id="userInput" name="q" size=60>
+<button onclick="startSim()"> Start Simulator</button>
+<p id="result"> Time taken (sec)</p>
+<p id="result1"> TIme</p>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+<script type = "text/javascript">
+
+// Aditya
+let ws;
+var image = [];
+var image_url = "";
+var prev_history = [];
+var generated_caption = "";
+var job_id = [];
+var image_question_mapping = [];
+var question_id = 1;
+var question_user = "";
+var currentUploadedImageDiv = ""; // set the current uploaded image div
+var justClearedHistory = true;
+var scrollHeightOnClearHistory = 60;
+var audio_clip = document.getElementById("myAudio");
+var KeyFramesArr;
+let count = 0;
+let all_pred_captions = "";
+let all_answers = "";
+let response_set = new Set();
+let response_map = {};
+let audio_path = "1";
+var isChatbotOn = false;
+var isChatbotInProcess = false;
+var chatbotTimeStamp = -1;
+let pythiaCaption = "A group of people in a large room";
+let time1 = 0;
+let time2 = 0;
+let time3 = 0;
+let ws_id = [];
+let initialCount = 1;
+
+function startSim(){
+    count = document.getElementById("userInput").value;
+    tempCount = document.getElementById("userInput").value;
+    keyframeCount = 1;
+    count *= keyframeCount;
+    console.log("Count: ",count);
+    // count = 2
+    for(let i=0; i< tempCount; i++){
+        sendAllImages(i,keyframeCount);
+    }    
+    let currentTime = new Date();
+    time1 = currentTime.getTime();
+
+}
+
+function autoSim(){
+    initialCount += 1;
+    if(initialCount <= 40)
+    {
+        document.getElementById("userInput").value = initialCount;
+        startSim();
+    }
+}
+
+function sendAllImages(index, keyframeCount){
+    
+    for(let i=0; i<keyframeCount;i++){
+
+        ws_id[i] = uuidv4();
+        sendWSid(ws_id[i]);
+        path = "https://api.videoindexer.ai/trial/Accounts/5a8c6ddf-900f-48b4-8a3a-0cd5cf48cb4b/Videos/a8eefb1ebb/Thumbnails/51215ff3-99a9-4a98-a18d-0f664e8c67ff?format=Jpeg";
+        sendImage(path,ws_id[i]);
+        }
+}
+
+
+function sendWSid(ws_id) {  
+    ws.send(ws_id.toString());  
+  }
+
+function sendWS(){ 
+  sendImage(path,wsID); 
+  console.log("The path received is: ",path); 
+}
+
+
+function sendImage(path,ws_id,frameNo){
+
+  fetch('https://cors-anywhere.herokuapp.com/'+path).then(function(response) {
+      
+      return response.blob();
+      
+    }).then(function(myBlob) {
+      console.log("Checking the type of blob: "+typeof(myBlob));
+      objectURL = URL.createObjectURL(myBlob);
+      console.log("The url is: "+objectURL);
+    
+
+      var reader = new FileReader();
+      reader.readAsDataURL(myBlob);
+      reader.onload = function () {
+      // Since it contains the Data URI, we should remove the prefix and keep only Base64 string
+      var b64 = reader.result.split(',')[1];
+      myBlob.lastModifiedDate = new Date();
+      myBlob.name = 'imge';
+      
+      class newFile {
+          constructor(filesName){
+              this.files = filesName;
+              }
+          }
+      
+      imageFile = new newFile([myBlob]);
+      readURL(imageFile,ws_id,frameNo);                 
+      }});
+  }
+
+let blob1;
+
+
+
+// var ws_id;
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function WebSocketTest() {
+    
+  console.log('Generate uuid: '+uuidv4());
+      if ("WebSocket" in window) {
+            ws = new WebSocket("ws://13.59.47.124:8001/chat/");
+            ws.onopen = function() {
+              console.log("Websocket opened");
+         };
+         console.log("Websocket open next");
+   }
+
+   ws.onmessage = function(evt){
+            console.log("Message is received...");
+            console.log(JSON.parse(evt.data));
+            var data = JSON.parse(evt.data);
+            data = JSON.parse(data['result']);
+            var socket_id = data.socketid;
+            // prev_history[map[socket_id]] = data["history"];
+            // let keyframeNo = map[socket_id];
+
+            if("pred_caption" in data){
+                var pred_caption = data.pred_caption;
+                console.log("The pred caption is: "+ pred_caption);
+                // prev_history[map[socket_id]].push(pred_caption);
+                // prev_history[map[socket_id]] = pred_caption;
+                count--;
+                console.log("Count: ",count);
+                if(!count){
+
+                    let currentTime = new Date();
+                    time2 = currentTime.getTime();
+                    document.getElementById("result"+initialCount).innerHTML = (time2 - time1)/1000;
+                    // autoSim();
+                }
+                  
+          }
+   }
+}
+
+function readURL(input, ws_id, frameNo) {
+  console.log('readURL entered!!');
+
+  var i = frameNo;
+
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        var formData = new FormData();
+        formData.append('file', input.files[0]);
+        var URL1 = "http://13.59.47.124:8001/upload/";
+        formData.append('socketid', ws_id);
+        formData.append('pythia_caption', pythiaCaption);
+        console.log('DSocket id in pOST is: '+ws_id);
+        $.ajax({
+                type: 'POST',
+                url: URL1,
+                data: formData,
+                processData: false,
+                contentType: false,
+                crossDomain:true,
+            })
+            .done(function(response) {
+                image[i] = response['file_path'];
+                image_url[i] = response['img_url'];
+                job_id[i] = response['job_id'];
+                console.log("readurl res is:",response);
+            });
+    }
+}
+
+</script>

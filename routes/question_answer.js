@@ -49,9 +49,9 @@ router.post('/addQuestion', function(req, res, next) {
 router.delete('/deleteQuestion', function(req, res, next) {
     let queryResult = questionAnswer.deleteQuestionById(req.body);
     queryResult.then(result => {
-      res.send('Question deleted successfully');  
+      res.status(200).send('Question deleted successfully');  
     }).catch((err) => {
-      res.send(err);
+      res.status(400).send(err);
       console.log(err)
     });
   });
@@ -64,7 +64,7 @@ router.post('/generate', async function(req, res) {
   let result = [];
   let gotResponse = 0;  
   for(let i=0; i < rows.length; i++){
-    axios.post('http://localhost:5000/generate', {sentence: rows[i]}).then((response) => {
+    axios.post('http://localhost:5300/generate', {sentence: rows[i]}).then((response) => {
       // console.log("success", response.data)
       gotResponse++;
       result.push({response: response.data})

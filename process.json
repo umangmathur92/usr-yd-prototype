@@ -1,0 +1,10 @@
+{
+    "apps": [
+        {
+            "name": "my-app",
+            "script": "npm",
+            "args" : "start",
+            "ignore_watch": ["public/keyframes"]
+        }
+    ]
+}
